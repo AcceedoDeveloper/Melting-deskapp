@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>{{ title }}</h1>
+<div mat-dialog-content>
+    <div gdAuto="column" gdGap="10px" gdAlignColumns="center center">
+        <mat-icon>
+            <img [src]="iconPath" alt="">
+        </mat-icon>
+        <p>{{ message }}</p>
+    </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button mat-dialog-close cdkFocusInitial>Ok</button>
+</div>

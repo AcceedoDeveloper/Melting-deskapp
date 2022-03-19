@@ -1,0 +1,42 @@
+<mat-sidenav-container ngClass.lt-md="mobile">
+    <mat-sidenav-content class="content">
+        <div class="container">
+            <div gdAuto="column" gdAlignRows="space-between" gdAlignColumns="center center">
+                <div gdAuto="column" gdGap="1rem" gdAlignRows="start start" gdAlignColumns="center center">
+                    <div class="btn-container">
+                        <button (click)="backTo()" mat-icon-button *ngIf="showBackBtn$ | async">
+                            <mat-icon>
+                                <img src="./assets/icons/arrow_back_white_24dp.svg" alt="">
+                            </mat-icon>
+                        </button>
+                    </div>
+                    <h1 class="title">
+                        Melting Spectrum Report
+                    </h1>
+                </div>
+                <div>
+                    <ng-container *ngIf="(serialPorts$ | async) as serialPorts">
+                        <div gdAuto="column" gdAlignColumns="center center">
+                            <div class="m-r-10">Serial Port :</div>
+                            <mat-form-field *ngIf="serialPorts.length; else noSerialPortTpl">
+                                <mat-select [formControl]="serialPortCtrl" (selectionChange)="onSerialPortChange($event)">
+                                    <mat-option [value]="port" *ngFor="let port of serialPorts">{{ port.path }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <button mat-icon-button (click)="onRefreshClick()" matTooltip="Refresh Ports">
+                                <mat-icon>
+                                    <img src="./assets/icons/refresh_white_24dp.svg" alt="">
+                                </mat-icon>
+                            </button>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+            <router-outlet></router-outlet>
+        </div>
+    </mat-sidenav-content>
+</mat-sidenav-container>
+
+<ng-template #noSerialPortTpl>
+    No Serial Ports found
+</ng-template>

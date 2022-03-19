@@ -1,0 +1,45 @@
+:host {
+  
+}
+
+.header-label{
+    color: darkgray;
+}
+
+.header{
+    margin-bottom: 1rem;
+}
+
+.title{
+    margin-bottom: 10px;
+}
+
+.result-table{
+    margin-bottom: 1rem;
+}
+
+.cell{
+    padding: 3px 1rem;
+    text-align: center;
+    &.l-1{
+        border-left: 1px solid rgba(255, 255, 255, 0.32);
+    }
+    &.t-1{
+        border-top: 1px solid rgba(255, 255, 255, 0.32);
+    }
+    &.r-1{
+        border-right: 1px solid rgba(255, 255, 255, 0.32);
+    }
+    &.b-1{
+        border-bottom: 1px solid rgba(255, 255, 255, 0.32);
+    }
+
+    &.r-2{
+        border-right: 1px solid rgba(255, 255, 255, 0.64);
+    }
+
+    &.value{
+        font-weight: bold;
+    }
+}
+

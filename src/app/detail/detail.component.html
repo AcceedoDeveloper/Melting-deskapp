@@ -1,0 +1,47 @@
+<div class="content">
+  <div class="report-view">
+    <div class="title">Element Concentration</div>
+    <div class="content-area" *ngIf="spectrum">
+      <div class="header" gdAuto="column">
+        <div gdRows gdGap="5px" *ngFor="let header of spectrum.headers">
+          <div class="header-label">{{ header.name }} :</div>
+          <div class="header-value">{{ header.value }}</div>
+        </div>
+      </div>
+      <div class="content" fxLayoutAlign="start start">
+        <div>
+          <div *ngFor="let elements of spectrum.elements" class="result-table" gdAlignRows="start" [gdColumns]="'90px repeat(' + elements.length + ', 120px)'">
+            <!-- <div > -->
+              <div class="cell l-1 t-1 r-2 b-1"></div>
+              <div class="cell r-1 t-1 b-1" *ngFor="let element of elements">
+                {{ element?.ElementName }}
+              </div>
+              <div class="cell l-1 b-1 r-2"></div>
+              <div class="cell r-1 b-1" *ngFor="let element of elements">
+                {{ element?.reportedResult.Unit }}
+              </div>
+              <div class="cell l-1 b-1 r-2">min</div>
+              <div class="cell r-1 b-1" *ngFor="let element of elements">
+                {{ element?.reportedResult.limits?.LowerAcceptanceLimit }}
+              </div>
+              <div class="cell l-1 b-1 r-2">&lt;x&gt;(2)</div>
+              <div class="cell r-1 b-1 value" *ngFor="let element of elements">
+                {{ element?.reportedResult.resultValue }}
+              </div>
+              <div class="cell l-1 b-1 r-2">max</div>
+              <div class="cell r-1 b-1" *ngFor="let element of elements">
+                {{ element?.reportedResult.limits?.UpperAcceptanceLimit }}
+              </div>
+            <!-- </div> -->
+          </div>
+          <div fxLayoutAlign="end">
+            <button [disabled]="!(selectedPort$ | async)" (click)="onSendClick()" mat-raised-button>
+              Send
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

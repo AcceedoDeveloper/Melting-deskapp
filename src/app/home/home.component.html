@@ -1,0 +1,116 @@
+<div class="content">
+  <div *ngIf="showSearchDirectory; else editDirectoryTpl" gdAuto="column" gdGap="10px" gdAlignRows="start start" gdAlignColumns="center center">
+      <label for="search-directory" class="m-b-10">Enter Directory</label>
+      <div class="m-b-10">:</div>
+      <div class="input-container m-b-10">
+        <input  #directorSearch [formControl]="directoryCtrl" id="search-directory" type=" text" class="custom-input">
+        <div class="input-addon" *ngIf="directoryCtrl.value" (click)="clearInput(directorSearch, directoryCtrl)">
+          <mat-icon>
+            <img src="./assets/icons/clear_white_24dp.svg" alt="">
+          </mat-icon>
+        </div>
+      </div>
+      <div class="m-b-10">
+        <button (click)="onShowFilesClick(true)" [disabled]="directoryCtrl.invalid" mat-raised-button>
+          Show Files
+        </button>
+      </div>
+      <div class="m-b-10">
+        <button (click)="onHideDirectoryClick()" mat-icon-button matTooltip="Hide Directory Path">
+          <mat-icon>
+            <img src="./assets/icons/hide_image_white_24dp.svg" alt="">
+          </mat-icon>
+        </button>
+      </div>
+    <!-- drive_file_rename_outline_white_24dp -->
+  </div>
+  <ng-template #editDirectoryTpl>
+    <div gdAuto="column" gdGap="10px" gdAlignRows="start start" gdAlignColumns="center center" class="m-b-10">
+      <div>
+        Change Search Directory
+       </div>
+       <div>
+         <button mat-icon-button matTooltip="Change Search Directory" (click)="onShowSearchDirectory()">
+           <mat-icon>
+             <img src="./assets/icons/drive_file_rename_outline_white_24dp.svg" alt="">
+           </mat-icon>
+         </button>
+       </div>
+       <div>
+        <button mat-icon-button matTooltip="Reload Files" (click)="onShowFilesClick(false)">
+          <mat-icon>
+            <img src="./assets/icons/refresh_white_24dp.svg" alt="">
+          </mat-icon>
+        </button>
+      </div>
+      <div *ngIf="filesLoading">Loading ...</div>
+    </div>
+  </ng-template>
+
+  <div class="files-area">
+    <ng-container *ngIf="filteredFiles$ | async as files">
+      <ng-container *ngIf="!errMsg; else errMsgTpl">
+        <ng-container *ngIf="filesLoaded$ | async; else enterDirectoryTpl">
+          <div class="search-input" fxLayoutAlign="start" fxLayoutGap="1rem">
+            <div class="input-container search-ctrl">
+              <input [value]="(fileSearch$ | async)" (input)="onFileSearchInput($event.target)" placeholder="Search Files" #fileSearch id="search-directory" type=" text" class="custom-input">
+              <div class="input-addon" *ngIf="fileSearch.value" (click)="clearInput(fileSearch); resetFileSearch()">
+                <mat-icon>
+                  <img src="./assets/icons/clear_white_24dp.svg" alt="">
+                </mat-icon>
+              </div>
+            </div>
+            <div fxLayoutAlign="center center" fxLayoutGap="10px">
+              <div>
+                Sort By :
+              </div>
+              <div class="sort-by-chip" [matMenuTriggerFor]="sortMenu">
+                <span>{{ (activeSort$ | async).name }}</span>
+                <i class="arrow"></i>
+              </div>
+            </div>
+          </div>
+            <div class="files" *ngIf="files?.length; else noFileFoundTpl" gdColumns="repeat(auto-fit, minmax(150px, 155px))">
+              <div (click)="onFileClick(file)" gdAlignRows="center center" gdAlignColumns="center center" class="file-container mat-elevation-z2" matRipple *ngFor="let file of files; trackBy: trackByFileName">
+                <div class="file-card" fxLayoutAlign="center center">
+                  <img src="./assets/icons/xml.svg" alt="" height="72px" width="72px">
+                </div>
+                <div class="file-name">
+                  {{ file.name }}
+                </div>
+                <div class="file-date">
+                  {{ file.info?.mtime | date: 'dd/MM/yy, h:mm a' }}
+                </div>
+              </div>
+            </div>
+        </ng-container>
+      </ng-container>
+
+    </ng-container>
+
+    <ng-template #enterDirectoryTpl>
+      <div *ngIf="!directoryCtrl.value; else loadingTpl" class="msg-container">
+        Enter a directory and click Show Files button.
+      </div>
+    </ng-template>
+    <ng-template #errMsgTpl>
+      <div class="msg-container error">
+        * {{ errMsg }} 
+      </div>
+    </ng-template>
+    <ng-template #noFileFoundTpl>
+      <div class="msg-container">
+        No Files Found.
+      </div>
+    </ng-template>
+    <ng-template #loadingTpl>
+      <div class="msg-container">
+        Loading ....
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<mat-menu #sortMenu="matMenu">
+    <button (click)="setActiveSort(sort)" *ngFor="let sort of sortOptions$ | async" [class.active]="sort === (activeSort$ | async)" mat-menu-item>{{ sort.name }}</button>
+</mat-menu>

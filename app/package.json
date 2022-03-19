@@ -1,0 +1,12 @@
+{
+  "name": "acceedo-spectrum",
+  "version": "10.5.0",
+  "main": "main.js",
+  "private": true,
+  "dependencies": {
+    "mime-types": "2.1.34",
+    "xml2js": "0.4.23",
+    "serialport": "10.4.0",
+    "chokidar": "3.5.3"
+  }
+}
