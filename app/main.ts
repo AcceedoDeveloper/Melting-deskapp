@@ -110,7 +110,7 @@ ipcMain.handle('send-data-ip', async (e, ip, data) => {
   console.log("Sending to IP:", ip, data);
 
   try {
-    const fullUrl = `${ip}?d=${encodeURIComponent(data)}`;
+    const fullUrl = `${ip}spectrumResult?d=${encodeURIComponent(data)}`;
     console.log("Final URL:", fullUrl);
 
     const response = await fetch(fullUrl, {
