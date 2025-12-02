@@ -70,26 +70,67 @@ export const readFileAndGetJson = async (filePath) => {
 }
 
 
+// export const sendDataSerialPort = async (path, data) => {
+//     return new Promise((resolve, reject) => {
+//         const port = new SerialPort({
+//             path,
+//             baudRate: 9600
+//         });
+//         port.on('error', (err) => {
+//             // console.log('error occured', err)
+//             return reject(err);
+//         })
+//         port.write(data, (err) => {
+//             // console.log('error', err)
+//             if (err) {
+//                 return reject(err)
+//             } else {
+//                 resolve('success');
+//             }
+//             port.close();
+//         })
+//     })
+
+// }
+
+
+
+
 export const sendDataSerialPort = async (path, data) => {
-    return new Promise((resolve, reject) => {
-        const port = new SerialPort({
-            path,
-            baudRate: 9600
-        });
-        port.on('error', (err) => {
-            // console.log('error occured', err)
-            return reject(err);
-        })
-        port.write(data, (err) => {
-            // console.log('error', err)
-            if (err) {
-                return reject(err)
-            } else {
-                resolve('success');
-            }
-            port.close();
-        })
-    })
+  return new Promise((resolve, reject) => {
 
-}
+    const port = new SerialPort({
+      path,
+      baudRate: 9600
+    });
 
+    let buffer = '';
+
+    port.on('data', (chunk) => {
+      const str = chunk.toString();
+      console.log("Received from device:", str);
+      buffer += str;
+
+ 
+
+   
+
+  if (buffer.includes('$hardwareAck#')) {
+    port.close();
+    return resolve('$hardwareAck#');
+  }
+
+      if (buffer.includes('$ack#')) {
+        port.close();
+        resolve('$ack#');
+      }
+    });
+
+    port.on('error', (err) => reject(err));
+
+    port.write(data, (err) => {
+      if (err) reject(err);
+      else console.log("Data sent to device:", data);
+    });
+  });
+};

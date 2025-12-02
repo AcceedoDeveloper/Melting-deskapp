@@ -35,7 +35,7 @@
             <!-- </div> -->
           </div>
           <div fxLayoutAlign="end">
-            <button [disabled]="!(selectedPort$ | async)" (click)="onSendClick()" mat-raised-button>
+            <button [disabled]="isSendDisabled()" (click)="onSendClick()" mat-raised-button>
               Send
             </button>
           </div>

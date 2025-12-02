@@ -11,12 +11,12 @@
                         </button>
                     </div>
                     <h1 class="title">
-                        Melting Spectrum Report
+                        Melting Spectrum Reports
                     </h1>
                 </div>
                 <div>
                     <ng-container *ngIf="(serialPorts$ | async) as serialPorts">
-                        <div gdAuto="column" gdAlignColumns="center center">
+                        <!-- <div gdAuto="column" gdAlignColumns="center center">
                             <div class="m-r-10">Serial Port :</div>
                             <mat-form-field *ngIf="serialPorts.length; else noSerialPortTpl">
                                 <mat-select [formControl]="serialPortCtrl" (selectionChange)="onSerialPortChange($event)">
@@ -28,7 +28,53 @@
                                     <img src="./assets/icons/refresh_white_24dp.svg" alt="">
                                 </mat-icon>
                             </button>
-                        </div>
+                        </div> -->
+
+
+
+                        <!-- MODE SELECTION DROPDOWN -->
+<mat-form-field appearance="fill" class="mode-select">
+  <mat-select placeholder="Select Mode" [formControl]="modeCtrl">
+    <mat-option value="serial">Serial Port</mat-option>
+    <mat-option value="ip">IP Address</mat-option>
+  </mat-select>
+</mat-form-field>
+
+<!-- SERIAL PORT UI -->
+<div *ngIf="modeCtrl.value === 'serial'">
+  <ng-container *ngIf="(serialPorts$ | async) as serialPorts">
+    <div gdAuto="column" gdAlignColumns="center center">
+      <div class="m-r-10">Serial Port :</div>
+
+      <mat-form-field *ngIf="serialPorts.length; else noSerialPortTpl">
+        <mat-select [formControl]="serialPortCtrl" (selectionChange)="onSerialPortChange($event)">
+          <mat-option [value]="port" *ngFor="let port of serialPorts">{{ port.path }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-icon-button (click)="onRefreshClick()" matTooltip="Refresh Ports">
+        <mat-icon><img src="./assets/icons/refresh_white_24dp.svg"></mat-icon>
+      </button>
+    </div>
+  </ng-container>
+</div>
+
+<!-- IP MODE UI -->
+<div *ngIf="modeCtrl.value === 'ip'">
+  <div gdAuto="column" gdAlignColumns="center center">
+    <div class="m-r-10">IP Address :</div>
+
+    <mat-form-field appearance="fill">
+      <input matInput placeholder="Enter IP (ex: 192.168.1.20)"
+             [formControl]="ipAddressCtrl">
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="onConnectIP()">
+      Connect
+    </button>
+  </div>
+</div>
+
                     </ng-container>
                 </div>
             </div>

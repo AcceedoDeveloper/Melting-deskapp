@@ -25,6 +25,10 @@ export class AppService {
     selectedPort$ = new BehaviorSubject<PortInfo>(null);
     activeSort$ = new BehaviorSubject<any>(this.sortOptions[0]);
     fileSearch$ = new BehaviorSubject<string>('');
+    selectedIP$ = new BehaviorSubject<string>(null);
+    mode$ = new BehaviorSubject<'serial' | 'ip'>('serial');
+
+
 
     sorts$ = new BehaviorSubject<any[]>(this.sortOptions)
 
@@ -128,5 +132,31 @@ export class AppService {
             this._loaderRef.close();
         }
     }
+
+    setSelectedIPAddress(ip: string) {
+  this.selectedIP$.next(ip);
+}
+
+getSelectedIPObs() {
+  return this.selectedIP$.asObservable();
+}
+
+getSelectedIP() {
+  return getOnce(this.selectedIP$.asObservable());
+}
+
+
+setMode(mode: 'serial' | 'ip') {
+  this.mode$.next(mode);
+}
+
+getModeObs() {
+  return this.mode$.asObservable();
+}
+
+getMode() {
+  return getOnce(this.mode$.asObservable());
+}
+
 
 }

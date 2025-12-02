@@ -35,7 +35,7 @@ export class SerialPortService {
     sendData(path: string, data: string) {
         return new Observable<any>((observer) => {
             ipcRenderer.invoke('send-data-serial-port-com', path, data).then((msg) => {
-                if (msg === 'success') {
+                if (msg) {
                     observer.next()
                     observer.complete()
                 } else {

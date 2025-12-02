@@ -20,6 +20,11 @@ export class AppComponent implements OnInit {
   showBackBtn$: Observable<boolean>;
   serialPorts$: Observable<PortInfo[]>;
   serialPortCtrl = new FormControl(null);
+  modeCtrl = new FormControl('serial');  
+ipAddressCtrl = new FormControl('');
+
+
+
 
   constructor(
     private electronService: ElectronService,
@@ -45,6 +50,15 @@ export class AppComponent implements OnInit {
     this.serialPorts$ = this.app.getSerialPortsObs();
 
     this.loadPorts();
+
+
+      this.app.setMode(this.modeCtrl.value);
+
+  this.modeCtrl.valueChanges.subscribe(mode => {
+    this.app.setMode(mode);
+  });
+
+
   }
 
   onRefreshClick() {
@@ -66,4 +80,18 @@ export class AppComponent implements OnInit {
   onSerialPortChange(event) {
     this.app.setSelectedSerialPort(this.serialPortCtrl.value);
   }
+
+
+  onConnectIP() {
+  const ip = this.ipAddressCtrl.value;
+
+  if (!ip) {
+    console.warn('IP is empty');
+    return;
+  }
+
+  console.log("Selected IP:", ip);
+  this.app.setSelectedIPAddress(ip);
+}
+
 }

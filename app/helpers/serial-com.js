@@ -112,6 +112,27 @@ var readFileAndGetJson = function (filePath) { return __awaiter(void 0, void 0, 
     });
 }); };
 exports.readFileAndGetJson = readFileAndGetJson;
+// export const sendDataSerialPort = async (path, data) => {
+//     return new Promise((resolve, reject) => {
+//         const port = new SerialPort({
+//             path,
+//             baudRate: 9600
+//         });
+//         port.on('error', (err) => {
+//             // console.log('error occured', err)
+//             return reject(err);
+//         })
+//         port.write(data, (err) => {
+//             // console.log('error', err)
+//             if (err) {
+//                 return reject(err)
+//             } else {
+//                 resolve('success');
+//             }
+//             port.close();
+//         })
+//     })
+// }
 var sendDataSerialPort = function (path, data) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         return [2 /*return*/, new Promise(function (resolve, reject) {
@@ -119,19 +140,26 @@ var sendDataSerialPort = function (path, data) { return __awaiter(void 0, void 0
                     path: path,
                     baudRate: 9600
                 });
-                port.on('error', function (err) {
-                    // console.log('error occured', err)
-                    return reject(err);
+                var buffer = '';
+                port.on('data', function (chunk) {
+                    var str = chunk.toString();
+                    console.log("Received from device:", str);
+                    buffer += str;
+                    if (buffer.includes('$hardwareAck#')) {
+                        port.close();
+                        return resolve('$hardwareAck#');
+                    }
+                    if (buffer.includes('$ack#')) {
+                        port.close();
+                        resolve('$ack#');
+                    }
                 });
+                port.on('error', function (err) { return reject(err); });
                 port.write(data, function (err) {
-                    // console.log('error', err)
-                    if (err) {
-                        return reject(err);
-                    }
-                    else {
-                        resolve('success');
-                    }
-                    port.close();
+                    if (err)
+                        reject(err);
+                    else
+                        console.log("Data sent to device:", data);
                 });
             })];
     });

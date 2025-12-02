@@ -10,6 +10,7 @@ import { PortInfo } from '../models/port-info.model';
 import { SerialPortService } from '../core/services/serial-port.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../shared/components/error-dialog/error-dialog.component';
+import { IpService} from '../core/services/ip-service';
 
 const CHUNK_LENGTH = 10;
 
@@ -39,7 +40,8 @@ export class DetailComponent implements OnInit {
     private app: AppService,
     private cdr: ChangeDetectorRef,
     private _serialPortService: SerialPortService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private ipService: IpService
   ) { }
 
   ngOnInit(): void {
@@ -119,10 +121,16 @@ export class DetailComponent implements OnInit {
   }
 
   onSendClick() {
-    const selectedSerialPort = this.app.getSelectedSerialPort();
-    // show loader
+
+
+    const data = this.sendableData;
+    const mode = this.app.getMode();
+
     this.app.showLoader('Sending Data.')
-    this._serialPortService.sendData(selectedSerialPort.path, this.sendableData).pipe(
+
+    if(mode === 'serial'){
+      const selectedSerialPort = this.app.getSelectedSerialPort();
+       this._serialPortService.sendData(selectedSerialPort.path, this.sendableData).pipe(
       finalize(() => { this.app.hideLoader() }),
       catchError(err => {
         this.dialog.open(ErrorDialogComponent, {
@@ -134,15 +142,71 @@ export class DetailComponent implements OnInit {
         })
         return throwError(() => err)
       })
-    ).subscribe(() => {
+    ).subscribe((deviceResponse) => {
       this.dialog.open(ErrorDialogComponent, {
         data: {
-          message: 'Data Send Successfully.',
+          message: 'Data sent successfully.',
           title: 'Success',
           iconPath: './assets/icons/done_white_24dp.svg',
         }
       })
     });
+
+    return;
+
+    }
+    
+
+    if (mode === 'ip') {
+    const ip = this.app.getSelectedIP();
+
+    this.ipService.sendData(ip, data).pipe(
+      finalize(() => { this.app.hideLoader() }),
+      catchError(err => {
+        this.dialog.open(ErrorDialogComponent, {
+          data: {
+            message: 'An Error occured while sending data through IP, Please try again.',
+            iconPath: './assets/icons/error_outline_white_24dp.svg',
+            title: 'Error'
+          }
+        });
+        return throwError(() => err);
+      })
+    ).subscribe(() => {
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message: 'Data sent successfully through IP.',
+          title: 'Success',
+          iconPath: './assets/icons/done_white_24dp.svg',
+        }
+      });
+    });
+
+    return;
   }
+    
+   
+  }
+
+
+  isSendDisabled() {
+  const mode = this.app.getMode();
+
+  // SERIAL MODE CHECK
+  if (mode === 'serial') {
+    const port = this.app.getSelectedSerialPort();
+    return !port; // disable when no port
+  }
+
+  // IP MODE CHECK
+  if (mode === 'ip') {
+    const ip = this.app.getSelectedIP();
+    return !ip; // disable when no IP entered
+  }
+
+  return true;
+}
+
+
 
 }

@@ -2,6 +2,7 @@ import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as url from 'url';
+import * as net from 'net';
 import { getFiles } from './helpers/get-file-name';
 import { readFileAndGetJson, sendDataSerialPort } from './helpers/serial-com';
 
@@ -27,7 +28,8 @@ function createWindow(): BrowserWindow {
     height: size.height,
     webPreferences: {
       nodeIntegration: true,
-      allowRunningInsecureContent: (serve) ? true : false,
+      // allowRunningInsecureContent: (serve) ? true : false,
+      allowRunningInsecureContent: true,
       contextIsolation: false,  // false if you want to run e2e test with Spectron
     },
   });
@@ -101,6 +103,36 @@ ipcMain.handle('send-data-serial-port-com', async (e, ...args) => {
     return error;
   }
 })
+
+
+ipcMain.handle('send-data-ip', async (e, ip, data) => {
+  return new Promise((resolve, reject) => {
+    const client = new net.Socket();
+
+    console.log("Connecting to IP:", ip);
+
+    client.connect(1234, ip, () => {   // Change port if needed
+      console.log("Connected. Sending data:", data);
+      client.write(data);
+    });
+
+    client.on('data', (chunk) => {
+      const msg = chunk.toString();
+      console.log("Received from IP device:", msg);
+
+      if (msg.includes('$ack#')) {
+        client.destroy();
+        resolve('$ack#');
+      }
+    });
+
+    client.on('error', (err) => {
+      console.error("IP Error:", err);
+      reject(err);
+    });
+  });
+});
+
 
 ipcMain.handle('get-spectrum-data', async (e, args) => {
   const filePath = args;
