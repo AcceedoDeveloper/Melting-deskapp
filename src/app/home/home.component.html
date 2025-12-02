@@ -71,7 +71,7 @@
             </div>
           </div>
             <div class="files" *ngIf="files?.length; else noFileFoundTpl" gdColumns="repeat(auto-fit, minmax(150px, 155px))">
-              <div (click)="onFileClick(file)" gdAlignRows="center center" gdAlignColumns="center center" class="file-container mat-elevation-z2" matRipple *ngFor="let file of files; trackBy: trackByFileName">
+              <div (click)="onFileClick(file)" gdAlignRows="center center" gdAlignColumns="center center" [class.new]="file.new" class="file-container mat-elevation-z2" matRipple *ngFor="let file of files; trackBy: trackByFileName">
                 <div class="file-card" fxLayoutAlign="center center">
                   <img src="./assets/icons/xml.svg" alt="" height="72px" width="72px">
                 </div>
@@ -79,8 +79,9 @@
                   {{ file.name }}
                 </div>
                 <div class="file-date">
-                  {{ file.info?.mtime | date: 'dd/MM/yy, h:mm a' }}
+                  {{ file.info?.birthtime | date: 'dd/MM/yy, h:mm a' }}
                 </div>
+                <div *ngIf="file.new" class="new-tag">new</div>
               </div>
             </div>
         </ng-container>

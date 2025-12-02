@@ -11,6 +11,7 @@ import { SerialPortService } from '../core/services/serial-port.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../shared/components/error-dialog/error-dialog.component';
 import { IpService} from '../core/services/ip-service';
+import { FormControl, Validators } from '@angular/forms';
 
 const CHUNK_LENGTH = 10;
 
@@ -20,6 +21,13 @@ const headerMap = {
   "Tested By": "T",
   "Stage": "ST",
   "Product ID": "PRO"
+}
+
+const furanceMap = {
+  'A': 1,
+  'B': 2,
+  'C': 3,
+  'D': 4,
 }
 
 @Component({
@@ -34,6 +42,15 @@ export class DetailComponent implements OnInit {
   spectrum: Spectrum;
   sendableData: string;
   selectedPort$: Observable<PortInfo>;
+  furnaces = [
+    { name: 'Furnace 1', no: 1 },
+    { name: 'Furnace 2', no: 2 },
+    { name: 'Furnace 3', no: 3 },
+    { name: 'Furnace 4', no: 4 },
+  ];
+
+  furnaceCtrl = new FormControl('', [Validators.required]);
+  furanceFound = false;
 
   constructor(
     private fileList: FileListService,
@@ -58,6 +75,11 @@ export class DetailComponent implements OnInit {
       // junk of 8 data
 
       this.sendableData = this.getSendableData(spectrum);
+      const furanceNo = this.getFurance(spectrum.headers)
+      if (furanceNo) {
+        this.furnaceCtrl.setValue(furanceNo);
+        this.furanceFound = true;
+      }
       console.log(this.sendableData)
 
       const elements = [];
@@ -91,6 +113,9 @@ export class DetailComponent implements OnInit {
       if (h.name === 'Grade') {
         value = h.value.split(' ')[0]
       }
+      if (h.name === 'Stage') {
+        value = value && value.replace(' ', '-')
+      }
       return `${headerMap[h.name]}:${value}`
     }).join(',');
 
@@ -98,7 +123,7 @@ export class DetailComponent implements OnInit {
       return `${e.ElementName}:${e.reportedResult.resultValue}`
     }).join(',')
 
-    return `$${headers},${elements}#`
+    return `${headers},${elements}`
 
     // const elements = spectrum.elements.map((e: SpectrumElement) => {
     //   const res = {};
@@ -120,88 +145,170 @@ export class DetailComponent implements OnInit {
     // }
   }
 
-  onSendClick() {
-
-
-    const data = this.sendableData;
-    const mode = this.app.getMode();
-
-    this.app.showLoader('Sending Data.')
-
-    if(mode === 'serial'){
-      const selectedSerialPort = this.app.getSelectedSerialPort();
-       this._serialPortService.sendData(selectedSerialPort.path, this.sendableData).pipe(
-      finalize(() => { this.app.hideLoader() }),
-      catchError(err => {
-        this.dialog.open(ErrorDialogComponent, {
-          data: {
-            message: 'An Error occured while sending data, Please try again.',
-            iconPath: './assets/icons/error_outline_white_24dp.svg',
-            title: 'Error'
-          }
-        })
-        return throwError(() => err)
-      })
-    ).subscribe((deviceResponse) => {
-      this.dialog.open(ErrorDialogComponent, {
-        data: {
-          message: 'Data sent successfully.',
-          title: 'Success',
-          iconPath: './assets/icons/done_white_24dp.svg',
-        }
-      })
-    });
-
-    return;
-
+  getFurance(headers) {
+    const stage = (headers || []).find(header => header.name?.toLowerCase() === 'stage')
+    if (!stage) {
+      return null
     }
+    const furanceChar = stage.value.substr(0, 1);
+    return furanceMap[furanceChar.toUpperCase()]
+  }
+
+  // onSendClick() {
+
+
+  //   const data = this.sendableData;
+  //   const mode = this.app.getMode();
+
+  //   this.app.showLoader('Sending Data.')
+
+  //   if(mode === 'serial'){
+  //     const selectedSerialPort = this.app.getSelectedSerialPort();
+  //      this._serialPortService.sendData(selectedSerialPort.path, this.sendableData).pipe(
+  //     finalize(() => { this.app.hideLoader() }),
+  //     catchError(err => {
+  //       this.dialog.open(ErrorDialogComponent, {
+  //         data: {
+  //           message: 'An Error occured while sending data, Please try again.',
+  //           iconPath: './assets/icons/error_outline_white_24dp.svg',
+  //           title: 'Error'
+  //         }
+  //       })
+  //       return throwError(() => err)
+  //     })
+  //   ).subscribe((deviceResponse) => {
+  //     this.dialog.open(ErrorDialogComponent, {
+  //       data: {
+  //         message: 'Data sent successfully.',
+  //         title: 'Success',
+  //         iconPath: './assets/icons/done_white_24dp.svg',
+  //       }
+  //     })
+  //   });
+
+  //   return;
+
+  //   }
     
 
-    if (mode === 'ip') {
-    const ip = this.app.getSelectedIP();
+  //   if (mode === 'ip') {
+  //   const ip = this.app.getSelectedIP();
 
-    this.ipService.sendData(ip, data).pipe(
-      finalize(() => { this.app.hideLoader() }),
-      catchError(err => {
-        this.dialog.open(ErrorDialogComponent, {
-          data: {
-            message: 'An Error occured while sending data through IP, Please try again.',
-            iconPath: './assets/icons/error_outline_white_24dp.svg',
-            title: 'Error'
-          }
-        });
-        return throwError(() => err);
-      })
-    ).subscribe(() => {
-      this.dialog.open(ErrorDialogComponent, {
-        data: {
-          message: 'Data sent successfully through IP.',
-          title: 'Success',
-          iconPath: './assets/icons/done_white_24dp.svg',
-        }
-      });
-    });
+  //   this.ipService.sendData(ip, data).pipe(
+  //     finalize(() => { this.app.hideLoader() }),
+  //     catchError(err => {
+  //       this.dialog.open(ErrorDialogComponent, {
+  //         data: {
+  //           message: 'An Error occured while sending data through IP, Please try again.',
+  //           iconPath: './assets/icons/error_outline_white_24dp.svg',
+  //           title: 'Error'
+  //         }
+  //       });
+  //       return throwError(() => err);
+  //     })
+  //   ).subscribe(() => {
+  //     this.dialog.open(ErrorDialogComponent, {
+  //       data: {
+  //         message: 'Data sent successfully through IP.',
+  //         title: 'Success',
+  //         iconPath: './assets/icons/done_white_24dp.svg',
+  //       }
+  //     });
+  //   });
 
-    return;
-  }
+  //   return;
+  // }
     
    
+  // }
+
+
+  onSendClick() {
+
+  const furnaceNo = this.furnaceCtrl.value;  
+  const baseData = this.sendableData;         
+
+  const finalData = `${baseData},fur:${furnaceNo}`;
+
+  console.log("Final Data Sent:", finalData);
+
+  const mode = this.app.getMode();
+  this.app.showLoader('Sending Data...');
+
+  if (mode === 'serial') {
+
+    const selectedSerialPort = this.app.getSelectedSerialPort();
+
+    this._serialPortService.sendData(selectedSerialPort.path, finalData)
+      .pipe(
+        finalize(() => this.app.hideLoader()),
+        catchError(err => {
+          this.dialog.open(ErrorDialogComponent, {
+            data: {
+              message: 'An Error occurred while sending data via Serial.',
+              iconPath: './assets/icons/error_outline_white_24dp.svg',
+              title: 'Error'
+            }
+          });
+          return throwError(() => err);
+        })
+      )
+      .subscribe(() => {
+        this.dialog.open(ErrorDialogComponent, {
+          data: {
+            message: 'Data sent successfully via Serial.',
+            title: 'Success',
+            iconPath: './assets/icons/done_white_24dp.svg',
+          }
+        });
+      });
+
+    return;
   }
+
+  if (mode === 'ip') {
+    const ip = this.app.getSelectedIP();
+
+    this.ipService.sendData(ip, finalData)
+      .pipe(
+        finalize(() => this.app.hideLoader()),
+        catchError(err => {
+          this.dialog.open(ErrorDialogComponent, {
+            data: {
+              message: 'An Error occurred while sending data via IP.',
+              iconPath: './assets/icons/error_outline_white_24dp.svg',
+              title: 'Error'
+            }
+          });
+          return throwError(() => err);
+        })
+      )
+      .subscribe(() => {
+        this.dialog.open(ErrorDialogComponent, {
+          data: {
+            message: 'Data sent successfully via IP.',
+            title: 'Success',
+            iconPath: './assets/icons/done_white_24dp.svg',
+          }
+        });
+      });
+
+    return;
+  }
+}
 
 
   isSendDisabled() {
   const mode = this.app.getMode();
 
-  // SERIAL MODE CHECK
   if (mode === 'serial') {
     const port = this.app.getSelectedSerialPort();
-    return !port; // disable when no port
+    return !port; 
   }
 
-  // IP MODE CHECK
   if (mode === 'ip') {
     const ip = this.app.getSelectedIP();
-    return !ip; // disable when no IP entered
+    return !ip;
   }
 
   return true;

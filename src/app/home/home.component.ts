@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ipcRenderer } from 'electron';
 
-import { catchError, combineLatest, finalize, map, Observable, shareReplay, startWith, tap, throwError } from 'rxjs';
+import { catchError, combineLatest, finalize, map, Observable, pairwise, shareReplay, startWith, tap, throwError } from 'rxjs';
 import { AppService } from '../core/services/app.service';
 import { FileListService } from '../core/services/file-list.service';
 import { AcFile } from '../models/file-model';
@@ -18,7 +18,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   directoryCtrl = new FormControl('', Validators.required);
   filesLoaded$: Observable<boolean> = this.fileService.getFilesLoadedObs();
-  files$: Observable<AcFile[]> = this.fileService.getFilesObs();
+  files$: Observable<AcFile[]>;
   activeSort$: Observable<any> = this.app.activeSortObs().pipe(shareReplay(1));
   sortOptions$: Observable<any[]> = this.app.getSortsObs();
   fileSearch$: Observable<string> = this.app.fileSearchObs();
@@ -33,11 +33,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   reloadFilesListener;
 
+  newFileClearTimer;
+
   constructor(
     private router: Router,
     private fileService: FileListService,
     private app: AppService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private zone: NgZone
   ) { }
 
   ngOnInit(): void {
@@ -45,10 +48,15 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.app.setShowBackBtn(false);
     });
     this.reloadFilesListener = () => {
-      this.loadFiles().subscribe(() => {
-        this.cdr.detectChanges();
+      console.log('realod ')
+      this.zone.run(() => {
+        this.loadFiles().subscribe(() => {
+          this.cdr.detectChanges();
+        })
       })
+      
     }
+    this.files$ = this.fileService.getFilesObs()
     ipcRenderer.on('reload-files', this.reloadFilesListener)
 
     if (this.fileService.getSearchDirectory()) {
@@ -95,16 +103,16 @@ export class HomeComponent implements OnInit, OnDestroy {
           }
         }
         if (sortValue === 'dateOld') {
-          sortPerdicate = (fileA, fileB) => (+fileA.info.mtime as any) - (+fileB.info.mtime as any)
+          sortPerdicate = (fileA, fileB) => (+fileA.info.birthtime as any) - (+fileB.info.birthtime as any)
         }
         if (sortValue === 'dateNew') {
-          sortPerdicate = (fileA, fileB) => (+fileB.info.mtime as any) - (+fileA.info.mtime as any)
+          sortPerdicate = (fileA, fileB) => (+fileB.info.birthtime as any) - (+fileA.info.birthtime as any)
         }
         if (sortValue === 'noAsc') {
-          sortPerdicate = (fileA, fileB) => (+fileB.info.mtime as any) - (+fileA.info.mtime as any)
+          sortPerdicate = (fileA, fileB) => (+fileB.info.birthtime as any) - (+fileA.info.birthtime as any)
         }
         if (sortValue === 'noDesc') {
-          sortPerdicate = (fileA, fileB) => (+fileB.info.mtime as any) - (+fileA.info.mtime as any)
+          sortPerdicate = (fileA, fileB) => (+fileB.info.birthtime as any) - (+fileA.info.birthtime as any)
         }
         return files.filter(file => file.name.toLowerCase().includes(normalizedSearch)).sort(sortPerdicate)
       })
@@ -187,6 +195,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   onFileClick(file: AcFile) {
     this.fileService.setSelectedFile(file);
     this.router.navigate(['/detail'])
+    this.cdr.detectChanges()
   }
 
   setActiveSort(sort) {

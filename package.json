@@ -1,6 +1,6 @@
 {
   "name": "acceedo-spectrum",
-  "version": "10.5.0",
+  "version": "10.5.3",
   "description": "Angular 13 with Electron 17 (Typescript + SASS + Hot Reload)",
   "homepage": "https://github.com/maximegris/angular-electron",
   "author": {

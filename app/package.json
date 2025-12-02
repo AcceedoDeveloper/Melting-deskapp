@@ -1,6 +1,6 @@
 {
   "name": "acceedo-spectrum",
-  "version": "10.5.0",
+  "version": "10.5.3",
   "main": "main.js",
   "private": true,
   "dependencies": {
