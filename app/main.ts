@@ -6,6 +6,7 @@ import * as net from 'net';
 import { getFiles } from './helpers/get-file-name';
 import { readFileAndGetJson, sendDataSerialPort } from './helpers/serial-com';
 
+const fetch = require("node-fetch");
 import { SerialPort } from 'serialport';
 import * as chokidar from 'chokidar';
 
@@ -106,32 +107,28 @@ ipcMain.handle('send-data-serial-port-com', async (e, ...args) => {
 
 
 ipcMain.handle('send-data-ip', async (e, ip, data) => {
-  return new Promise((resolve, reject) => {
-    const client = new net.Socket();
+  console.log("Sending to IP:", ip, data);
 
-    console.log("Connecting to IP:", ip);
+  try {
+    const fullUrl = `${ip}?d=${encodeURIComponent(data)}`;
+    console.log("Final URL:", fullUrl);
 
-    client.connect(1234, ip, () => {   // Change port if needed
-      console.log("Connected. Sending data:", data);
-      client.write(data);
+    const response = await fetch(fullUrl, {
+      method: "GET"
     });
 
-    client.on('data', (chunk) => {
-      const msg = chunk.toString();
-      console.log("Received from IP device:", msg);
+    const text = await response.text(); 
+    console.log("Raw Response:", text);
 
-      if (msg.includes('$ack#')) {
-        client.destroy();
-        resolve('$ack#');
-      }
-    });
-
-    client.on('error', (err) => {
-      console.error("IP Error:", err);
-      reject(err);
-    });
-  });
+    return text;
+  } catch (err) {
+    console.error("IP HTTP Error:", err);
+    throw err;
+  }
 });
+
+
+
 
 
 ipcMain.handle('get-spectrum-data', async (e, args) => {

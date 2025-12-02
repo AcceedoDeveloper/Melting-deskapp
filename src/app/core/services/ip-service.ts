@@ -7,10 +7,14 @@ import { ipcRenderer } from "electron";
 })
 export class IpService {
 
-  sendData(ip: string, data: string) {
+ sendData(ip: string, data: string) {
     return new Observable((observer) => {
-      ipcRenderer.invoke('send-data-ip', ip, data).then((resp) => {
-        observer.next(resp);
+      ipcRenderer.invoke('send-data-ip', ip, data).then((response) => {
+        if (response?.error) {
+          observer.error(response.message);
+        } else {
+          observer.next(response);
+        }
         observer.complete();
       }).catch(err => observer.error(err));
     });
