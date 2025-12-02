@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { SerialPortService } from './core/services/serial-port.service';
 import { PortInfo } from './models/port-info.model';
 import { FormControl } from '@angular/forms';
+import { FileListService } from './core/services/file-list.service';
 
 @Component({
   selector: 'app-root',
@@ -26,7 +27,8 @@ export class AppComponent implements OnInit {
     private translate: TranslateService,
     private app: AppService,
     private router: Router,
-    private _serialPort: SerialPortService
+    private _serialPort: SerialPortService,
+    private fileService: FileListService
   ) {
     this.translate.setDefaultLang('en');
     console.log('APP_CONFIG', APP_CONFIG);
@@ -45,10 +47,38 @@ export class AppComponent implements OnInit {
     this.serialPorts$ = this.app.getSerialPortsObs();
 
     this.loadPorts();
+
+    setInterval(() => {
+      const files = this.fileService.getFiles()
+      files.forEach(file => {
+        const durationMs = (new Date() as any) - file.info.birthtime
+        const durationMin = Math.round(durationMs / (1000 * 60))
+        if (durationMin >= 5 && file.new) {
+          file.new = false
+        }
+      })
+      this.fileService.files$.next(files)
+    }, 1000 * 60)
+
+    this.cleanUpDirectory();
+
+    setInterval(() => {
+      this.cleanUpDirectory()
+    }, 1000 * 60)
+
   }
 
   onRefreshClick() {
     this.loadPorts();
+  }
+
+  cleanUpDirectory() { 
+    // cleanup directory
+    const directoryPath = this.fileService.getSearchDirectory()
+
+    if (directoryPath) {
+      this.fileService.cleanDirectory(directoryPath)
+    }
   }
 
   loadPorts() {

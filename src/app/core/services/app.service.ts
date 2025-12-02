@@ -12,8 +12,8 @@ import { getOnce } from "../utils/get-once";
 export class AppService {
 
     sortOptions = [
-        { value: 'dateOld', name: 'Date (Oldest)' },
         { value: 'dateNew', name: 'Date (Newest)' },
+        { value: 'dateOld', name: 'Date (Oldest)' },
         // { value: 'noAsc', name: 'Number (0-9)' },
         // { value: 'noDsc', name: 'Number (9-0)' },
         { value: 'nameAsc', name: 'Name (A-Z)' },

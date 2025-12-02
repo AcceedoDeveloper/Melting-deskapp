@@ -10,6 +10,7 @@ import { PortInfo } from '../models/port-info.model';
 import { SerialPortService } from '../core/services/serial-port.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../shared/components/error-dialog/error-dialog.component';
+import { FormControl, Validators } from '@angular/forms';
 
 const CHUNK_LENGTH = 10;
 
@@ -19,6 +20,13 @@ const headerMap = {
   "Tested By": "T",
   "Stage": "ST",
   "Product ID": "PRO"
+}
+
+const furanceMap = {
+  'A': 1,
+  'B': 2,
+  'C': 3,
+  'D': 4,
 }
 
 @Component({
@@ -33,6 +41,15 @@ export class DetailComponent implements OnInit {
   spectrum: Spectrum;
   sendableData: string;
   selectedPort$: Observable<PortInfo>;
+  furnaces = [
+    { name: 'Furnace 1', no: 1 },
+    { name: 'Furnace 2', no: 2 },
+    { name: 'Furnace 3', no: 3 },
+    { name: 'Furnace 4', no: 4 },
+  ];
+
+  furnaceCtrl = new FormControl('', [Validators.required]);
+  furanceFound = false;
 
   constructor(
     private fileList: FileListService,
@@ -56,6 +73,11 @@ export class DetailComponent implements OnInit {
       // junk of 8 data
 
       this.sendableData = this.getSendableData(spectrum);
+      const furanceNo = this.getFurance(spectrum.headers)
+      if (furanceNo) {
+        this.furnaceCtrl.setValue(furanceNo);
+        this.furanceFound = true;
+      }
       console.log(this.sendableData)
 
       const elements = [];
@@ -89,6 +111,9 @@ export class DetailComponent implements OnInit {
       if (h.name === 'Grade') {
         value = h.value.split(' ')[0]
       }
+      if (h.name === 'Stage') {
+        value = value && value.replace(' ', '-')
+      }
       return `${headerMap[h.name]}:${value}`
     }).join(',');
 
@@ -96,7 +121,7 @@ export class DetailComponent implements OnInit {
       return `${e.ElementName}:${e.reportedResult.resultValue}`
     }).join(',')
 
-    return `$${headers},${elements}#`
+    return `${headers},${elements}`
 
     // const elements = spectrum.elements.map((e: SpectrumElement) => {
     //   const res = {};
@@ -118,11 +143,22 @@ export class DetailComponent implements OnInit {
     // }
   }
 
+  getFurance(headers) {
+    const stage = (headers || []).find(header => header.name?.toLowerCase() === 'stage')
+    if (!stage) {
+      return null
+    }
+    const furanceChar = stage.value.substr(0, 1);
+    return furanceMap[furanceChar.toUpperCase()]
+  }
+
   onSendClick() {
     const selectedSerialPort = this.app.getSelectedSerialPort();
     // show loader
     this.app.showLoader('Sending Data.')
-    this._serialPortService.sendData(selectedSerialPort.path, this.sendableData).pipe(
+    const payload = `$${this.sendableData},${"fur:" + this.furnaceCtrl.value}#`
+    console.log(payload)
+    this._serialPortService.sendData(selectedSerialPort.path, payload).pipe(
       finalize(() => { this.app.hideLoader() }),
       catchError(err => {
         this.dialog.open(ErrorDialogComponent, {

@@ -35,9 +35,25 @@
             <!-- </div> -->
           </div>
           <div fxLayoutAlign="end">
-            <button [disabled]="!(selectedPort$ | async)" (click)="onSendClick()" mat-raised-button>
-              Send
-            </button>
+            <div gdAuto="column" gdGap="1rem" gdAlignColumns='center center'>
+              <ng-container *ngIf="!furanceFound; else furanceDisplay">
+                <mat-form-field>
+                  <mat-label>Select Furnace</mat-label>
+                  <mat-select [formControl]="furnaceCtrl">
+                    <mat-option [value]="furnace.no" *ngFor="let furnace of furnaces">
+                      {{ furnace.name }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </ng-container>
+              <ng-template #furanceDisplay>
+                <span>Furance {{ furnaceCtrl.value }}</span>
+              </ng-template>
+              
+              <button [disabled]="!(selectedPort$ | async) || furnaceCtrl.invalid" (click)="onSendClick()" mat-raised-button>
+                Send
+              </button>
+            </div>
           </div>
         </div>
 

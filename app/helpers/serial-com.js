@@ -121,17 +121,21 @@ var sendDataSerialPort = function (path, data) { return __awaiter(void 0, void 0
                 });
                 port.on('error', function (err) {
                     // console.log('error occured', err)
+                    port.close();
                     return reject(err);
                 });
+                // $H:124483,G:Grey,T:A.S,ST:AI-Initial,C:3.50699,Si:1.63319,Mn:0.639766,P:0.0595395,S:0.08,Cr:0.0666722,Mo:0.00593579,Ni:0.0106145,Al:0.00224165,Co:0.00354354,Cu:0.250841,Nb:0.00219472,Ti:0.0272454,V:0.00635257,W:0.0002,Pb:0.00281755,Sn:0.0200302,Mg:0.000500656,As:0.00320924,Zr:0.00063529,Bi:0.00241148,Ca:0.0002,Ce:0.000954009,Sb:0.000654718,Te:0.0008,B:0.000849607,Zn:0.00528085,N:0.00965143,O:0.012,Fe:93.6447#
                 port.write(data, function (err) {
-                    // console.log('error', err)
-                    if (err) {
-                        return reject(err);
-                    }
-                    else {
-                        resolve('success');
-                    }
-                    port.close();
+                    // give a timeout to send full data
+                    setTimeout(function () {
+                        port.close();
+                        if (err) {
+                            return reject(err);
+                        }
+                        else {
+                            resolve('success');
+                        }
+                    }, 1000 * 2);
                 });
             })];
     });

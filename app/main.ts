@@ -2,7 +2,7 @@ import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as url from 'url';
-import { getFiles } from './helpers/get-file-name';
+import { checkFileExists, deleteFile, getFilePaths, getFiles } from './helpers/get-file-name';
 import { readFileAndGetJson, sendDataSerialPort } from './helpers/serial-com';
 
 import { SerialPort } from 'serialport';
@@ -70,9 +70,31 @@ function createWindow(): BrowserWindow {
 ipcMain.handle('file-list', async (e, args) => {
   const directoryPath = args;
   try {
+    console.log(directoryPath)
     return await getFiles(directoryPath);
   } catch (error) {
     return error
+  }
+});
+
+ipcMain.handle('directory-cleanup', async (e, args) => {
+  const directoryPath = args;
+  console.log('directory clean', directoryPath)
+  try {
+    const files = await getFiles(directoryPath, () => true) as any[];
+    const sortedFiles = files.sort((fileA, fileB) => (+fileB.info.birthtime as any) - (+fileA.info.birthtime as any))
+    const deletableFiles = sortedFiles.slice(5, files.length)
+    for (const file of deletableFiles) {
+      try {
+        if (await checkFileExists(file.path)) {
+          await deleteFile(file.path)
+        }
+      } catch (error) {
+        console.log(file.name, 'cannot be deleted')
+      }
+    }
+  } catch (error) {
+    console.log(error)
   }
 });
 
@@ -83,6 +105,7 @@ ipcMain.on('watch-dir', async (e, args) => {
   }
   watcher = chokidar.watch(directoryPath, { ignored: /^\./, persistent: true, ignoreInitial: true })
     .on('add', function (path) {
+      console.log(path)
       win.webContents.send('reload-files')
     })
     .on('change', function (path) {

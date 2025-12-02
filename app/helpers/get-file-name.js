@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.readFileAsXml = exports.getFiles = exports.getFileInfo = void 0;
+exports.readFileAsXml = exports.checkFileExists = exports.deleteFile = exports.getFilePaths = exports.getFiles = exports.getFileInfo = void 0;
 var fs = require("fs");
 var mime = require("mime-types");
 var path = require("path");
@@ -51,10 +51,10 @@ var getFileInfo = function (filePath) {
     });
 };
 exports.getFileInfo = getFileInfo;
-var getFiles = function (dirPath) {
+var getFiles = function (dirPath, filterPredicate) {
     return new Promise(function (resolve, reject) {
         fs.readdir(dirPath, function (err, files) { return __awaiter(void 0, void 0, void 0, function () {
-            var xmlFiles, xmlFilesInfo, _i, xmlFiles_1, file, filePath, name_1, fileInfo;
+            var xmlFiles, xmlFilesInfo, _i, xmlFiles_1, file, filePath, name_1, fileInfo, durationMs, durationHr;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -74,6 +74,15 @@ var getFiles = function (dirPath) {
                         return [4 /*yield*/, (0, exports.getFileInfo)(filePath)];
                     case 2:
                         fileInfo = _a.sent();
+                        durationMs = new Date() - fileInfo.birthtime;
+                        durationHr = Math.round(durationMs / (1000 * 60 * 60));
+                        // if (filterPredicate ? filterPredicate(durationHr) : (durationHr <= 24)) {
+                        //     xmlFilesInfo.push({
+                        //         name,
+                        //         path: filePath,
+                        //         info: fileInfo
+                        //     })
+                        // }
                         xmlFilesInfo.push({
                             name: name_1,
                             path: filePath,
@@ -92,6 +101,49 @@ var getFiles = function (dirPath) {
     });
 };
 exports.getFiles = getFiles;
+var getFilePaths = function (dirPath) {
+    return new Promise(function (resolve, reject) {
+        fs.readdir(dirPath, function (err, files) { return __awaiter(void 0, void 0, void 0, function () {
+            var xmlFiles, filePaths;
+            return __generator(this, function (_a) {
+                xmlFiles = files.filter(function (file) { return mime.lookup(file) === 'application/xml'; });
+                filePaths = xmlFiles.map(function (file) { return path.join(dirPath, file); });
+                resolve(filePaths);
+                return [2 /*return*/];
+            });
+        }); });
+    });
+};
+exports.getFilePaths = getFilePaths;
+var deleteFile = function (filePath) {
+    return new Promise(function (resolve, reject) {
+        fs.unlink(filePath, function (err) { return __awaiter(void 0, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (err) {
+                    reject('file cannot be deleted');
+                }
+                else {
+                    resolve('file deleted success.');
+                }
+                return [2 /*return*/];
+            });
+        }); });
+    });
+};
+exports.deleteFile = deleteFile;
+var checkFileExists = function (filePath) {
+    return new Promise(function (resolve, reject) {
+        fs.access(filePath, function (error) {
+            if (error) {
+                reject('file cannot be found');
+            }
+            else {
+                resolve('file found.');
+            }
+        });
+    });
+};
+exports.checkFileExists = checkFileExists;
 var readFileAsXml = function (filePath) {
     return new Promise(function (resolve) {
         fs.readFile(filePath, { encoding: 'utf16le' }, function (err, data) {

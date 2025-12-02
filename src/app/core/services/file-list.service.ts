@@ -11,9 +11,26 @@ import { getOnce } from "../utils/get-once";
 export class FileListService {
 
     files$ = new BehaviorSubject<AcFile[]>([]);
+    oldFiles$ = new BehaviorSubject<AcFile[]>(null);
     filesLoaded$ = new BehaviorSubject<boolean>(false);
     selectedFile$ = new BehaviorSubject<AcFile>(null);
     seacrhDirectory$ = new BehaviorSubject<string>('');
+
+    getFiles() {
+        let files = []
+        this.files$.pipe(take(1)).subscribe((resFiles) => {
+            files = resFiles
+        })
+        return files
+    }
+
+    get oldFiles() {
+        let files = []
+        this.oldFiles$.pipe(take(1)).subscribe(() => {
+            files = files
+        })
+        return files
+    }
 
     getFileList(directoryPath) {
         return new Observable<AcFile[]>((observer) => {
@@ -26,8 +43,34 @@ export class FileListService {
                 }
             })
         }).pipe(
-            tap(files => this.files$.next(files))
+            tap(files => {
+                const oldFiles = this.getFiles();
+                const newFiles = files;
+                if (oldFiles.length) {
+                    const oldFilesMap = (oldFiles as any[]).reduce((acc, file) => {
+                        acc[file.name] = file
+                        return acc
+                    }, {})
+                    // new file detected
+                    const newlyAddedFiles = [];
+                    newFiles.forEach(newFile => {
+                        if (!oldFilesMap[newFile.name]) {
+                            newlyAddedFiles.push(newFile)
+                        }
+                        if (oldFilesMap[newFile.name]?.new) {
+                            newFile['new'] = true
+                        }
+                    })
+                    console.log(newlyAddedFiles)
+                    newlyAddedFiles.forEach(file => file.new = true)
+                }
+                this.files$.next(files)
+            })
         )
+    }
+
+    cleanDirectory(directoryPath) {
+        return ipcRenderer.invoke('directory-cleanup', directoryPath)
     }
 
     setWatcher(directoryPath) {

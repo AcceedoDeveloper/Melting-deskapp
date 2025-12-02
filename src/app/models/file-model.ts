@@ -1,6 +1,7 @@
 export interface AcFile {
     name: string;
     path: string;
+    new: boolean;
     info: {
         birthtime: string; // created time
         size: string;
