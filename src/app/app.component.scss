@@ -22,7 +22,6 @@
 /* Container adjustment */
 .mode-select {
   width: 220px;
-  margin-bottom: 1.5rem;
 }
 
 /* Serial / IP block layout */
@@ -71,4 +70,52 @@
   .mode-select {
     width: 95%;
   }
+}
+/* ROW CONTAINER */
+.mode-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 20px;
+  margin-left: 50%;
+}
+
+/* Mode dropdown width */
+.mode-select {
+  width: 200px;
+}
+
+/* Serial/IP area */
+.mode-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 10px;
+}
+
+/* Fix input/dropdown width */
+.mode-content mat-form-field {
+  width: 250px;
+}
+
+button {
+  height: 48px;
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .mode-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mode-content mat-form-field,
+  .mode-select {
+    width: 100%;
+  }
+}
+
+
+.connect-button{
+margin-bottom: 20px;
 }
