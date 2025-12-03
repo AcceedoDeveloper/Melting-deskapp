@@ -119,3 +119,79 @@ button {
 .connect-button{
 margin-bottom: 20px;
 }
+
+/* MAIN HEADER ROW */
+.header-row {
+  display: flex;
+  justify-content: space-between; /* Left and right side alignment */
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* LEFT SIDE TITLE */
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* RIGHT SIDE BUTTON + INFO */
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Usage message */
+.usage-info {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: #fff;
+}
+
+.usage-none {
+  font-size: 14px;
+  opacity: 0.6;
+  font-style: italic;
+  color: #bbb;
+}
+
+/* Settings button style (optional) */
+.settings-btn {
+  padding: 6px 16px;
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Mobile fix */
+@media (max-width: 600px) {
+  .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
+
+
+.settings-icon-btn {
+  color: white;
+}
+.settings-img-icon img {
+  width: 24px;           /* Material icon size */
+  height: 24px;
+  object-fit: contain;   /* Prevents distortion */
+  filter: invert(1);     /* Makes icon white on dark background */
+}
+
+.settings-icon-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

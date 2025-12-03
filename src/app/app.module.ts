@@ -15,8 +15,10 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 
 import { HomeModule } from './home/home.module';
 import { DetailModule } from './detail/detail.module';
+import { MatIconModule } from '@angular/material/icon';
 
 import { AppComponent } from './app.component';
+import { ModeSelectorModule } from './mode-selector/mode-selector.module';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -25,6 +27,7 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
   declarations: [AppComponent],
   imports: [
     BrowserModule,
+    MatIconModule,
     BrowserAnimationsModule,
     FormsModule,
     HttpClientModule,
@@ -32,6 +35,7 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
     SharedModule,
     HomeModule,
     DetailModule,
+    ModeSelectorModule,
     AppRoutingModule,
     MatSidenavModule,
     TranslateModule.forRoot({

@@ -1,0 +1,99 @@
+<!-- <div class="mode-row">
+
+  <mat-form-field appearance="fill" class="mode-select">
+    <mat-select placeholder="Select Mode" [formControl]="modeCtrl">
+      <mat-option value="serial">Serial Port</mat-option>
+      <mat-option value="ip">IP Address</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div *ngIf="modeCtrl.value === 'serial'" class="mode-content">
+    <mat-form-field>
+      <mat-select [formControl]="serialPortCtrl" (selectionChange)="onSerialPortChange($event)">
+        <mat-option *ngFor="let port of serialPorts$ | async" [value]="port">
+          {{ port.path }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-icon-button (click)="onRefreshClick()">
+      <mat-icon>
+        <img src="./assets/icons/refresh_white_24dp.svg" />
+      </mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="modeCtrl.value === 'ip'" class="mode-content">
+    <mat-form-field>
+      <input matInput placeholder="Enter IP Address" [formControl]="ipAddressCtrl">
+    </mat-form-field>
+
+    <button class="connect-button" (click)="onConnectIP()">Connect</button>
+  </div>
+
+</div> -->
+
+
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div class="login-box" *ngIf="!isLoggedIn">
+
+  <h2 class="login-title">Admin Login</h2>
+
+  <div class="input-group">
+    <label>Username</label>
+    <input type="text" [formControl]="loginUserCtrl" />
+  </div>
+
+  <div class="input-group">
+    <label>Password</label>
+    <input type="password" [formControl]="loginPassCtrl" />
+  </div>
+
+  <button class="login-btn" (click)="login()">Login</button>
+
+  <p class="error" *ngIf="loginError">{{ loginError }}</p>
+</div>
+
+
+
+<!-- ================= MODE SELECTION UI (AFTER LOGIN) ================= -->
+<div *ngIf="isLoggedIn" class="mode-container">
+
+  <!-- MODE DROPDOWN -->
+  <div class="input-group small">
+    <label>Select Mode</label>
+    <select [formControl]="modeCtrl">
+      <option value="serial">Serial Port</option>
+      <option value="ip">IP Address</option>
+    </select>
+  </div>
+
+  <!-- SERIAL PORT UI -->
+  <div *ngIf="modeCtrl.value === 'serial'" class="mode-content">
+
+    <div class="input-group small">
+      <label>Select Serial Port</label>
+      <select [formControl]="serialPortCtrl" (change)="onSerialPortChange($event)">
+        <option *ngFor="let port of serialPorts$ | async" [ngValue]="port">
+          {{ port.path }}
+        </option>
+      </select>
+    </div>
+
+    <button class="refresh-btn" (click)="onRefreshClick()">⟳</button>
+  </div>
+
+  <!-- IP INPUT UI -->
+  <div *ngIf="modeCtrl.value === 'ip'" class="mode-content">
+
+    <div class="input-group small">
+      <label>Enter IP Address</label>
+      <input type="text" placeholder="192.168.1.50" [formControl]="ipAddressCtrl">
+    </div>
+
+    <button class="connect-btn" (click)="onConnectIP()">Connect</button>
+  </div>
+
+</div>
+

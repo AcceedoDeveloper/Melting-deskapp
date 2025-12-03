@@ -1,77 +1,65 @@
 <mat-sidenav-container ngClass.lt-md="mobile">
     <mat-sidenav-content class="content">
         <div class="container">
-            <div gdAuto="column" gdAlignRows="space-between" gdAlignColumns="center center">
-                <div gdAuto="column" gdGap="1rem" gdAlignRows="start start" gdAlignColumns="center center">
-                    <div class="btn-container">
-                        <button (click)="backTo()" mat-icon-button *ngIf="showBackBtn$ | async">
-                            <mat-icon>
-                                <img src="./assets/icons/arrow_back_white_24dp.svg" alt="">
-                            </mat-icon>
-                        </button>
-                    </div>
-                    <h1 class="title">
-                        Melting Spectrum Reports
-                    </h1>
-                       <ng-container *ngIf="(serialPorts$ | async) as serialPorts">
-                        <!-- <div gdAuto="column" gdAlignColumns="center center">
-                            <div class="m-r-10">Serial Port :</div>
-                            <mat-form-field *ngIf="serialPorts.length; else noSerialPortTpl">
-                                <mat-select [formControl]="serialPortCtrl" (selectionChange)="onSerialPortChange($event)">
-                                    <mat-option [value]="port" *ngFor="let port of serialPorts">{{ port.path }}</mat-option>
-                                </mat-select>
-                            </mat-form-field>
-                            <button mat-icon-button (click)="onRefreshClick()" matTooltip="Refresh Ports">
-                                <mat-icon>
-                                    <img src="./assets/icons/refresh_white_24dp.svg" alt="">
-                                </mat-icon>
-                            </button>
-                        </div> -->
-
-
-<!-- SIDE BY SIDE MODE + SERIAL / IP UI -->
-<div class="mode-row">
+        
+                   <div class="header-row">
   
-  <!-- MODE DROPDOWN -->
-  <mat-form-field appearance="fill" class="mode-select">
-    <mat-select placeholder="Select Mode" [formControl]="modeCtrl">
-      <mat-option value="serial">Serial Port</mat-option>
-      <mat-option value="ip">IP Address</mat-option>
-    </mat-select>
-  </mat-form-field>
+  <!-- LEFT SIDE -->
+  <div class="title-section">
+    <div class="btn-container">
+      <button (click)="backTo()" mat-icon-button *ngIf="showBackBtn$ | async">
+        <mat-icon>
+          <img src="./assets/icons/arrow_back_white_24dp.svg" alt="">
+        </mat-icon>
+      </button>
+    </div>
 
-  <!-- SERIAL PORT UI -->
-  <div *ngIf="modeCtrl.value === 'serial'" class="mode-content">
-    <mat-form-field>
-      <mat-select [formControl]="serialPortCtrl" (selectionChange)="onSerialPortChange($event)">
-        <mat-option [value]="port" *ngFor="let port of serialPorts$ | async">{{ port.path }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+    <h1 class="title">Melting Spectrum Reports</h1>
+  </div>
 
-    <button mat-icon-button (click)="onRefreshClick()" matTooltip="Refresh">
+  <!-- RIGHT SIDE -->
+  <div class="right-section">
+    
+    <button class="settings-btn" (click)="settings()">
+      Settings
+    </button>
+     <!-- <div class="btn-container">
+         <button mat-icon-button class="settings-icon-btn" (click)="settings()">
       <mat-icon>
-        <img src="./assets/icons/refresh_white_24dp.svg" />
+          <img src="./assets/icons/system-code-icon-svg-download-png-8384832.png" alt="">
       </mat-icon>
     </button>
+     </div> -->
+ 
+
+    <!-- SERIAL/IP INFO -->
+    <div class="usage-info" *ngIf="(selectedPortInfo$ | async) || (selectedIP$ | async); else noneSelected">
+      <div *ngIf="selectedPortInfo$ | async as selPort">
+        Serial: {{ selPort?.path }}
+      </div>
+
+      <div *ngIf="selectedIP$ | async as selIP">
+        IP: {{ selIP }}
+      </div>
+    </div>
+
+    <ng-template #noneSelected>
+      <div class="usage-none">
+        No Serial or IP Selected
+      </div>
+    </ng-template>
+
   </div>
-
-  <!-- IP MODE UI -->
-  <div *ngIf="modeCtrl.value === 'ip'" class="mode-content">
-    <mat-form-field>
-      <input matInput placeholder="Enter IP Address" [formControl]="ipAddressCtrl">
-    </mat-form-field>
-
-    <button  class="connect-button" (click)="onConnectIP()">Connect</button>
-  </div>
-
 </div>
 
 
-                    </ng-container>
-                </div>
+
+
+
+               
                 <div>
                  
-                </div>
+      
             </div>
             <router-outlet></router-outlet>
         </div>

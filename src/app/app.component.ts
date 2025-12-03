@@ -23,6 +23,9 @@ export class AppComponent implements OnInit {
   serialPortCtrl = new FormControl(null);
   modeCtrl = new FormControl('serial');  
 ipAddressCtrl = new FormControl('');
+selectedPortInfo$: Observable<PortInfo>;
+selectedIP$: Observable<string>;
+
 
 
 
@@ -50,6 +53,10 @@ ipAddressCtrl = new FormControl('');
   ngOnInit(): void {
     this.showBackBtn$ = this.app.isBackBtnShowObs();
     this.serialPorts$ = this.app.getSerialPortsObs();
+
+    this.selectedPortInfo$ = this.app.geSelectedtSerialPortObs();
+  this.selectedIP$ = this.app.getSelectedIPObs();
+
 
     this.loadPorts();
 
@@ -109,6 +116,9 @@ ipAddressCtrl = new FormControl('');
     this.app.setSelectedSerialPort(this.serialPortCtrl.value);
   }
 
+  settings(){
+    this.router.navigate(['/settings']);
+  }
 
   onConnectIP() {
   const ip = this.ipAddressCtrl.value;
