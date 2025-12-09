@@ -50,9 +50,19 @@
                 <span>Furance {{ furnaceCtrl.value }}</span>
               </ng-template>
               
-              <button [disabled]="isSendDisabled()" (click)="onSendClick()" mat-raised-button>
+              <!-- <button [disabled]="isSendDisabled()" (click)="onSendClick()" mat-raised-button>
                 Send
-              </button>
+              </button> -->
+
+              <button 
+  [disabled]="isSendDisabled()" 
+  (click)="onSendClick()" 
+  mat-raised-button
+  [ngClass]="{ 'send-enabled': !isSendDisabled(), 'send-disabled': isSendDisabled() }">
+  Send
+</button>
+
+
             </div>
           </div>
         </div>

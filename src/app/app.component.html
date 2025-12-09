@@ -4,7 +4,6 @@
         
                    <div class="header-row">
   
-  <!-- LEFT SIDE -->
   <div class="title-section">
     <div class="btn-container">
       <button (click)="backTo()" mat-icon-button *ngIf="showBackBtn$ | async">
@@ -17,29 +16,21 @@
     <h1 class="title">Melting Spectrum Reports</h1>
   </div>
 
-  <!-- RIGHT SIDE -->
   <div class="right-section">
-    
-    <button class="settings-btn" (click)="settings()">
-      Settings
-    </button>
-     <!-- <div class="btn-container">
-         <button mat-icon-button class="settings-icon-btn" (click)="settings()">
-      <mat-icon>
-          <img src="./assets/icons/system-code-icon-svg-download-png-8384832.png" alt="">
-      </mat-icon>
-    </button>
-     </div> -->
- 
 
-    <!-- SERIAL/IP INFO -->
+  <div class="input-addon" (click)="settings()" matTooltip="Set IP or serial port">
+  <span style="font-size: 22px;">⚙️</span>
+</div>
+
+    
+
     <div class="usage-info" *ngIf="(selectedPortInfo$ | async) || (selectedIP$ | async); else noneSelected">
       <div *ngIf="selectedPortInfo$ | async as selPort">
-        Serial: {{ selPort?.path }}
+         {{ selPort?.path }}
       </div>
 
       <div *ngIf="selectedIP$ | async as selIP">
-        IP: {{ selIP }}
+       {{ selIP }}
       </div>
     </div>
 
@@ -48,6 +39,11 @@
         No Serial or IP Selected
       </div>
     </ng-template>
+
+    <!-- <div class="serial-data-display" *ngIf="serialDataReceived$ | async as data">
+      <div class="serial-data-label">Received Data:</div>
+      <div class="serial-data-content">{{ data }}</div>
+    </div> -->
 
   </div>
 </div>

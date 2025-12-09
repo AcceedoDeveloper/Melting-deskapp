@@ -27,7 +27,9 @@ export class AppService {
     fileSearch$ = new BehaviorSubject<string>('');
     selectedIP$ = new BehaviorSubject<string>(null);
     mode$ = new BehaviorSubject<'serial' | 'ip'>('serial');
+    serialDataReceived$ = new BehaviorSubject<string>('');
 
+fileStatus$ = new BehaviorSubject<{ [fileId: string]: string }>({});
 
 
     sorts$ = new BehaviorSubject<any[]>(this.sortOptions)
@@ -158,5 +160,22 @@ getMode() {
   return getOnce(this.mode$.asObservable());
 }
 
+// Serial data received
+setSerialDataReceived(data: string) {
+  this.serialDataReceived$.next(data);
+}
+
+getSerialDataReceivedObs() {
+  return this.serialDataReceived$.asObservable();
+}
+
+getSerialDataReceived() {
+  return getOnce(this.serialDataReceived$.asObservable());
+}
+
+setFileStatus(fileId: string, status: string) {
+  const current = this.fileStatus$.value;
+  this.fileStatus$.next({ ...current, [fileId]: status });
+}
 
 }

@@ -33,6 +33,7 @@ export class SerialPortService {
     }
 
     sendData(path: string, data: string) {
+        console.log("Sending Data to Serial Port:", data, path);
         return new Observable<any>((observer) => {
             ipcRenderer.invoke('send-data-serial-port-com', path, data).then((msg) => {
                 if (msg) {
@@ -46,4 +47,22 @@ export class SerialPortService {
         })
 
     }
+
+    listenSerialResponse(): Observable<string> {
+  return new Observable(observer => {
+    ipcRenderer.on('serial-data-received', (event, data) => {
+      observer.next(data);
+    });
+
+    ipcRenderer.on('serial-data-error', (event, error) => {
+      observer.error(error);
+    });
+
+    ipcRenderer.on('serial-port-closed', () => {
+      observer.complete();
+    });
+  });
 }
+
+}
+

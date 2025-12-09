@@ -1,6 +1,10 @@
 <div class="content">
-  <div *ngIf="showSearchDirectory; else editDirectoryTpl" gdAuto="column" gdGap="10px" gdAlignRows="start start" gdAlignColumns="center center">
-      <label for="search-directory" class="m-b-10">Enter Directory</label>
+  <div *ngIf="showSearchDirectory; else editDirectoryTpl"  gdAuto="column" gdGap="10px" 
+  gdAlignRows="start start" 
+  gdAlignColumns="center center"
+  fxLayoutAlign="end start"
+  class="m-b-10">
+      <label for="search-directory" class="m-b-10 heading">Enter Directory</label>
       <div class="m-b-10">:</div>
       <div class="input-container m-b-10">
         <input  #directorSearch [formControl]="directoryCtrl" id="search-directory" type=" text" class="custom-input">
@@ -25,8 +29,17 @@
     <!-- drive_file_rename_outline_white_24dp -->
   </div>
   <ng-template #editDirectoryTpl>
-    <div gdAuto="column" gdGap="10px" gdAlignRows="start start" gdAlignColumns="center center" class="m-b-10">
-      <div>
+
+<div 
+  gdAuto="column" gdGap="10px" 
+  gdAlignRows="start start" 
+  gdAlignColumns="center center"
+  fxLayoutAlign="end start"
+  class="m-b-10"
+>
+
+
+      <div class="heading" >
         Change Search Directory
        </div>
        <div>
@@ -51,7 +64,9 @@
     <ng-container *ngIf="filteredFiles$ | async as files">
       <ng-container *ngIf="!errMsg; else errMsgTpl">
         <ng-container *ngIf="filesLoaded$ | async; else enterDirectoryTpl">
-          <div class="search-input" fxLayoutAlign="start" fxLayoutGap="1rem">
+          <div>
+
+              <div class="search-input" fxLayoutAlign="start" fxLayoutGap="1rem">
             <div class="input-container search-ctrl">
               <input [value]="(fileSearch$ | async)" (input)="onFileSearchInput($event.target)" placeholder="Search Files" #fileSearch id="search-directory" type=" text" class="custom-input">
               <div class="input-addon" *ngIf="fileSearch.value" (click)="clearInput(fileSearch); resetFileSearch()">
@@ -60,18 +75,75 @@
                 </mat-icon>
               </div>
             </div>
-            <div fxLayoutAlign="center center" fxLayoutGap="10px">
-              <div>
-                Sort By :
-              </div>
-              <div class="sort-by-chip" [matMenuTriggerFor]="sortMenu">
-                <span>{{ (activeSort$ | async).name }}</span>
-                <i class="arrow"></i>
-              </div>
-            </div>
+            
+
+
+  
+
+
+
+  <div fxFlex></div>
+
+  <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="1rem">
+
+    <div class="date-filter">
+      <input
+        type="date"
+        #dateInput
+        class="date-input"
+        (change)="onNormalDateSelect($event)"
+      />
+
+ <button 
+    mat-icon-button
+    class="reset-btn"
+    *ngIf="selectedDate$ | async"
+    (click)="resetDate(dateInput)">
+    <mat-icon>
+      <img src="./assets/icons/clear_white_24dp.svg" alt="">
+    </mat-icon>
+  </button>
+
+    </div>
+
+   <div fxLayoutAlign="center center" fxLayoutGap="10px">
+  <div class="sort-by-chip"
+       [matMenuTriggerFor]="statusMenu">
+    <span>{{ statusInfo[(status$ | async)]?.text }}</span>
+    <i class="arrow"></i>
+  </div>
+
+  <mat-menu #statusMenu="matMenu">
+    <button mat-menu-item (click)="setStatus('all')">All Status</button>
+    <button mat-menu-item (click)="setStatus('sent-data')">Sent Data</button>
+    <button mat-menu-item (click)="setStatus('no-wifi')">No Wi-Fi</button>
+    <button mat-menu-item (click)="setStatus('no-response')">No Response</button>
+  </mat-menu>
+</div>
+
+    <div fxLayoutAlign="center center" fxLayoutGap="10px">
+      <div class="sort-by-chip" [matMenuTriggerFor]="sortMenu">
+        <span>{{ (activeSort$ | async).name }}</span>
+        <i class="arrow"></i>
+      </div>
+    </div>
+
+  </div>
+
+
+
           </div>
             <div class="files" *ngIf="files?.length; else noFileFoundTpl" gdColumns="repeat(auto-fit, minmax(150px, 155px))">
-              <div (click)="onFileClick(file)" gdAlignRows="center center" gdAlignColumns="center center" [class.new]="file.new" class="file-container mat-elevation-z2" matRipple *ngFor="let file of files; trackBy: trackByFileName">
+             <div 
+  (click)="onFileClick(file)"
+  gdAlignRows="center center"
+  gdAlignColumns="center center"
+  class="file-container mat-elevation-z2"
+  matRipple
+  *ngFor="let file of files; trackBy: trackByFileName"
+  [class.new]="file.new"
+  [ngClass]="statusMap[file.name]"
+>
                 <div class="file-card" fxLayoutAlign="center center">
                   <img src="./assets/icons/xml.svg" alt="" height="72px" width="72px">
                 </div>
@@ -81,9 +153,35 @@
                 <div class="file-date">
                   {{ file.info?.birthtime | date: 'dd/MM/yy, h:mm a' }}
                 </div>
+<div *ngIf="statusMap[file.name.toLowerCase()]">
+    <div class="status-tag"
+       [ngClass]="statusMap[file.name.toLowerCase()]">
+
+
+
+       {{
+     statusMap[file.name] === 'sent-data' ? 'Sent' :
+        statusMap[file.name] === 'no-wifi' ? 'No WiFi' :
+        statusMap[file.name] === 'no-response' ? 'No Response' :
+      ''
+    }}
+  </div>
+
+</div>
+
+
                 <div *ngIf="file.new" class="new-tag">new</div>
               </div>
+           
             </div>
+
+
+   
+          </div>
+        
+
+   
+
         </ng-container>
       </ng-container>
 

@@ -14,6 +14,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     FormsModule,
     ReactiveFormsModule
   ],
-  exports: [ModeSelectorComponent]   // <== IMPORTANT
+  exports: [ModeSelectorComponent]   
 })
 export class ModeSelectorModule { }

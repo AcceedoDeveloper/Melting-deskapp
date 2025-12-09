@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ElectronService } from './core/services';
 import { TranslateService } from '@ngx-translate/core';
 import { APP_CONFIG } from '../environments/environment';
 import { AppService } from './core/services/app.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { SerialPortService } from './core/services/serial-port.service';
 import { PortInfo } from './models/port-info.model';
@@ -16,7 +16,7 @@ import { FileListService } from './core/services/file-list.service';
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
 
   showBackBtn$: Observable<boolean>;
   serialPorts$: Observable<PortInfo[]>;
@@ -25,6 +25,8 @@ export class AppComponent implements OnInit {
 ipAddressCtrl = new FormControl('');
 selectedPortInfo$: Observable<PortInfo>;
 selectedIP$: Observable<string>;
+serialDataReceived$: Observable<string>;
+private subscriptions: Subscription[] = [];
 
 
 
@@ -36,7 +38,8 @@ selectedIP$: Observable<string>;
     private app: AppService,
     private router: Router,
     private _serialPort: SerialPortService,
-    private fileService: FileListService
+    private fileService: FileListService,
+    private cdr: ChangeDetectorRef
   ) {
     this.translate.setDefaultLang('en');
     console.log('APP_CONFIG', APP_CONFIG);
@@ -56,6 +59,7 @@ selectedIP$: Observable<string>;
 
     this.selectedPortInfo$ = this.app.geSelectedtSerialPortObs();
   this.selectedIP$ = this.app.getSelectedIPObs();
+  this.serialDataReceived$ = this.app.getSerialDataReceivedObs();
 
 
     this.loadPorts();
@@ -66,6 +70,39 @@ selectedIP$: Observable<string>;
   this.modeCtrl.valueChanges.subscribe(mode => {
     this.app.setMode(mode);
   });
+
+    // Subscribe to selected port changes and start/stop listening
+    const portSub = this.selectedPortInfo$.subscribe(port => {
+      if (this.electronService.isElectron) {
+        if (port && port.path) {
+          this.startSerialListener(port.path);
+        } else {
+          this.stopSerialListener();
+        }
+      }
+    });
+    this.subscriptions.push(portSub);
+
+    if (this.electronService.isElectron) {
+      const ipc = this.electronService.ipcRenderer;
+      
+      ipc.on('serial-data-received', (event, data: string) => {
+        this.app.setSerialDataReceived(data);
+        this.cdr.detectChanges();
+      });
+
+      ipc.on('serial-data-error', (event, error: string) => {
+        console.error('Serial data error:', error);
+        this.app.setSerialDataReceived(`Error: ${error}`);
+        this.cdr.detectChanges();
+      });
+
+      ipc.on('serial-port-closed', () => {
+        console.log('Serial port closed');
+        this.app.setSerialDataReceived('');
+        this.cdr.detectChanges();
+      });
+    }
 
     setInterval(() => {
       const files = this.fileService.getFiles()
@@ -131,5 +168,53 @@ selectedIP$: Observable<string>;
   console.log("Selected IP:", ip);
   this.app.setSelectedIPAddress(ip);
 }
+
+  startSerialListener(portPath: string) {
+    if (this.electronService.isElectron) {
+      const ipc = this.electronService.ipcRenderer;
+      ipc.invoke('start-serial-listener', portPath).then(result => {
+        if (result.success) {
+          console.log(`Started listening on ${portPath}`);
+        } else {
+          console.error('Failed to start serial listener:', result.error);
+        }
+      }).catch(err => {
+        console.error('Error starting serial listener:', err);
+      });
+    }
+  }
+
+  stopSerialListener() {
+    if (this.electronService.isElectron) {
+      const ipc = this.electronService.ipcRenderer;
+      ipc.invoke('stop-serial-listener').then(result => {
+        if (result.success) {
+          console.log('Stopped serial listener');
+          this.app.setSerialDataReceived('');
+          this.cdr.detectChanges();
+        }
+      }).catch(err => {
+        console.error('Error stopping serial listener:', err);
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    // Clean up subscriptions
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    
+    // Stop serial listener
+    if (this.electronService.isElectron) {
+      const ipc = this.electronService.ipcRenderer;
+      ipc.invoke('stop-serial-listener').then(result => {
+        console.log('Serial listener stopped');
+      });
+      
+      // Remove IPC listeners
+      ipc.removeAllListeners('serial-data-received');
+      ipc.removeAllListeners('serial-data-error');
+      ipc.removeAllListeners('serial-port-closed');
+    }
+  }
 
 }

@@ -13,6 +13,8 @@ import * as chokidar from 'chokidar';
 let win: BrowserWindow = null;
 let watcher: chokidar.FSWatcher = null;
 let initialLoad = false;
+let serialPortListener: SerialPort = null;
+let serialDataBuffer: string = '';
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
@@ -119,14 +121,37 @@ ipcMain.on('watch-dir', async (e, args) => {
     })
 })
 
-ipcMain.handle('send-data-serial-port-com', async (e, ...args) => {
-  const [path, data] = args;
+// ipcMain.handle('send-data-serial-port-com', async (e, ...args) => {
+//   const [path, data] = args;
+//   console.log('data sent to the serial port', data, path);
+//   try {
+//     return await sendDataSerialPort(path, data);
+//   } catch (error) {
+//     return error;
+//   }
+// })
+
+
+ipcMain.handle('send-data-serial-port-com', async (e, path, data) => {
+  console.log('data sent to serial port', data);
   try {
-    return await sendDataSerialPort(path, data);
-  } catch (error) {
-    return error;
+    // Use existing open serialPortListener
+    if (serialPortListener && serialPortListener.isOpen) {
+      serialPortListener.write(data, (err) => {
+        if (err) {
+          console.error("Error writing to serial port:", err);
+        }
+      });
+
+      return { success: true };
+    }
+
+    return { success: false, error: "Serial port is not open." };
+  } catch (err) {
+    console.error("Send data error:", err);
+    return { success: false, error: err.message };
   }
-})
+});
 
 
 ipcMain.handle('send-data-ip', async (e, ip, data) => {
@@ -148,6 +173,95 @@ ipcMain.handle('send-data-ip', async (e, ip, data) => {
     console.error("IP HTTP Error:", err);
     throw err;
   }
+});
+
+ipcMain.handle('start-serial-listener', async (e, portPath) => {
+  try {
+
+    if (serialPortListener && serialPortListener.isOpen) {
+      return { success: true };
+    }
+
+    if (serialPortListener && !serialPortListener.isOpen) {
+      serialPortListener = null;
+    }
+
+    serialPortListener = new SerialPort({
+      path: portPath,
+      baudRate: 9600,
+      autoOpen: false
+    });
+
+    serialDataBuffer = '';
+
+    await new Promise((resolve, reject) => {
+      serialPortListener.open(err => {
+        if (err) {
+          reject(err);
+        } else {
+          console.log("Serial port OPEN:", portPath);
+          resolve(true);
+        }
+      });
+    });
+
+  let serialBuffer = "";  
+
+serialPortListener.on('data', (chunk) => {
+  const data = chunk.toString();
+  console.log("SERIAL CHUNK:", data);
+
+  serialBuffer += data;  
+
+  if (serialBuffer.startsWith('$') && serialBuffer.endsWith('#')) {
+
+    console.log("FULL SERIAL MESSAGE:", serialBuffer);
+
+    win.webContents.send('serial-data-received', serialBuffer);
+
+    serialBuffer = ""; 
+  }
+});
+
+
+    serialPortListener.on('error', (err) => {
+      console.log("SERIAL ERROR:", err);
+      win.webContents.send('serial-data-error', err.message);
+    });
+
+    serialPortListener.on('close', () => {
+      win.webContents.send('serial-port-closed');
+    });
+
+    return { success: true };
+
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+
+
+// Stop listening to serial port
+ipcMain.handle('stop-serial-listener', async () => {
+  try {
+    if (serialPortListener && serialPortListener.isOpen) {
+      await serialPortListener.close();
+      console.log("Serial listener stopped");
+    }
+    serialPortListener = null;
+    return { success: true };
+
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+
+// Clear serial data buffer
+ipcMain.handle('clear-serial-buffer', async () => {
+  serialDataBuffer = '';
+  return { success: true };
 });
 
 
