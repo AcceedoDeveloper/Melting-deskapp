@@ -25,8 +25,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 selectedDate$ = new BehaviorSubject<Date | null>(null);
 status$ = new BehaviorSubject<string>('all'); 
 sendStatus$ = this.app.fileStatus$;
-statusMap: { [fileName: string]: string } = {};
-
+statusMap: { [key: string]: string } = {};
 
 statusInfo = {
   'all':       { text: 'All Status',   class: 'status-all' },
@@ -59,6 +58,9 @@ statusInfo = {
   ) { }
 
   ngOnInit(): void {
+
+    this.getFileStatus();
+
     setTimeout(() => {
       this.app.setShowBackBtn(false);
     });
@@ -174,9 +176,15 @@ this.filteredFiles$ = combineLatest([
       });
     }
 
-    if (activeStatus !== 'all') {
-      filtered = filtered.filter(file => this.statusMap[file.name] === activeStatus);
-    }
+if (activeStatus !== 'all') {
+  filtered = filtered.filter(file => {
+    const key = this.normalizeName(file.name);
+    const status = this.statusMap[key];
+    return status === activeStatus;
+  });
+}
+
+
 
     return filtered;
   })
@@ -185,22 +193,18 @@ this.filteredFiles$ = combineLatest([
 
 
     console.log(this.sendStatus$ );
+
 this.sendStatus$.subscribe(update => {
-  console.log("STATUS UPDATE RECEIVED:", update);
+  if (!update?.fileName) return;
 
-  if (update && update.fileName) {
-    console.log("Updating map for:", update.fileName, "=", update.status);
+  const key = this.normalizeName(update.fileName);
 
-    this.statusMap = {
-      ...this.statusMap,
-[update.fileName.toLowerCase()]: update.status
-    };
+  this.statusMap[key] = update.status;
 
-    console.log("CURRENT STATUS MAP:", this.statusMap);
-
-    this.cdr.markForCheck();
-  }
+  this.cdr.markForCheck();
 });
+
+
 
 
 
@@ -305,6 +309,31 @@ resetDate(dateInput: HTMLInputElement) {
 
 setStatus(status: string) {
   this.status$.next(status);
+}
+
+
+
+
+
+
+
+normalizeName(name: string) {
+  return name.toLowerCase().replace(/\s+/g, '').replace(/-/g, '');
+}
+
+
+getStatus(file: any) {
+  console.log("Getting status for file:", file.name);
+  return this.statusMap[file.name];
+}
+
+
+getFileStatus() {
+  this.sendStatus$.subscribe(v => {
+    console.log("UPDATE:", v);
+    this.statusMap = v;        // <-- Store it here for UI use
+    console.log("Mapped:", this.statusMap);
+  });
 }
 
 

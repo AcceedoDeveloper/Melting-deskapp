@@ -53,6 +53,7 @@ export class DetailComponent implements OnInit {
 
   furnaceCtrl = new FormControl('', [Validators.required]);
   furanceFound = false;
+  WifiDisconneced: number = 0;
 
   constructor(
     private fileList: FileListService,
@@ -325,7 +326,7 @@ onSendClick() {
           this.app.setFileStatus(fileName, "no-response");
           ipcRenderer.invoke("stop-serial-listener");
         }
-      }, 6000);
+      }, 10000);
 
       // Listen for serial response
       this._serialPortService.listenSerialResponse().subscribe(resp => {
@@ -346,13 +347,27 @@ onSendClick() {
               }
             });
           });
+          this.WifiDisconneced = 0;
 
           this.app.setFileStatus(fileName, "sent-data");
         }
 
         // WIFI ERROR
         else if (resp.includes("$WiFiDisConnected#")) {
-          this.ngZone.run(() => {
+          if(this.WifiDisconneced ==0){
+                 this.ngZone.run(() => {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: "Something went wrong. Trying again.",
+                title: "Try Again",
+                iconPath: "./assets/icons/refresh_white_24dp.svg"
+              }
+            });
+          });
+          this.WifiDisconneced++;
+          }
+          else{
+              this.ngZone.run(() => {
             this.dialog.open(ErrorDialogComponent, {
               data: {
                 message: "WiFi is not connected on the machine.",
@@ -361,8 +376,28 @@ onSendClick() {
               }
             });
           });
+          }
+
+     
 
           this.app.setFileStatus(fileName, "no-wifi");
+        }
+
+
+         // MQTT Disconnected 
+        else if (resp.includes("$mqttDisconnected#")) {
+          this.ngZone.run(() => {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: "MQTT is fail to connect.",
+                title: "MQTT Error",
+                iconPath: "./assets/icons/error_outline_white_24dp.svg"
+              }
+            });
+          });
+          this.WifiDisconneced = 0;
+
+          this.app.setFileStatus(fileName, "sent-data");
         }
 
         // UNKNOWN
@@ -376,6 +411,8 @@ onSendClick() {
               }
             });
           });
+
+          this.WifiDisconneced = 0;
 
           this.app.setFileStatus(fileName, "no-response");
         }

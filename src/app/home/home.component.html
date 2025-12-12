@@ -153,21 +153,24 @@
                 <div class="file-date">
                   {{ file.info?.birthtime | date: 'dd/MM/yy, h:mm a' }}
                 </div>
-<div *ngIf="statusMap[file.name.toLowerCase()]">
-    <div class="status-tag"
-       [ngClass]="statusMap[file.name.toLowerCase()]">
 
 
 
-       {{
-     statusMap[file.name] === 'sent-data' ? 'Sent' :
-        statusMap[file.name] === 'no-wifi' ? 'No WiFi' :
-        statusMap[file.name] === 'no-response' ? 'No Response' :
+
+<!-- Actual Status -->
+<div *ngIf="getStatus(file) as status">
+  <div class="status-tag"  [ngClass]="status" >
+    {{
+      status === 'sent-data'   ? 'Sent' :
+      status === 'no-wifi'     ? 'No WiFi' :
+      status === 'no-response' ? 'No Response' :
       ''
     }}
   </div>
-
 </div>
+
+
+
 
 
                 <div *ngIf="file.new" class="new-tag">new</div>
