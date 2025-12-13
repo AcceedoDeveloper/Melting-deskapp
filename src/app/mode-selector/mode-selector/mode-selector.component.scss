@@ -1,139 +1,287 @@
-/* ================= LOGIN BOX ================= */
+/* ================= GLOBAL ================= */
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #121212;
+  color: #fff;
+}
+
+/* ================= LOGIN ================= */
 .login-box {
-  width: 350px;
-  padding: 25px 30px;
-  margin: 80px auto;
-  background: #1b1b1b;
-  border-radius: 12px;
+  width: 360px;
+  padding: 30px;
+  margin: 90px auto;
+  background: linear-gradient(145deg, #1c1c1c, #242424);
+  border-radius: 14px;
   text-align: center;
-  box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
 }
 
 .login-title {
-  color: #fff;
-  margin-bottom: 20px;
-  font-size: 22px;
+  margin-bottom: 24px;
+  font-size: 24px;
   font-weight: 600;
 }
 
+.error {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #ff6b6b;
+}
+
+/* ================= SETTINGS LAYOUT ================= */
+.settings-layout {
+  width: 100%;
+  padding: 30px 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+/* ================= SETTINGS CARD ================= */
+.settings-card {
+  background: #1f1f1f;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-card.full-width {
+  grid-column: 1 / -1;
+}
+
+/* ================= SECTION TITLES ================= */
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #4a90e2;
+  border-bottom: 1px solid #2f2f2f;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+/* ================= SECTION CONTENT ================= */
+.section-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* ================= INPUT GROUP ================= */
 .input-group {
   display: flex;
   flex-direction: column;
-  margin-bottom: 15px;
-}
-
-.input-group.small {
-  width: 250px;
 }
 
 .input-group label {
-  color: #bbb;
-  font-size: 14px;
-  margin-bottom: 5px;
+  font-size: 13px;
+  color: #9aa0a6;
+  margin-bottom: 6px;
 }
 
 .input-group input,
 .input-group select {
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #444;
-  background: #262626;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #3a3a3a;
+  background: #2a2a2a;
   color: #fff;
-  font-size: 15px;
+  font-size: 14px;
   outline: none;
-  transition: 0.2s ease;
+  transition: 0.25s ease;
 }
 
 .input-group input:focus,
 .input-group select:focus {
   border-color: #4a90e2;
-  background: #2e2e2e;
+  background: #303030;
 }
 
-/* ================= LOGIN BUTTON ================= */
-.login-btn {
-  width: 100%;
-  padding: 12px;
-  background: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: 0.25s;
-}
-
-.login-btn:hover {
-  background: #357ac9;
-}
-
-/* ================= ERROR MESSAGE ================= */
-.error {
-  margin-top: 12px;
-  font-size: 14px;
-  color: #ff5c5c;
-}
-
-
-
-/* ================= MODE SELECTION UI ================= */
-.mode-container {
-    width: 350px;
-  padding: 25px 30px;
-  margin: 80px auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 40px;
-  gap: 20px;
-}
-
+/* ================= MODE CONTENT ================= */
 .mode-content {
   display: flex;
-  align-items: center;
-  gap: 15px;
+  align-items: flex-end;
+  gap: 12px;
 }
 
+/* ================= BUTTONS ================= */
+.login-btn,
+.connect-btn,
+.refresh-btn {
+  height: 42px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
 
-/* ================= SERIAL REFRESH BUTTON ================= */
+.login-btn,
+.connect-btn {
+  background: linear-gradient(135deg, #4a90e2, #357ac9);
+  color: #fff;
+}
+
+.login-btn:hover,
+.connect-btn:hover {
+  box-shadow: 0 6px 16px rgba(74, 144, 226, 0.35);
+}
+
 .refresh-btn {
   background: #333;
-  color: white;
-  border: none;
-  padding: 12px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 18px;
+  color: #fff;
+  padding: 0 16px;
 }
 
 .refresh-btn:hover {
   background: #444;
 }
 
-/* ================= IP CONNECT BUTTON ================= */
-.connect-btn {
-  padding: 12px 20px;
-  border: none;
-  background: #4a90e2;
-  color: white;
-  border-radius: 6px;
+/* ================= DIRECTORY ================= */
+.heading {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.input-container {
+  position: relative;
+  width: 55%;
+}
+
+.custom-input {
+  width: 100%;
+  padding: 12px 42px 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #3a3a3a;
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.location-section{
+  margin-top: 15px;
+}
+
+.input-addon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.connect-btn:hover {
-  background: #357ac9;
+.location-actions {
+  display: flex;
+  gap: 10px;
 }
 
+/* ================= AUTOMATION ================= */
+.auto-detect-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #3a3a3a;
+  background: #262626;
+  transition: 0.3s ease;
+}
 
+.auto-detect-box label {
+  font-size: 14px;
+  color: #bbb;
+  flex: 1;
+}
+
+.auto-detect-box input {
+  width: 90px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #1e1e1e;
+  color: #fff;
+}
+
+/* SAVED STATE */
+.auto-detect-box.saved {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.saved-text {
+  color: #4caf50;
+  font-weight: 600;
+  font-size: 13px;
+}
 
 /* ================= RESPONSIVE ================= */
-@media (max-width: 500px) {
+@media (max-width: 900px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
   .login-box {
-    width: 90%;
+    width: 92%;
   }
 
   .mode-content {
     flex-direction: column;
+    align-items: stretch;
   }
+}
+
+
+/* ========== TOGGLE SWITCH ========== */
+.toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  display: inline-block;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  background-color: #777;
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle-switch input:checked + .slider {
+  background-color: #4caf50;
+}
+
+.toggle-switch input:checked + .slider::before {
+  transform: translateX(22px);
+}
+
+
+.theme-content{
+  width: 18%;
 }

@@ -28,6 +28,7 @@ export class AppService {
     selectedIP$ = new BehaviorSubject<string>(null);
     mode$ = new BehaviorSubject<'serial' | 'ip'>('serial');
     serialDataReceived$ = new BehaviorSubject<string>('');
+    autoDetectFiles$ = new BehaviorSubject<number | null>(null);
 
 fileStatus$ = new BehaviorSubject<{ [fileId: string]: string }>({});
 
@@ -176,6 +177,22 @@ getSerialDataReceived() {
 setFileStatus(fileId: string, status: string) {
   const current = this.fileStatus$.value;
   this.fileStatus$.next({ ...current, [fileId]: status });
+}
+
+
+// setter
+setAutoDetectFiles(value: number) {
+  this.autoDetectFiles$.next(value);
+}
+
+// observable
+getAutoDetectFilesObs() {
+  return this.autoDetectFiles$.asObservable();
+}
+
+// sync getter (if needed)
+getAutoDetectFiles() {
+  return getOnce(this.autoDetectFiles$.asObservable());
 }
 
 }

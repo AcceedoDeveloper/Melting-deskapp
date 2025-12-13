@@ -1,5 +1,4 @@
-
-
+<!-- ================= LOGIN ================= -->
 <div class="login-box" *ngIf="!isLoggedIn">
 
   <h2 class="login-title">Admin Login</h2>
@@ -20,40 +19,203 @@
 </div>
 
 
+<!-- ================= SETTINGS ================= -->
+<div *ngIf="isLoggedIn" class="settings-layout">
 
-<div *ngIf="isLoggedIn" class="mode-container">
+  <!-- ========== COMMUNICATION ========= -->
+  <div class="settings-card">
+    <h3 class="section-title">Communication</h3>
 
-  <div class="input-group small">
-    <label>Select Mode</label>
-    <select [formControl]="modeCtrl">
-      <option value="serial">Serial Port</option>
-      <option value="ip">IP Address</option>
-    </select>
-  </div>
+    <div class="section-content">
 
-  <div *ngIf="modeCtrl.value === 'serial'" class="mode-content">
+      <div class="input-group">
+        <label>Select Mode</label>
+        <select [formControl]="modeCtrl">
+          <option value="serial">Serial Port</option>
+          <option value="ip">IP Address</option>
+        </select>
+      </div>
 
-    <div class="input-group small">
-      <label>Select Serial Port</label>
-      <select [formControl]="serialPortCtrl" (change)="onSerialPortChange($event)">
-        <option *ngFor="let port of serialPorts$ | async" [ngValue]="port">
-          {{ port.path }}
-        </option>
-      </select>
+      <!-- SERIAL MODE -->
+      <div *ngIf="modeCtrl.value === 'serial'" class="mode-content">
+        <div class="input-group">
+          <label>Select Serial Port</label>
+          <select
+            [formControl]="serialPortCtrl"
+            (change)="onSerialPortChange($event)">
+            <option
+              *ngFor="let port of serialPorts$ | async"
+              [ngValue]="port">
+              {{ port.path }}
+            </option>
+          </select>
+        </div>
+
+        <button class="refresh-btn" (click)="onRefreshClick()">⟳</button>
+      </div>
+
+      <!-- IP MODE -->
+      <div *ngIf="modeCtrl.value === 'ip'" class="mode-content">
+        <div class="input-group">
+          <label>Enter IP Address</label>
+          <input
+            type="text"
+            placeholder="192.168.1.50"
+            [formControl]="ipAddressCtrl" />
+        </div>
+
+        <button class="connect-btn" (click)="onConnectIP()">Connect</button>
+      </div>
+
     </div>
-
-    <button class="refresh-btn" (click)="onRefreshClick()">⟳</button>
   </div>
 
-  <div *ngIf="modeCtrl.value === 'ip'" class="mode-content">
 
-    <div class="input-group small">
-      <label>Enter IP Address</label>
-      <input type="text" placeholder="192.168.1.50" [formControl]="ipAddressCtrl">
+  <!-- ========== LOCATION ========= -->
+  <div class="settings-card">
+    <h3 class="section-title">Location</h3>
+
+    <div class="section-content location-section">
+
+      <!-- ENTER DIRECTORY -->
+      <ng-container *ngIf="showSearchDirectory; else editDirectoryTpl">
+
+        <label class="heading">Enter Directory</label>
+
+        <div class="input-container">
+          <input
+            #directorSearch
+            [formControl]="directoryCtrl"
+            type="text"
+            class="custom-input" />
+
+          <div
+            class="input-addon"
+            *ngIf="directoryCtrl.value"
+            (click)="clearInput(directorSearch, directoryCtrl)">
+            <mat-icon>
+              <img src="./assets/icons/clear_white_24dp.svg" />
+            </mat-icon>
+          </div>
+        </div>
+
+        <button
+          mat-raised-button
+          (click)="onShowFilesClick(true)"
+          [disabled]="directoryCtrl.invalid">
+          Show Files
+        </button>
+
+        <button
+          mat-icon-button
+          matTooltip="Hide Directory"
+          (click)="onHideDirectoryClick()">
+          <mat-icon>
+            <img src="./assets/icons/hide_image_white_24dp.svg" />
+          </mat-icon>
+        </button>
+
+      </ng-container>
+
+      <!-- EDIT DIRECTORY -->
+      <ng-template #editDirectoryTpl>
+
+        <div class="heading">Change Search Directory</div>
+
+        <div class="location-actions">
+          <button
+            mat-icon-button
+            matTooltip="Change Directory"
+            (click)="onShowSearchDirectory()">
+            <mat-icon>
+              <img src="./assets/icons/drive_file_rename_outline_white_24dp.svg" />
+            </mat-icon>
+          </button>
+
+          <button
+            mat-icon-button
+            matTooltip="Reload Files"
+            (click)="onShowFilesClick(false)">
+            <mat-icon>
+              <img src="./assets/icons/refresh_white_24dp.svg" />
+            </mat-icon>
+          </button>
+        </div>
+
+        <div *ngIf="filesLoading">Loading ...</div>
+
+      </ng-template>
+
     </div>
-
-    <button class="connect-btn" (click)="onConnectIP()">Connect</button>
   </div>
+
+
+  <!-- ========== AUTOMATION ========= -->
+  <div class="settings-card full-width">
+    <h3 class="section-title">Automation</h3>
+
+    <div class="section-content">
+
+      <div
+        class="auto-detect-box"
+        [ngClass]="{ 'saved': isAutoDetectSaved }">
+
+        <label>Auto Detect Files</label>
+
+        <input
+          type="number"
+          [value]="autoDetectValue"
+          (change)="onAutoDetectFilesChange($event)" />
+
+        <span
+          *ngIf="isAutoDetectSaved"
+          class="saved-text">
+          Saved
+        </span>
+
+      </div>
+
+        <div
+        class="auto-detect-box"
+       >
+
+        <label>Auto sent Files</label>
+
+        <input
+          type="checkbox"
+          [checked]="autosent"
+          (change)="autosentfile($event)" />
+
+        <span
+          *ngIf="isAutoDetectSaved"
+          class="saved-text">
+          Saved
+        </span>
+
+      </div>
+
+
+ <div class="auto-detect-box theme-content ">
+
+  <label class="toggle-label">
+    {{ theme === 'dark' ? 'Dark Mode' : 'Light Mode' }}
+  </label>
+
+  <label class="toggle-switch">
+    <input
+      type="checkbox"
+      [checked]="theme === 'dark'"
+      (change)="toggleTheme($event)"
+    />
+    <span class="slider"></span>
+  </label>
 
 </div>
 
+
+
+
+    </div>
+  </div>
+
+</div>

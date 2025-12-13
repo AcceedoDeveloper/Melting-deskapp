@@ -51,40 +51,67 @@ var getFileInfo = function (filePath) {
     });
 };
 exports.getFileInfo = getFileInfo;
+// export const getFiles = (dirPath, filterPredicate?) => {
+//     return new Promise((resolve, reject) => {
+//         fs.readdir(dirPath, async (err, files) => {
+//             if (err) {
+//                 // console.log(err)
+//                 return reject({ code: err.code, err })
+//             }
+// let xmlFiles = files.filter(file => {
+//     const ext = path.extname(file).toLowerCase();
+//     return ext === '.xml' || ext === '.txt' || ext === '.asc';
+// });
+//             const xmlFilesInfo = []
+//             for (const file of xmlFiles) {
+//                 const filePath = path.join(dirPath, file);
+//                 const name = path.parse(filePath).name
+//                 const fileInfo = await getFileInfo(filePath) as any;
+//                 const durationMs = (new Date() as any) - fileInfo.birthtime
+//                 const durationHr = Math.round(durationMs / (1000 * 60 * 60))
+//                 // if (filterPredicate ? filterPredicate(durationHr) : (durationHr <= 24)) {
+//                 //     xmlFilesInfo.push({
+//                 //         name,
+//                 //         path: filePath,
+//                 //         info: fileInfo
+//                 //     })
+//                 // }
+//                 xmlFilesInfo.push({
+//                     name,
+//                     path: filePath,
+//                     info: fileInfo
+//                 })
+//             }
+//             resolve(xmlFilesInfo)
+//         })
+//     })
+// }
 var getFiles = function (dirPath, filterPredicate) {
     return new Promise(function (resolve, reject) {
         fs.readdir(dirPath, function (err, files) { return __awaiter(void 0, void 0, void 0, function () {
-            var xmlFiles, xmlFilesInfo, _i, xmlFiles_1, file, filePath, name_1, fileInfo, durationMs, durationHr;
+            var supportedFiles, fileInfos, _i, supportedFiles_1, file, filePath, fileInfo;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (err) {
-                            // console.log(err)
                             return [2 /*return*/, reject({ code: err.code, err: err })];
                         }
-                        xmlFiles = files.filter(function (file) { return mime.lookup(file) === 'application/xml'; });
-                        xmlFilesInfo = [];
-                        _i = 0, xmlFiles_1 = xmlFiles;
+                        supportedFiles = files.filter(function (file) {
+                            var ext = path.extname(file).toLowerCase();
+                            return ext === '.xml' || ext === '.txt' || ext === '.asc';
+                        });
+                        fileInfos = [];
+                        _i = 0, supportedFiles_1 = supportedFiles;
                         _a.label = 1;
                     case 1:
-                        if (!(_i < xmlFiles_1.length)) return [3 /*break*/, 4];
-                        file = xmlFiles_1[_i];
+                        if (!(_i < supportedFiles_1.length)) return [3 /*break*/, 4];
+                        file = supportedFiles_1[_i];
                         filePath = path.join(dirPath, file);
-                        name_1 = path.parse(filePath).name;
                         return [4 /*yield*/, (0, exports.getFileInfo)(filePath)];
                     case 2:
                         fileInfo = _a.sent();
-                        durationMs = new Date() - fileInfo.birthtime;
-                        durationHr = Math.round(durationMs / (1000 * 60 * 60));
-                        // if (filterPredicate ? filterPredicate(durationHr) : (durationHr <= 24)) {
-                        //     xmlFilesInfo.push({
-                        //         name,
-                        //         path: filePath,
-                        //         info: fileInfo
-                        //     })
-                        // }
-                        xmlFilesInfo.push({
-                            name: name_1,
+                        fileInfos.push({
+                            name: file,
                             path: filePath,
                             info: fileInfo
                         });
@@ -93,7 +120,7 @@ var getFiles = function (dirPath, filterPredicate) {
                         _i++;
                         return [3 /*break*/, 1];
                     case 4:
-                        resolve(xmlFilesInfo);
+                        resolve(fileInfos);
                         return [2 /*return*/];
                 }
             });

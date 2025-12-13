@@ -154,26 +154,56 @@ ipcMain.handle('send-data-serial-port-com', async (e, path, data) => {
 });
 
 
+// ipcMain.handle('send-data-ip', async (e, ip, data) => {
+//   console.log("Sending to IP:", ip, data);
+
+//   try {
+//     const fullUrl = `${ip}spectrumResult?d=${encodeURIComponent(data)}`;
+//     console.log("Final URL:", fullUrl);
+
+//     const response = await fetch(fullUrl, {
+//       method: "GET"
+//     });
+
+//     const text = await response.text(); 
+//     console.log("Raw Response:", text);
+
+//     return text;
+//   } catch (err) {
+//     console.error("IP HTTP Error:", err);
+//     throw err;
+//   }
+// });
+
+
 ipcMain.handle('send-data-ip', async (e, ip, data) => {
-  console.log("Sending to IP:", ip, data);
-
   try {
-    const fullUrl = `${ip}spectrumResult?d=${encodeURIComponent(data)}`;
-    console.log("Final URL:", fullUrl);
+    // 1. Normalize base IP
+    if (!ip.startsWith('http://') && !ip.startsWith('https://')) {
+      ip = 'http://' + ip;
+    }
 
-    const response = await fetch(fullUrl, {
-      method: "GET"
+    // 2. Build URL safely
+    const url = new URL('/spectrumResult', ip);
+    url.searchParams.set('d', data);
+
+    console.log('Final URL:', url.toString());
+
+    // 3. Send request
+    const response = await fetch(url.toString(), {
+      method: 'GET'
     });
 
-    const text = await response.text(); 
-    console.log("Raw Response:", text);
+    const text = await response.text();
+    console.log('Raw Response:', text);
 
     return text;
   } catch (err) {
-    console.error("IP HTTP Error:", err);
+    console.error('IP HTTP Error:', err);
     throw err;
   }
 });
+
 
 ipcMain.handle('start-serial-listener', async (e, portPath) => {
   try {
@@ -266,6 +296,27 @@ ipcMain.handle('clear-serial-buffer', async () => {
 
 
 
+//to ready ascii data from file
+ipcMain.handle('get-ascii-data', async (e, filePath) => {
+  try {
+    console.log("Reading ASCII file:", filePath);
+
+    // Read file as UTF-16LE (REAL ENCODING)
+    const content = fs.readFileSync(filePath, "utf16le");
+
+    // Convert ASCII → Spectrum
+    const spectrum = convertAsciiToSpectrum(content);
+
+    return spectrum;
+
+  } catch (err) {
+    console.error("ASCII read error:", err);
+    return { error: err.message };
+  }
+});
+
+
+
 
 
 ipcMain.handle('get-spectrum-data', async (e, args) => {
@@ -318,3 +369,76 @@ try {
   // Catch Error
   // throw e;
 }
+
+
+
+
+
+function convertAsciiToSpectrum(content: string) {
+
+  const lines = content
+    .split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => l.length > 0);
+
+  console.log("RAW LINES:");
+  lines.forEach((l, i) => console.log(i, JSON.stringify(l)));
+
+  const avgLine = lines.find(l => l.startsWith("Average"));
+  if (!avgLine) {
+    console.log("NO AVERAGE LINE FOUND");
+    return { headers: [], elements: [] };
+  }
+
+  console.log("FOUND AVERAGE LINE:", avgLine);
+
+  // SPLIT EACH COLUMN BY TAB
+  const parts = avgLine.split("\t").map(p => p.trim());
+
+  // GET HEADER_1 for element names
+  const headerParts = lines[0].split("\t").map(p => p.trim());
+
+  // Element names start AFTER column 15
+  const elementNames = headerParts.slice(15);
+
+  // Values also start at index 15
+  const elementValues = parts.slice(15);
+
+  const elements = [];
+
+  for (let i = 0; i < elementNames.length; i++) {
+    const name = elementNames[i];
+    let val = elementValues[i] ?? "";
+
+    // Clean <, >, ++
+    val = val.replace(/[<>+]/g, "").trim();
+
+    elements.push({
+      ElementName: name,
+      reportedResult: {
+        resultValue: val,
+        limits: null,
+        Unit: "%"
+      }
+    });
+  }
+
+  // Create headers matching XML format
+  const headers = [
+    { name: "Date",      value: parts[1] },
+    { name: "Time",      value: parts[1] },
+    { name: "Method",    value: parts[2] },
+    { name: "Heat No",   value: parts[4] },
+    { name: "Part Name", value: parts[5] },
+    { name: "Stage",     value: parts[6] },
+    { name: "Tested By", value: parts[7] },
+    { name: "Alloy",     value: parts[8] },
+    { name: "Grade",     value: parts[9] },
+  ];
+
+  return {
+    headers,
+    elements
+  };
+}
+

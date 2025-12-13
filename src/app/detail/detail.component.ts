@@ -74,40 +74,90 @@ export class DetailComponent implements OnInit {
 
     this.selectedPort$ = this.app.geSelectedtSerialPortObs();
 
-    ipcRenderer.invoke('get-spectrum-data', this.file.path).then((spectrum: Spectrum) => {
+    // ipcRenderer.invoke('get-spectrum-data', this.file.path).then((spectrum: Spectrum) => {
 
-      // junk of 8 data
+    //   // junk of 8 data
 
-      this.sendableData = this.getSendableData(spectrum);
-      const furanceNo = this.getFurance(spectrum.headers)
-      if (furanceNo) {
-        this.furnaceCtrl.setValue(furanceNo);
-        this.furanceFound = true;
-      }
-      console.log(this.sendableData)
+    //   this.sendableData = this.getSendableData(spectrum);
+    //   const furanceNo = this.getFurance(spectrum.headers)
+    //   if (furanceNo) {
+    //     this.furnaceCtrl.setValue(furanceNo);
+    //     this.furanceFound = true;
+    //   }
+    //   console.log(this.sendableData)
 
-      const elements = [];
-      const chunkCount = Math.ceil(spectrum.elements.length / CHUNK_LENGTH)
+    //   const elements = [];
+    //   const chunkCount = Math.ceil(spectrum.elements.length / CHUNK_LENGTH)
 
-      for (let i = 0; i < chunkCount; i++) {
-        const startIndex = i * CHUNK_LENGTH;
-        const endIndex = startIndex + CHUNK_LENGTH;
-        const subElemt = spectrum.elements.slice(startIndex, endIndex)
-        if (subElemt.length < CHUNK_LENGTH) {
-          const itemRequiredToFill = CHUNK_LENGTH - subElemt.length;
-          for (let j = 0; j < itemRequiredToFill; j++) {
-            subElemt.push(null)
-          }
-        }
-        elements.push(subElemt)
-      }
+    //   for (let i = 0; i < chunkCount; i++) {
+    //     const startIndex = i * CHUNK_LENGTH;
+    //     const endIndex = startIndex + CHUNK_LENGTH;
+    //     const subElemt = spectrum.elements.slice(startIndex, endIndex)
+    //     if (subElemt.length < CHUNK_LENGTH) {
+    //       const itemRequiredToFill = CHUNK_LENGTH - subElemt.length;
+    //       for (let j = 0; j < itemRequiredToFill; j++) {
+    //         subElemt.push(null)
+    //       }
+    //     }
+    //     elements.push(subElemt)
+    //   }
 
-      spectrum.elements = elements;
+    //   spectrum.elements = elements;
 
-      this.spectrum = spectrum;
-      this.cdr.detectChanges();
-    })
+    //   this.spectrum = spectrum;
+    //   this.cdr.detectChanges();
+    // })
+
+
+
+    if (this.file.name.endsWith('.xml')) {
+      ipcRenderer.invoke('get-spectrum-data', this.file.path)
+        .then(spectrum => this.processSpectrum(spectrum));
+    } 
+    else if (this.file.name.endsWith('.asc') || this.file.name.endsWith('.txt')) {
+      ipcRenderer.invoke('get-ascii-data', this.file.path)
+        .then(spectrum => this.processSpectrum(spectrum));
+    }
+
+
   }
+
+
+
+   processSpectrum(spectrum: Spectrum) {
+    this.sendableData = this.getSendableData(spectrum);
+
+    const furanceNo = this.getFurance(spectrum.headers);
+    if (furanceNo) {
+      this.furnaceCtrl.setValue(furanceNo);
+      this.furanceFound = true;
+    }
+
+    // Chunk elements for UI table
+    const elements = [];
+    const chunkCount = Math.ceil(spectrum.elements.length / CHUNK_LENGTH);
+
+    for (let i = 0; i < chunkCount; i++) {
+      const start = i * CHUNK_LENGTH;
+      const end = start + CHUNK_LENGTH;
+      const chunk = spectrum.elements.slice(start, end);
+
+      while (chunk.length < CHUNK_LENGTH) {
+        chunk.push(null);
+      }
+
+      elements.push(chunk);
+    }
+
+    spectrum.elements = elements;
+
+    this.spectrum = spectrum;
+    console.log('data to send:', this.spectrum);
+    this.cdr.detectChanges();
+  }
+
+
+
 
   getSendableData(spectrum: any) {
     // const headers = spectrum.headers.map(h => ({ n: h.name, v: h.value }));
