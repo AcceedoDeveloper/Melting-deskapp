@@ -27,6 +27,10 @@ selectedPortInfo$: Observable<PortInfo>;
 selectedIP$: Observable<string>;
 serialDataReceived$: Observable<string>;
 private subscriptions: Subscription[] = [];
+selectedFileFormat$: Observable<
+  'XML' | 'TXT' | 'BAK'
+>;
+
 
 
 
@@ -60,6 +64,9 @@ private subscriptions: Subscription[] = [];
     this.selectedPortInfo$ = this.app.geSelectedtSerialPortObs();
   this.selectedIP$ = this.app.getSelectedIPObs();
   this.serialDataReceived$ = this.app.getSerialDataReceivedObs();
+    this.selectedFileFormat$ = this.app.getSelectedFileFormatObs();
+
+    
 
 
     this.loadPorts();

@@ -24,7 +24,7 @@
 
   <!-- ========== COMMUNICATION ========= -->
   <div class="settings-card">
-    <h3 class="section-title">Communication</h3>
+    <h3 class="section-title">Communication </h3>
 
     <div class="section-content">
 
@@ -57,7 +57,7 @@
       <!-- IP MODE -->
       <div *ngIf="modeCtrl.value === 'ip'" class="mode-content">
         <div class="input-group">
-          <label>Enter IP Address</label>
+          <label>Enter IP Address and Port</label>
           <input
             type="text"
             placeholder="192.168.1.50"
@@ -68,7 +68,136 @@
       </div>
 
     </div>
+
+        <h3 class="section-title">Automation</h3>
+
+
+     <div class="section-content">
+
+      <div
+        class="auto-detect-box"
+      >
+
+        <label>Auto Detect Files</label>
+
+        <input
+          type="number"
+          [value]="autoDetectValue"
+          (change)="onAutoDetectFilesChange($event)" />
+
+     
+
+      </div>
+
+       <div class="auto-detect-box toggle-box">
+
+  <label class="toggle-text">
+    Auto sent Files
+  </label>
+
+  <label class="toggle-switch">
+    <input
+      type="checkbox"
+      [checked]="autosent"
+      (change)="autosentfile($event)" />
+    <span class="slider"></span>
+  </label>
+
+</div>
+
+
+
+ <!-- <div class="auto-detect-box theme-content ">
+
+  <label class="toggle-label">
+    {{ theme === 'dark' ? 'Dark Mode' : 'Light Mode' }}
+  </label>
+
+  <label class="toggle-switch">
+    <input
+      type="checkbox"
+      [checked]="theme === 'dark'"
+      (change)="toggleTheme($event)"
+    />
+    <span class="slider"></span>
+  </label>
+
+</div> -->
+
+
+
+
+    </div>
+
   </div>
+
+
+
+    <div class="settings-card" >
+    
+
+    <h3 class="section-title">Spectrom module</h3>
+
+
+         <div class="section-content">
+
+    
+<div class="radio-group">
+
+  <label class="radio-item">
+    <input
+      type="radio"
+      name="fileType"
+      value="AMTEX_DIA_XML"
+      [checked]="selectedFormat === 'XML'"
+      (change)="onFormatChange('XML')"
+    />
+    <span class="radio-custom"></span>
+    <span class="radio-text">
+      <strong>Amtex Dia</strong>
+      <small>XML</small>
+    </span>
+  </label>
+
+  <label class="radio-item">
+    <input
+      type="radio"
+      name="fileType"
+      value="AMTEX_NEW_TXT"
+      [checked]="selectedFormat === 'TXT'"
+      (change)="onFormatChange('TXT')"
+    />
+    <span class="radio-custom"></span>
+    <span class="radio-text">
+      <strong>Amtex New</strong>
+      <small>TXT</small>
+    </span>
+  </label>
+
+  <label class="radio-item">
+    <input
+      type="radio"
+      name="fileType"
+      value="AMTEX_NEW_BAD"
+      [checked]="selectedFormat === 'BAK'"
+      (change)="onFormatChange('BAK')"
+    />
+    <span class="radio-custom"></span>
+    <span class="radio-text">
+      <strong>Amtex New</strong>
+      <small>BAK</small>
+    </span>
+  </label>
+
+</div>
+
+ 
+
+    </div>
+
+
+  </div>
+
 
 
   <!-- ========== LOCATION ========= -->
@@ -150,72 +279,7 @@
   </div>
 
 
-  <!-- ========== AUTOMATION ========= -->
-  <div class="settings-card full-width">
-    <h3 class="section-title">Automation</h3>
-
-    <div class="section-content">
-
-      <div
-        class="auto-detect-box"
-        [ngClass]="{ 'saved': isAutoDetectSaved }">
-
-        <label>Auto Detect Files</label>
-
-        <input
-          type="number"
-          [value]="autoDetectValue"
-          (change)="onAutoDetectFilesChange($event)" />
-
-        <span
-          *ngIf="isAutoDetectSaved"
-          class="saved-text">
-          Saved
-        </span>
-
-      </div>
-
-        <div
-        class="auto-detect-box"
-       >
-
-        <label>Auto sent Files</label>
-
-        <input
-          type="checkbox"
-          [checked]="autosent"
-          (change)="autosentfile($event)" />
-
-        <span
-          *ngIf="isAutoDetectSaved"
-          class="saved-text">
-          Saved
-        </span>
-
-      </div>
 
 
- <div class="auto-detect-box theme-content ">
-
-  <label class="toggle-label">
-    {{ theme === 'dark' ? 'Dark Mode' : 'Light Mode' }}
-  </label>
-
-  <label class="toggle-switch">
-    <input
-      type="checkbox"
-      [checked]="theme === 'dark'"
-      (change)="toggleTheme($event)"
-    />
-    <span class="slider"></span>
-  </label>
-
-</div>
-
-
-
-
-    </div>
-  </div>
 
 </div>

@@ -320,227 +320,380 @@ export class DetailComponent implements OnInit {
 // }
 
 
+// onSendClick() {
+
+//   const furnaceNo = this.furnaceCtrl.value;
+//   const sendData = `${this.sendableData},fur:${furnaceNo}`;
+
+//   const mode = this.app.getMode();
+//   const finalSerialData = `$${sendData}#`;   
+//   const finalIPData = sendData;             
+
+//   const fileName = this.file.name;
+
+//   this.ngZone.run(() => this.app.showLoader("Sending data..."));
+
+//   if (mode === "serial") {
+
+//     const selectedPort = this.app.getSelectedSerialPort();
+//     if (!selectedPort) return;
+
+//     ipcRenderer.invoke("start-serial-listener", selectedPort.path).then(res => {
+
+//       if (!res.success) {
+//         this.ngZone.run(() => {
+//           this.app.hideLoader();
+//           this.dialog.open(ErrorDialogComponent, {
+//             data: {
+//               message: "Could not open serial port.",
+//               title: "Error",
+//               iconPath: "./assets/icons/error_outline_white_24dp.svg"
+//             }
+//           });
+//         });
+//         return;
+//       }
+
+//       this._serialPortService.sendData(selectedPort.path, finalSerialData).subscribe();
+
+//       let responseReceived = false;
+
+//       // Timeout (6 seconds)
+//       const timeout = setTimeout(() => {
+//         if (!responseReceived) {
+
+//           this.ngZone.run(() => {
+//             this.app.hideLoader();
+//             this.dialog.open(ErrorDialogComponent, {
+//               data: {
+//                 message: "No response from device (Timeout).",
+//                 title: "Timeout",
+//                 iconPath: "./assets/icons/error_outline_white_24dp.svg"
+//               }
+//             });
+//           });
+
+//           this.app.setFileStatus(fileName, "no-response");
+//           ipcRenderer.invoke("stop-serial-listener");
+//         }
+//       }, 10000);
+
+//       // Listen for serial response
+//       this._serialPortService.listenSerialResponse().subscribe(resp => {
+
+//         responseReceived = true;
+//         clearTimeout(timeout);
+
+//         this.ngZone.run(() => this.app.hideLoader());
+
+//         // SUCCESS 
+//         if (resp.includes("$received#")) {
+//           this.ngZone.run(() => {
+//             this.dialog.open(ErrorDialogComponent, {
+//               data: {
+//                 message: "Data sent successfully.",
+//                 title: "Success",
+//                 iconPath: "./assets/icons/done_white_24dp.svg"
+//               }
+//             });
+//           });
+//           this.WifiDisconneced = 0;
+
+//           this.app.setFileStatus(fileName, "sent-data");
+//         }
+
+//         // WIFI ERROR
+//         else if (resp.includes("$WiFiDisConnected#")) {
+//           if(this.WifiDisconneced ==0){
+//                  this.ngZone.run(() => {
+//             this.dialog.open(ErrorDialogComponent, {
+//               data: {
+//                 message: "Something went wrong. Trying again.",
+//                 title: "Try Again",
+//                 iconPath: "./assets/icons/refresh_white_24dp.svg"
+//               }
+//             });
+//           });
+//           this.WifiDisconneced++;
+//           }
+//           else{
+//               this.ngZone.run(() => {
+//             this.dialog.open(ErrorDialogComponent, {
+//               data: {
+//                 message: "WiFi is not connected on the machine.",
+//                 title: "WiFi Error",
+//                 iconPath: "./assets/icons/error_outline_white_24dp.svg"
+//               }
+//             });
+//           });
+//           }
+
+     
+
+//           this.app.setFileStatus(fileName, "no-wifi");
+//         }
+
+
+//          // MQTT Disconnected 
+//         else if (resp.includes("$mqttDisconnected#")) {
+//           this.ngZone.run(() => {
+//             this.dialog.open(ErrorDialogComponent, {
+//               data: {
+//                 message: "MQTT is fail to connect.",
+//                 title: "MQTT Error",
+//                 iconPath: "./assets/icons/error_outline_white_24dp.svg"
+//               }
+//             });
+//           });
+//           this.WifiDisconneced = 0;
+
+//           this.app.setFileStatus(fileName, "sent-data");
+//         }
+
+//         // UNKNOWN
+//         else {
+//           this.ngZone.run(() => {
+//             this.dialog.open(ErrorDialogComponent, {
+//               data: {
+//                 message: "Unknown response received.",
+//                 title: "Unknown",
+//                 iconPath: "./assets/icons/error_outline_white_24dp.svg"
+//               }
+//             });
+//           });
+
+//           this.WifiDisconneced = 0;
+
+//           this.app.setFileStatus(fileName, "no-response");
+//         }
+
+//         ipcRenderer.invoke("stop-serial-listener");
+//       });
+
+//     });
+
+//     return;
+//   }
+
+
+
+//   if (mode === "ip") {
+//     const ip = this.app.getSelectedIP();
+//     if (!ip) return;
+
+//     let responseReceived = false;
+
+//     const timeout = setTimeout(() => {
+//       if (!responseReceived) {
+//         this.ngZone.run(() => {
+//           this.app.hideLoader();
+//           this.dialog.open(ErrorDialogComponent, {
+//             data: {
+//               message: "No response from device over IP (Timeout).",
+//               title: "Timeout",
+//               iconPath: "./assets/icons/error_outline_white_24dp.svg"
+//             }
+//           });
+//         });
+
+//         this.app.setFileStatus(fileName, "no-response");
+//       }
+//     }, 6000);
+
+//     this.ipService.sendData(ip, finalIPData)
+//       .pipe(
+//         finalize(() => {
+//           this.ngZone.run(() => this.app.hideLoader());
+//         }),
+//         catchError(err => {
+//           clearTimeout(timeout);
+
+//           this.ngZone.run(() => {
+//             this.dialog.open(ErrorDialogComponent, {
+//               data: {
+//                 message: "IP send failed.",
+//                 title: "IP Error",
+//                 iconPath: "./assets/icons/error_outline_white_24dp.svg"
+//               }
+//             });
+//           });
+
+//           this.app.setFileStatus(fileName, "no-response");
+//           return throwError(() => err);
+//         })
+//       )
+//       .subscribe(resp => {
+
+//         responseReceived = true;
+//         clearTimeout(timeout);
+
+     
+
+//         this.ngZone.run(() => {
+//           this.dialog.open(ErrorDialogComponent, {
+//             data: {
+//               message: "Data sent successfully via IP.",
+//               title: "Success",
+//               iconPath: "./assets/icons/done_white_24dp.svg"
+//             }
+//           });
+//         });
+//       });
+//   }
+// }
+
+
 onSendClick() {
 
   const furnaceNo = this.furnaceCtrl.value;
   const sendData = `${this.sendableData},fur:${furnaceNo}`;
-
-  const mode = this.app.getMode();
-  const finalSerialData = `$${sendData}#`;   
-  const finalIPData = sendData;             
-
+  const finalSerialData = `$${sendData}#`;
+  const finalIPData = sendData;
   const fileName = this.file.name;
+
+  const ip = this.app.getSelectedIP();
+  const serialPort = this.app.getSelectedSerialPort();
 
   this.ngZone.run(() => this.app.showLoader("Sending data..."));
 
-  if (mode === "serial") {
 
-    const selectedPort = this.app.getSelectedSerialPort();
-    if (!selectedPort) return;
+  if (ip) {
+    this.sendViaIP(ip, finalIPData, fileName);
+    return;
+  }
 
-    ipcRenderer.invoke("start-serial-listener", selectedPort.path).then(res => {
 
-      if (!res.success) {
-        this.ngZone.run(() => {
-          this.app.hideLoader();
-          this.dialog.open(ErrorDialogComponent, {
-            data: {
-              message: "Could not open serial port.",
-              title: "Error",
-              iconPath: "./assets/icons/error_outline_white_24dp.svg"
-            }
-          });
+  if (serialPort) {
+    this.sendViaSerial(serialPort.path, finalSerialData, fileName);
+    return;
+  }
+
+
+  this.app.hideLoader();
+  this.dialog.open(ErrorDialogComponent, {
+    data: {
+      message: "No IP or Serial connection available.",
+      title: "Connection Error",
+      iconPath: "./assets/icons/error_outline_white_24dp.svg"
+    }
+  });
+}
+
+
+
+private sendViaIP(ip: string, data: string, fileName: string) {
+
+  let responseReceived = false;
+
+  const timeout = setTimeout(() => {
+    if (!responseReceived) {
+      this.ngZone.run(() => {
+        this.app.hideLoader();
+        this.dialog.open(ErrorDialogComponent, {
+          data: {
+            message: "No response from device over IP (Timeout).",
+            title: "Timeout",
+            iconPath: "./assets/icons/error_outline_white_24dp.svg"
+          }
         });
-        return;
-      }
+      });
+      this.app.setFileStatus(fileName, "no-response");
+    }
+  }, 6000);
 
-      this._serialPortService.sendData(selectedPort.path, finalSerialData).subscribe();
-
-      let responseReceived = false;
-
-      // Timeout (6 seconds)
-      const timeout = setTimeout(() => {
-        if (!responseReceived) {
-
-          this.ngZone.run(() => {
-            this.app.hideLoader();
-            this.dialog.open(ErrorDialogComponent, {
-              data: {
-                message: "No response from device (Timeout).",
-                title: "Timeout",
-                iconPath: "./assets/icons/error_outline_white_24dp.svg"
-              }
-            });
-          });
-
-          this.app.setFileStatus(fileName, "no-response");
-          ipcRenderer.invoke("stop-serial-listener");
-        }
-      }, 10000);
-
-      // Listen for serial response
-      this._serialPortService.listenSerialResponse().subscribe(resp => {
-
+  this.ipService.sendData(ip, data)
+    .pipe(
+      catchError(err => {
+        clearTimeout(timeout);
+        this.ngZone.run(() => this.app.hideLoader());
+        this.app.setFileStatus(fileName, "no-response");
+        return throwError(() => err);
+      })
+    )
+    .subscribe({
+      next: (resp: string) => {
+        responseReceived = true;
+        console.log("IP RESPONSE:", resp);
+      },
+      complete: () => {
         responseReceived = true;
         clearTimeout(timeout);
 
-        this.ngZone.run(() => this.app.hideLoader());
+        // 🔥 CLOSE LOADER FIRST
+        this.ngZone.run(() => {
+          this.app.hideLoader();
+        });
 
-        // SUCCESS 
-        if (resp.includes("$received#")) {
+        // 🔥 WAIT 1 TICK, THEN OPEN SUCCESS
+        setTimeout(() => {
           this.ngZone.run(() => {
             this.dialog.open(ErrorDialogComponent, {
               data: {
-                message: "Data sent successfully.",
+                message: "Data sent successfully via IP.",
                 title: "Success",
                 iconPath: "./assets/icons/done_white_24dp.svg"
               }
             });
           });
-          this.WifiDisconneced = 0;
 
           this.app.setFileStatus(fileName, "sent-data");
-        }
-
-        // WIFI ERROR
-        else if (resp.includes("$WiFiDisConnected#")) {
-          if(this.WifiDisconneced ==0){
-                 this.ngZone.run(() => {
-            this.dialog.open(ErrorDialogComponent, {
-              data: {
-                message: "Something went wrong. Trying again.",
-                title: "Try Again",
-                iconPath: "./assets/icons/refresh_white_24dp.svg"
-              }
-            });
-          });
-          this.WifiDisconneced++;
-          }
-          else{
-              this.ngZone.run(() => {
-            this.dialog.open(ErrorDialogComponent, {
-              data: {
-                message: "WiFi is not connected on the machine.",
-                title: "WiFi Error",
-                iconPath: "./assets/icons/error_outline_white_24dp.svg"
-              }
-            });
-          });
-          }
-
-     
-
-          this.app.setFileStatus(fileName, "no-wifi");
-        }
-
-
-         // MQTT Disconnected 
-        else if (resp.includes("$mqttDisconnected#")) {
-          this.ngZone.run(() => {
-            this.dialog.open(ErrorDialogComponent, {
-              data: {
-                message: "MQTT is fail to connect.",
-                title: "MQTT Error",
-                iconPath: "./assets/icons/error_outline_white_24dp.svg"
-              }
-            });
-          });
-          this.WifiDisconneced = 0;
-
-          this.app.setFileStatus(fileName, "sent-data");
-        }
-
-        // UNKNOWN
-        else {
-          this.ngZone.run(() => {
-            this.dialog.open(ErrorDialogComponent, {
-              data: {
-                message: "Unknown response received.",
-                title: "Unknown",
-                iconPath: "./assets/icons/error_outline_white_24dp.svg"
-              }
-            });
-          });
-
-          this.WifiDisconneced = 0;
-
-          this.app.setFileStatus(fileName, "no-response");
-        }
-
-        ipcRenderer.invoke("stop-serial-listener");
-      });
-
+        }, 100);
+      }
     });
-
-    return;
-  }
+}
 
 
 
-  if (mode === "ip") {
-    const ip = this.app.getSelectedIP();
-    if (!ip) return;
+
+private sendViaSerial(portPath: string, data: string, fileName: string) {
+
+  ipcRenderer.invoke("start-serial-listener", portPath).then(res => {
+
+    if (!res.success) {
+      this.ngZone.run(() => {
+        this.app.hideLoader();
+        this.dialog.open(ErrorDialogComponent, {
+          data: {
+            message: "Could not open serial port.",
+            title: "Error",
+            iconPath: "./assets/icons/error_outline_white_24dp.svg"
+          }
+        });
+      });
+      return;
+    }
+
+    this._serialPortService.sendData(portPath, data).subscribe();
 
     let responseReceived = false;
 
     const timeout = setTimeout(() => {
       if (!responseReceived) {
-        this.ngZone.run(() => {
-          this.app.hideLoader();
-          this.dialog.open(ErrorDialogComponent, {
-            data: {
-              message: "No response from device over IP (Timeout).",
-              title: "Timeout",
-              iconPath: "./assets/icons/error_outline_white_24dp.svg"
-            }
-          });
-        });
+        this.ngZone.run(() => this.app.hideLoader());
+        this.app.setFileStatus(fileName, "no-response");
+        ipcRenderer.invoke("stop-serial-listener");
+      }
+    }, 10000);
 
+    this._serialPortService.listenSerialResponse().subscribe(resp => {
+
+      responseReceived = true;
+      clearTimeout(timeout);
+      this.ngZone.run(() => this.app.hideLoader());
+
+      if (resp.includes("$received#")) {
+        this.app.setFileStatus(fileName, "sent-data");
+      } else {
         this.app.setFileStatus(fileName, "no-response");
       }
-    }, 6000);
 
-    this.ipService.sendData(ip, finalIPData)
-      .pipe(
-        finalize(() => {
-          this.ngZone.run(() => this.app.hideLoader());
-        }),
-        catchError(err => {
-          clearTimeout(timeout);
-
-          this.ngZone.run(() => {
-            this.dialog.open(ErrorDialogComponent, {
-              data: {
-                message: "IP send failed.",
-                title: "IP Error",
-                iconPath: "./assets/icons/error_outline_white_24dp.svg"
-              }
-            });
-          });
-
-          this.app.setFileStatus(fileName, "no-response");
-          return throwError(() => err);
-        })
-      )
-      .subscribe(resp => {
-
-        responseReceived = true;
-        clearTimeout(timeout);
-
-     
-
-        this.ngZone.run(() => {
-          this.dialog.open(ErrorDialogComponent, {
-            data: {
-              message: "Data sent successfully via IP.",
-              title: "Success",
-              iconPath: "./assets/icons/done_white_24dp.svg"
-            }
-          });
-        });
-      });
-  }
+      ipcRenderer.invoke("stop-serial-listener");
+    });
+  });
 }
+
+
+
 
 
   isSendDisabled() {

@@ -6,6 +6,16 @@
     height: 100%;
 }
 
+.title {
+  font-family: 'Poppins', 'Segoe UI', Roboto, sans-serif;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: capitalize;
+  color: #ffffff;
+}
+
+
 .container{
     padding: 25px;
 }
@@ -229,4 +239,18 @@ margin-bottom: 20px;
 .input-addon{
   cursor: pointer;
   margin-bottom: 7px;
+}
+
+
+.header-icon{
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.icon-setting{
+  cursor: pointer;
+      position: relative;
+    bottom: 3px;
+    right: 10px;
 }

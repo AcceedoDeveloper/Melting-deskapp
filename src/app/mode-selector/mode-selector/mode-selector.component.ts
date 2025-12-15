@@ -31,6 +31,7 @@ export class ModeSelectorComponent implements OnInit {
   isAutoDetectSaved = false;
   autosent = false;
 theme: 'dark' | 'light' = 'dark';
+selectedFormat: 'XML' | 'TXT' | 'BAK' | null = null;
 
 
 
@@ -49,6 +50,14 @@ theme: 'dark' | 'light' = 'dark';
   ) {}
 
   ngOnInit(): void {
+
+
+    this.app.getSelectedFileFormatObs().subscribe(format => {
+    if (format) {
+      this.selectedFormat = format;
+      this.cdr.markForCheck(); // IMPORTANT (OnPush safety)
+    }
+  });
 
      setTimeout(() => {
       this.app.setShowBackBtn(true);
@@ -172,17 +181,15 @@ onAutoDetectFilesChange(event: Event) {
   const value = Number((event.target as HTMLInputElement).value);
 
   if (!isNaN(value)) {
-    this.app.setAutoDetectFiles(value);   // ✅ SAVE IN SERVICE
-    this.isAutoDetectSaved = true;        // ✅ UI STATE
+    this.app.setAutoDetectFiles(value);   
+    this.isAutoDetectSaved = true;        
   }
 }
 
 
   saveAutoDetectValue(value: number) {
-    // Example: save to service or localStorage
     localStorage.setItem('autoDetectFiles', value.toString());
 
-    // Mark UI as saved
     this.isAutoDetectSaved = true;
   }
 
@@ -196,6 +203,16 @@ onAutoDetectFilesChange(event: Event) {
 
   // localStorage.setItem('theme', this.theme);
   // this.applyTheme(this.theme);
+}
+
+onFormatChange(format: 'XML' | 'TXT' | 'BAK') {
+  this.selectedFormat = format;
+
+  // ✅ SEND TO SERVICE
+  this.app.setSelectedFileFormat(format);
+
+  // optional persistence
+  localStorage.setItem('selectedFormat', format);
 }
 
 

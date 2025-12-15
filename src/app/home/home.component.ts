@@ -26,6 +26,8 @@ selectedDate$ = new BehaviorSubject<Date | null>(null);
 status$ = new BehaviorSubject<string>('all'); 
 sendStatus$ = this.app.fileStatus$;
 statusMap: { [key: string]: string } = {};
+selectedFileFormat$ = this.app.getSelectedFileFormatObs();
+
 
 statusInfo = {
   'all':       { text: 'All Status',   class: 'status-all' },
@@ -144,9 +146,10 @@ this.filteredFiles$ = combineLatest([
   this.fileSearch$,
   this.activeSort$,
   this.selectedDate$,
-  this.status$
+  this.status$,
+  this.selectedFileFormat$
 ]).pipe(
-  map(([files, searchTerm, sort, selectedDate, activeStatus]) => {
+  map(([files, searchTerm, sort, selectedDate, activeStatus, selectedFormat]) => {
     const normalizedSearch = searchTerm.toLowerCase();
     const sortValue = sort.value;
 
@@ -183,6 +186,18 @@ if (activeStatus !== 'all') {
     return status === activeStatus;
   });
 }
+
+
+if (selectedFormat) {
+      const extMap = {
+        XML: '.xml',
+        TXT: '.txt',
+        BAK: '.bak'
+      };
+      filtered = filtered.filter(file =>
+        file.name.toLowerCase().endsWith(extMap[selectedFormat])
+      );
+    }
 
 
 

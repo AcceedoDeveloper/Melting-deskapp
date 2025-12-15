@@ -123,6 +123,11 @@ body {
   font-weight: 500;
 }
 
+.login-btn{
+margin-top: 12px;
+width: 100%;
+}
+
 .login-btn,
 .connect-btn {
   background: linear-gradient(135deg, #4a90e2, #357ac9);
@@ -254,6 +259,7 @@ body {
 }
 
 .slider {
+  width: 65%;
   position: absolute;
   inset: 0;
   background-color: #777;
@@ -283,5 +289,104 @@ body {
 
 
 .theme-content{
-  width: 18%;
+  width: 27%;
+}
+
+
+/* ================= RADIO GROUP ================= */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid #3a3a3a;
+  background: #262626;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.radio-item:hover {
+  background: #2e2e2e;
+}
+
+.radio-item input {
+  display: none;
+}
+
+/* CUSTOM RADIO */
+.radio-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #777;
+  position: relative;
+}
+
+.radio-item input:checked + .radio-custom {
+  border-color: #4a90e2;
+}
+
+.radio-item input:checked + .radio-custom::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background: #4a90e2;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* TEXT */
+.radio-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.radio-text strong {
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.radio-text small {
+  font-size: 12px;
+  color: #9aa0a6;
+}
+
+/* SELECTED CARD EFFECT */
+.radio-item input:checked ~ .radio-text strong {
+  color: #4a90e2;
+}
+
+
+/* ================= TOGGLE CARD (AUTO SENT) ================= */
+.toggle-box {
+  justify-content: space-between;
+  padding: 16px 18px;
+}
+
+.toggle-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+/* Active visual feedback */
+.toggle-box:has(input:checked) {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.12);
+}
+
+/* Optional hover polish */
+.toggle-box:hover {
+  background: #2d2d2d;
 }

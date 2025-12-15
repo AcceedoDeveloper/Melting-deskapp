@@ -18,23 +18,37 @@
 
   <div class="right-section">
 
-  <div class="input-addon" (click)="settings()" matTooltip="Set IP or serial port">
-  <span style="font-size: 22px;">⚙️</span>
-</div>
 
-    
+
+
 
     <div class="usage-info" *ngIf="(selectedPortInfo$ | async) || (selectedIP$ | async); else noneSelected">
+                    <span style="font-size: 22px;"  (click)="settings()"  class="icon-setting" >⚙️</span>
       <div *ngIf="selectedPortInfo$ | async as selPort">
          {{ selPort?.path }}
       </div>
 
-      <div *ngIf="selectedIP$ | async as selIP">
+      <div *ngIf="selectedIP$ | async as selIP" class="header-icon"  >
+              <span style="font-size: 22px;"  (click)="settings()"  class="icon-setting" >⚙️</span>
+
+        <div class="input-addon"  matTooltip="serial or IP">
+          <span style="font-size: 22px;">🟢</span>
+        </div>
        {{ selIP }}
       </div>
+
+      <!-- <div *ngIf="selectedFileFormat$ | async as fileFormat" class="header-icon"  >
+          <div class="input-addon"  matTooltip="fileFormat" >
+          <span style="font-size: 22px;">📄</span>
+        </div>
+        {{ fileFormat }}
+      </div> -->
     </div>
 
     <ng-template #noneSelected>
+        <div class="input-addon" (click)="settings()" matTooltip="Set IP or serial port">
+  <span style="font-size: 22px;">⚙️</span>
+</div>
       <div class="usage-none">
         No Serial or IP Selected
       </div>
