@@ -34,6 +34,8 @@ export class AppService {
 >(null);
 
 fileStatus$ = new BehaviorSubject<{ [fileId: string]: string }>({});
+autoSend$ = new BehaviorSubject<boolean>(false);
+
 
 
     sorts$ = new BehaviorSubject<any[]>(this.sortOptions)
@@ -52,6 +54,11 @@ fileStatus$ = new BehaviorSubject<{ [fileId: string]: string }>({});
     constructor(
         private dialog: MatDialog
     ) {
+
+       const saved = localStorage.getItem('autoSend');
+  if (saved !== null) {
+    this.autoSend$.next(saved === 'true');
+  }
 
     }
 
@@ -177,10 +184,10 @@ getSerialDataReceived() {
   return getOnce(this.serialDataReceived$.asObservable());
 }
 
-setFileStatus(fileId: string, status: string) {
-  const current = this.fileStatus$.value;
-  this.fileStatus$.next({ ...current, [fileId]: status });
-}
+// setFileStatus(fileId: string, status: string) {
+//   const current = this.fileStatus$.value;
+//   this.fileStatus$.next({ ...current, [fileId]: status });
+// }
 
 
 // setter
@@ -212,5 +219,35 @@ getSelectedFileFormatObs() {
 getSelectedFileFormat() {
   return getOnce(this.selectedFileFormat$.asObservable());
 }
+
+
+// setter
+setAutoSend(value: boolean) {
+  this.autoSend$.next(value);
+}
+
+// observable
+getAutoSendObs() {
+  return this.autoSend$.asObservable();
+}
+
+// sync getter
+getAutoSend() {
+  return getOnce(this.autoSend$.asObservable());
+}
+
+
+setFileStatus(fileName: string, status: string) {
+  const key = this.normalize(fileName);
+  const current = this.fileStatus$.value;
+  this.fileStatus$.next({ ...current, [key]: status });
+}
+
+
+private normalize(name: string) {
+  return name.toLowerCase().replace(/\s+/g, '').replace(/-/g, '');
+}
+
+
 
 }

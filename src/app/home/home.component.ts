@@ -61,6 +61,48 @@ statusInfo = {
 
   ngOnInit(): void {
 
+
+
+this.fileService.getNewFilesObs().subscribe(files => {
+
+  if (!this.app.getAutoSend()) return;
+  if (!files || !files.length) return;
+
+  files.forEach(file => {
+
+    const format = this.app.getSelectedFileFormat();
+    if (!format) return;
+
+const ext = file.name.split('.').pop()?.toLowerCase();
+
+const formatMap = {
+  XML: ['xml'],
+  TXT: ['txt', 'asc'],
+  BAK: ['bak']
+};
+
+if (!formatMap[format]?.includes(ext)) return;
+
+
+    const ip = this.app.getSelectedIP();
+    const serial = this.app.getSelectedSerialPort();
+    if (!ip && !serial) return;
+
+    console.log('AUTO SEND FILE:', file.name);
+
+    this.fileService.setSelectedFile(file);
+
+    this.router.navigate(['/detail'], {
+      queryParams: { auto: true }
+    });
+  });
+
+  // 🔥 IMPORTANT: clear after handling
+  this.fileService.clearNewFiles();
+
+});
+
+
     this.getFileStatus();
 
     setTimeout(() => {
@@ -209,15 +251,11 @@ if (selectedFormat) {
 
     console.log(this.sendStatus$ );
 
-this.sendStatus$.subscribe(update => {
-  if (!update?.fileName) return;
-
-  const key = this.normalizeName(update.fileName);
-
-  this.statusMap[key] = update.status;
-
+this.sendStatus$.subscribe(statusMap => {
+  this.statusMap = statusMap;
   this.cdr.markForCheck();
 });
+
 
 
 
@@ -338,9 +376,10 @@ normalizeName(name: string) {
 
 
 getStatus(file: any) {
-  console.log("Getting status for file:", file.name);
-  return this.statusMap[file.name];
+  const key = this.normalizeName(file.name);
+  return this.statusMap[key];
 }
+
 
 
 getFileStatus() {

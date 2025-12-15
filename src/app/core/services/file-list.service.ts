@@ -15,6 +15,8 @@ export class FileListService {
     filesLoaded$ = new BehaviorSubject<boolean>(false);
     selectedFile$ = new BehaviorSubject<AcFile>(null);
     seacrhDirectory$ = new BehaviorSubject<string>('');
+    newFiles$ = new BehaviorSubject<AcFile[]>([]);
+
 
     getFiles() {
         let files = []
@@ -44,28 +46,30 @@ export class FileListService {
             })
         }).pipe(
             tap(files => {
-                const oldFiles = this.getFiles();
-                const newFiles = files;
-                if (oldFiles.length) {
-                    const oldFilesMap = (oldFiles as any[]).reduce((acc, file) => {
-                        acc[file.name] = file
-                        return acc
-                    }, {})
-                    // new file detected
-                    const newlyAddedFiles = [];
-                    newFiles.forEach(newFile => {
-                        if (!oldFilesMap[newFile.name]) {
-                            newlyAddedFiles.push(newFile)
-                        }
-                        if (oldFilesMap[newFile.name]?.new) {
-                            newFile['new'] = true
-                        }
-                    })
-                    console.log(newlyAddedFiles)
-                    newlyAddedFiles.forEach(file => file.new = true)
-                }
-                this.files$.next(files)
-            })
+  const oldFiles = this.getFiles();
+  const newlyAddedFiles: AcFile[] = [];
+
+  if (oldFiles.length) {
+    const oldMap = oldFiles.reduce((acc, f) => {
+      acc[f.name] = true;
+      return acc;
+    }, {});
+    
+    files.forEach(file => {
+      if (!oldMap[file.name]) {
+        file.new = true;
+        newlyAddedFiles.push(file);
+      }
+    });
+  }
+
+  this.files$.next(files);
+
+  if (newlyAddedFiles.length) {
+    this.newFiles$.next(newlyAddedFiles);
+  }
+})
+
         )
     }
 
@@ -121,5 +125,12 @@ export class FileListService {
         return getOnce(this.seacrhDirectory$.asObservable())
     }
 
+    getNewFilesObs() {
+  return this.newFiles$.asObservable();
+}
+
+clearNewFiles() {
+  this.newFiles$.next([]);
+}
 
 }

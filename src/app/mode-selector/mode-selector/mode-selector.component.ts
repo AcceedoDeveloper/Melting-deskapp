@@ -52,6 +52,14 @@ selectedFormat: 'XML' | 'TXT' | 'BAK' | null = null;
   ngOnInit(): void {
 
 
+     const saved = localStorage.getItem('autoSend');
+  if (saved !== null) {
+    this.autosent = saved === 'true';
+    this.app.setAutoSend(this.autosent);
+  }
+
+
+
     this.app.getSelectedFileFormatObs().subscribe(format => {
     if (format) {
       this.selectedFormat = format;
@@ -193,9 +201,18 @@ onAutoDetectFilesChange(event: Event) {
     this.isAutoDetectSaved = true;
   }
 
-  autosentfile($event: Event) {
+autosentfile(event: Event) {
+  const checked = (event.target as HTMLInputElement).checked;
 
-  }
+  this.autosent = checked;
+
+  // 🔥 tell app: auto-send ON / OFF
+  this.app.setAutoSend(checked);
+
+  // optional persistence
+  localStorage.setItem('autoSend', String(checked));
+}
+
 
   toggleTheme(event: Event) {
   const checked = (event.target as HTMLInputElement).checked;
