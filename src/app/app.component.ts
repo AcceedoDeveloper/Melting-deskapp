@@ -224,4 +224,13 @@ selectedFileFormat$: Observable<
     }
   }
 
+  formatIPForDisplay(ip: string): string {
+  if (!ip) return '';
+
+  return ip
+    .replace(/^https?:\/\//, '')  // remove http:// or https://
+    .replace(/\/$/, '');          // remove ending /
+}
+
+
 }

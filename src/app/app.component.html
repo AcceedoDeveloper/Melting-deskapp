@@ -1,81 +1,89 @@
-<mat-sidenav-container ngClass.lt-md="mobile">
-    <mat-sidenav-content class="content">
-        <div class="container">
-        
-                   <div class="header-row">
-  
-  <div class="title-section">
-    <div class="btn-container">
-      <button (click)="backTo()" mat-icon-button *ngIf="showBackBtn$ | async">
-        <mat-icon>
-          <img src="./assets/icons/arrow_back_white_24dp.svg" alt="">
-        </mat-icon>
-      </button>
-    </div>
+<!-- ================= HEADER ================= -->
+<div class="app-header">
 
-    <h1 class="title">Acceedo melt pro</h1>
-  </div>
+  <div class="header-row">
 
-  <div class="right-section">
-
-
-
-
-
-    <div class="usage-info" *ngIf="(selectedPortInfo$ | async) || (selectedIP$ | async); else noneSelected">
-                    <span style="font-size: 22px;"  (click)="settings()"  class="icon-setting" >⚙️</span>
-      <div *ngIf="selectedPortInfo$ | async as selPort">
-         {{ selPort?.path }}
-      </div>
-
-      <div *ngIf="selectedIP$ | async as selIP" class="header-icon"  >
-              <span style="font-size: 22px;"  (click)="settings()"  class="icon-setting" >⚙️</span>
-
-        <div class="input-addon"  matTooltip="serial or IP">
-          <span style="font-size: 22px;">🟢</span>
-        </div>
-       {{ selIP }}
-      </div>
-
-      <!-- <div *ngIf="selectedFileFormat$ | async as fileFormat" class="header-icon"  >
-          <div class="input-addon"  matTooltip="fileFormat" >
-          <span style="font-size: 22px;">📄</span>
-        </div>
-        {{ fileFormat }}
+    <div class="title-section">
+      <!-- <div class="btn-container">
+        <button
+          (click)="backTo()"
+          mat-icon-button
+          *ngIf="showBackBtn$ | async">
+          <mat-icon>
+            <img src="./assets/icons/arrow_back_white_24dp.svg" />
+          </mat-icon>
+        </button>
       </div> -->
+
+      <img
+        src="./assets/icons/ChatGPT_Image_Dec_16__2025__10_13_30_AM-removebg-preview.png"
+        class="app-logo"
+        alt="Acceedo Melt Pro" />
     </div>
 
-    <ng-template #noneSelected>
-        <div class="input-addon" (click)="settings()" matTooltip="Set IP or serial port">
-  <span style="font-size: 22px;">⚙️</span>
-</div>
-      <div class="usage-none">
-        No Serial or IP Selected
-      </div>
-    </ng-template>
+    <div class="right-section">
 
-    <!-- <div class="serial-data-display" *ngIf="serialDataReceived$ | async as data">
-      <div class="serial-data-label">Received Data:</div>
-      <div class="serial-data-content">{{ data }}</div>
-    </div> -->
+      <ng-container
+        *ngIf="(selectedPortInfo$ | async) || (selectedIP$ | async); else noneSelected">
 
+
+        <div *ngIf="selectedPortInfo$ | async as selPort">
+          {{ selPort?.path }}
+        </div>
+
+        <div *ngIf="selectedIP$ | async as selIP" class="header-icon">
+          <span class="live" >🟢</span>
+          {{ formatIPForDisplay(selIP) }}
+        </div>
+
+      </ng-container>
+
+      <ng-template #noneSelected>
+        <img src="./assets/icons/cloud-computing.png" alt="Help" class="notification-icon  offline" >
+
+        <div class="usage-none">No Serial or IP Selected</div>
+      </ng-template>
+
+      <img
+        src="./assets/icons/notification.png"
+        class="notification-icon" />
+
+    </div>
   </div>
 </div>
 
 
+<!-- ================= BODY ================= -->
+<mat-sidenav-container class="body-container">
 
+  <!-- SIDENAV -->
+  <mat-sidenav
+    mode="side"
+    opened
+    class="side-nav">
 
+    <div class="nav-item active">
+      <img src="./assets/icons/home-button.png" />
+      <span class="nav-text">Home</span>
+    </div>
 
-               
-                <div>
-                 
-      
-            </div>
-            <router-outlet></router-outlet>
-        </div>
-    </mat-sidenav-content>
+    <div class="nav-item" (click)="settings()">
+      <img src="./assets/icons/settings.png" />
+      <span class="nav-text">settings</span>
+    </div>
+
+    <div class="nav-item">
+      <img src="./assets/icons/calendar.png" />
+      <span class="nav-text">calendar</span>
+    </div>
+
+  </mat-sidenav>
+
+  <!-- CONTENT -->
+  <mat-sidenav-content>
+    <div class="container">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+
 </mat-sidenav-container>
-
-<ng-template #noSerialPortTpl>
-    No Serial Ports found
-</ng-template>

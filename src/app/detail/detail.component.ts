@@ -427,6 +427,8 @@ private sendViaSerial(portPath: string, data: string, fileName: string) {
   return true;
 }
 
-
+backTo(){
+  this.router.navigate(['/home']);
+}
 
 }

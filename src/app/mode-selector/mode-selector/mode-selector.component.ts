@@ -5,7 +5,7 @@ import { SerialPortService } from '../../core/services/serial-port.service';
 import { PortInfo } from '../../models/port-info.model';
 import { FileListService } from '../../core/services/file-list.service';
 import { catchError, combineLatest, finalize, map, Observable, pairwise, shareReplay, startWith, tap, throwError, BehaviorSubject } from 'rxjs';
-
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-mode-selector',
@@ -32,11 +32,13 @@ export class ModeSelectorComponent implements OnInit {
   autosent = false;
 theme: 'dark' | 'light' = 'dark';
 selectedFormat: 'XML' | 'TXT' | 'BAK' | null = null;
+isIpConnected = false;
 
 
 
 
-  modeCtrl = new FormControl('serial');
+
+modeCtrl = new FormControl('ip');
   serialPortCtrl = new FormControl(null);
   ipAddressCtrl = new FormControl('');
 
@@ -46,10 +48,35 @@ selectedFormat: 'XML' | 'TXT' | 'BAK' | null = null;
     private app: AppService,
     private serialService: SerialPortService,
     private fileService: FileListService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+
+
+this.app.getModeObs().subscribe(mode => {
+  this.modeCtrl.setValue(mode, { emitEvent: false });
+  this.cdr.markForCheck();
+});
+
+
+
+this.app.getSelectedIPObs().subscribe(ip => {
+
+  if (ip) {
+    this.ipAddressCtrl.setValue(ip);
+    this.isIpConnected = true;
+
+    this.modeCtrl.setValue('ip', { emitEvent: false });
+  } else {
+    this.isIpConnected = false;
+  }
+
+  this.cdr.markForCheck();
+});
+
+
 
 
      const saved = localStorage.getItem('autoSend');
@@ -114,9 +141,6 @@ this.app.getAutoDetectFilesObs().subscribe(value => {
     this.app.setSelectedSerialPort(this.serialPortCtrl.value);
   }
 
-  onConnectIP() {
-    this.app.setSelectedIPAddress(this.ipAddressCtrl.value);
-  }
 
    // LOGIN FUNCTION
   login() {
@@ -230,6 +254,91 @@ onFormatChange(format: 'XML' | 'TXT' | 'BAK') {
 
   // optional persistence
   localStorage.setItem('selectedFormat', format);
+}
+
+// onConnectIP() {
+
+//   if (this.isIpConnected) {
+//     this.app.setSelectedIPAddress(null);
+//     this.ipAddressCtrl.reset();
+//     this.isIpConnected = false;
+//     return;
+//   }
+
+//   const ip = this.ipAddressCtrl.value;
+//   if (!ip) return;
+
+//   this.app.setSelectedIPAddress(ip);
+//   this.isIpConnected = true;
+// }
+
+
+onConnectIP() {
+
+  // 🔌 DISCONNECT
+  if (this.isIpConnected) {
+    this.app.setSelectedIPAddress(null);
+    this.ipAddressCtrl.reset();
+    this.isIpConnected = false;
+    return;
+  }
+
+  let rawIp = this.ipAddressCtrl.value?.trim();
+  if (!rawIp) return;
+
+  // ✅ ADD http:// if missing
+  if (!rawIp.startsWith('http://') && !rawIp.startsWith('https://')) {
+    rawIp = 'http://' + rawIp;
+  }
+
+  // ✅ ADD trailing slash if missing
+  if (!rawIp.endsWith('/')) {
+    rawIp = rawIp + '/';
+  }
+
+  // 🔥 FINAL NORMALIZED IP
+  console.log('Final IP:', rawIp);
+
+  this.app.setSelectedIPAddress(rawIp);
+  this.isIpConnected = true;
+}
+
+
+onFormatSelect(event: Event) {
+  const value = (event.target as HTMLSelectElement).value as
+    | 'XML'
+    | 'TXT'
+    | 'BAK';
+
+  this.selectedFormat = value;
+
+  // 🔥 send to AppService
+  this.app.setSelectedFileFormat(value);
+
+  // optional persistence
+  localStorage.setItem('selectedFormat', value);
+}
+
+
+backTo(){
+  this.router.navigate(['/home']);
+}
+
+
+get displayIp(): string {
+  const ip = this.ipAddressCtrl.value;
+  if (!ip) return '';
+
+  return ip
+    .replace(/^https?:\/\//, '')  // remove http:// or https://
+    .replace(/\/$/, '');          // remove trailing /
+}
+
+
+onIpInput(event: Event) {
+  this.ipAddressCtrl.setValue(
+    (event.target as HTMLInputElement).value
+  );
 }
 
 

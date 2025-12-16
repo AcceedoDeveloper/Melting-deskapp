@@ -2,9 +2,38 @@
   
 }
 
+
+
 .mat-sidenav-container{
-    height: 100%;
+    height: 100vh;
 }
+
+.container{
+  min-height: 100vh;
+  background: transparent;
+  padding: 25px;
+}
+
+
+.app-logo {
+  height: 50px;          
+  width: auto;
+  object-fit: contain;
+  margin-left: 6px;
+}
+
+.notification-icon{
+  height: 24px;
+  width: 24px;
+  object-fit: contain;
+  cursor: pointer;
+  margin-left: 15px;
+}
+
+.offline{
+  margin-right: 4px;
+}
+
 
 .title {
   font-family: 'Poppins', 'Segoe UI', Roboto, sans-serif;
@@ -136,7 +165,7 @@ margin-bottom: 20px;
   justify-content: space-between; /* Left and right side alignment */
   align-items: center;
   width: 100%;
-  margin-bottom: 20px;
+  padding-right: 40px;
 }
 
 /* LEFT SIDE TITLE */
@@ -194,7 +223,7 @@ margin-bottom: 20px;
   width: 24px;           /* Material icon size */
   height: 24px;
   object-fit: contain;   /* Prevents distortion */
-  filter: invert(1);     /* Makes icon white on dark background */
+  // filter: invert(1);     /* Makes icon white on dark background */
 }
 
 .settings-icon-btn {
@@ -238,7 +267,7 @@ margin-bottom: 20px;
 
 .input-addon{
   cursor: pointer;
-  margin-bottom: 7px;
+  margin-right: 10px;
 }
 
 
@@ -253,4 +282,77 @@ margin-bottom: 20px;
       position: relative;
     bottom: 3px;
     right: 10px;
+}
+
+/* HEADER */
+.app-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(145deg, #1c1c1c, #242424);
+  border-bottom: 1px solid #333;
+}
+
+/* BODY */
+.body-container {
+  height: calc(100vh - 64px);
+}
+
+/* SIDENAV */
+.side-nav {
+  width: 64px;
+  background: #1b1b1b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.nav-item {
+  width: 64px;
+  padding: 10px 0;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;      /* 👈 vertical layout */
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  gap: 6px;
+  transition: background 0.2s ease;
+}
+
+.nav-item:hover {
+  background: #2a2a2a;
+}
+
+
+/* ICON */
+.nav-item img {
+  width: 30px;
+  height: 30px;
+}
+
+/* TEXT UNDER ICON */
+.nav-text {
+  font-size: 11px;
+  color: #bdbdbd;
+  text-align: center;
+  line-height: 1;
+  user-select: none;
+}
+
+/* ACTIVE TEXT COLOR */
+.nav-item.active .nav-text {
+  color: #4caf50; /* or your brand green */
+}
+
+/* CONTENT */
+.container {
+  padding: 25px;
+}
+
+
+.live{
+  font-size: 18px;
+  margin-right: 6px;
 }

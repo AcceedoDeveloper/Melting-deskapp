@@ -1,6 +1,14 @@
 <div class="content">
   <div class="report-view">
-    <div class="title">Element Concentration</div>
+    <div class="title"> <span> 
+    
+        
+          <mat-icon   (click)="backTo()"
+          mat-icon-button>
+            <img src="./assets/icons/arrow_back_white_24dp.svg" />
+          </mat-icon>
+       
+    </span>  Element Concentration</div>
     <div class="content-area" *ngIf="spectrum">
       <div class="header" gdAuto="column">
         <div gdRows gdGap="5px" *ngFor="let header of spectrum.headers">

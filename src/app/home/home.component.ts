@@ -385,7 +385,7 @@ getStatus(file: any) {
 getFileStatus() {
   this.sendStatus$.subscribe(v => {
     console.log("UPDATE:", v);
-    this.statusMap = v;        // <-- Store it here for UI use
+    this.statusMap = v;       
     console.log("Mapped:", this.statusMap);
   });
 }
