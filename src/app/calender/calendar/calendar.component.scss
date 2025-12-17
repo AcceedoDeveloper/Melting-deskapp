@@ -26,12 +26,35 @@
   color: white;
   font-size: 18px;
   cursor: pointer;
+  position: relative;
+  top: -2px;
 }
 
 .nav-btn:hover {
   color: #4285f4;
 }
 
+.day-cell {
+  position: relative;
+}
+
+.day-cell.has-data {
+  background: rgba(66, 133, 244, 0.12);
+}
+
+.day-count {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: #4285f4;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+}
 
 
 .week-header {
@@ -62,4 +85,186 @@
   background: #4285f4;
   padding: 4px 6px;
   border-radius: 6px;
+}
+
+/* BACKDROP */
+.popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 1000;
+}
+
+/* POPUP CONTAINER */
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 720px;              /* 🔥 increased width */
+  max-height: 75vh;
+  background: #1f1f26;
+  color: white;
+  border-radius: 16px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+
+/* HEADER */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.3px;
+  }
+
+  button {
+    background: transparent;
+    border: none;
+    color: #ccc;
+    font-size: 20px;
+    cursor: pointer;
+
+    &:hover {
+      color: white;
+    }
+  }
+}
+
+/* BODY */
+.popup-body {
+  padding: 16px;
+  overflow-y: auto;
+
+  display: grid;                    /* 🔥 GRID */
+  grid-template-columns: repeat(2, 1fr);  /* 🔥 2 boxes */
+  gap: 14px;
+}
+
+
+
+.log-card {
+  background: #2a2d38;
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Each row */
+.log-card .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+}
+
+/* Full width row */
+.log-card .row.full {
+  grid-template-columns: 1fr;
+}
+
+/* Left & Right alignment */
+.log-card .left {
+  text-align: left;
+}
+
+.log-card .right {
+  text-align: right;
+}
+
+/* Labels */
+.log-card .label {
+  color: #8ab4f8;
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+/* Values */
+.log-card .value {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Time styling */
+.log-card .time {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* Hover polish */
+.log-card:hover {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+  transform: translateY(-2px);
+  transition: all 0.15s ease;
+}
+
+
+
+.month-title.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.month-picker {
+  position: absolute;
+  top: 52px;
+  right: 16px;
+  background: #1f2230;
+  border-radius: 12px;
+  padding: 12px;
+  width: 260px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  z-index: 100;
+}
+
+.year-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.year-nav button {
+  background: transparent;
+  border: none;
+  color: #8ab4f8;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.month-cell {
+  padding: 8px;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #cfd8dc;
+}
+
+.month-cell:hover {
+  background: rgba(66,133,244,0.2);
+}
+
+.month-cell.active {
+  background: #4285f4;
+  color: white;
+  font-weight: 600;
 }

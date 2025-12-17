@@ -6,9 +6,34 @@
     <div class="calendar-header">
   <button class="nav-btn" (click)="prevMonth()">‹</button>
 
-  <div class="month-title">
+  <!-- <div class="month-title">
     {{ months[currentMonth] }} {{ currentYear }}
+  </div> -->
+
+  <div class="month-title clickable" (click)="toggleMonthPicker()">
+  {{ months[currentMonth] }} {{ currentYear }} ▼
+</div>
+
+
+<div class="month-picker" *ngIf="showMonthPicker">
+  <div class="year-nav">
+    <button (click)="changeYear(-1)">‹</button>
+    <span>{{ pickerYear }}</span>
+    <button (click)="changeYear(1)">›</button>
   </div>
+
+  <div class="month-grid">
+    <div
+      *ngFor="let m of months; let i = index"
+      class="month-cell"
+      [class.active]="i === currentMonth && pickerYear === currentYear"
+      (click)="selectMonth(i)">
+      {{ m }}
+    </div>
+  </div>
+</div>
+
+
 
   <button class="nav-btn" (click)="nextMonth()">›</button>
 </div>
@@ -22,9 +47,36 @@
       *ngFor="let day of calendarDays"
       class="day-cell"
       [class.today]="day.isToday"
-      [class.other-month]="!day.currentMonth">
+       [class.has-data]="day.hasData"
+        (click)="day.hasData && openDayPopup(day.dateKey)">
 
       <span class="day-number">{{ day.date }}</span>
+       <span class="day-count" *ngIf="day.count">
+    {{ day.count }}
+  </span>
+
     </div>
   </div>
 </div>
+
+
+
+<div class="popup" *ngIf="showPopup">
+  <div class="popup-header">
+    <h3>Test Results</h3>
+    <button (click)="closePopup()">✕</button>
+  </div>
+
+  <div class="popup-body">
+    <div class="log-card" *ngFor="let log of selectedDayLogs">
+      <div><b>Heat No:</b> {{ log.heatNo }}</div>
+      <div><b>Grade:</b> {{ log.ironGrade }}</div>
+      <div><b>Stage:</b> {{ log.stage }}</div>
+      <div><b>Tested By:</b> {{ log.testedBy }}</div>
+      <div class="time">
+        {{ log.updatedAt | date:'dd/MM/yyyy, hh:mm a' }}
+      </div>
+    </div>
+  </div>
+</div>
+

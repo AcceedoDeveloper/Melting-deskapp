@@ -27,14 +27,29 @@
         *ngIf="(selectedPortInfo$ | async) || (selectedIP$ | async); else noneSelected">
 
 
-        <div *ngIf="selectedPortInfo$ | async as selPort">
+        <!-- <div *ngIf="selectedPortInfo$ | async as selPort">
           {{ selPort?.path }}
         </div>
 
         <div *ngIf="selectedIP$ | async as selIP" class="header-icon">
           <span class="live" >🟢</span>
           {{ formatIPForDisplay(selIP) }}
-        </div>
+        </div> -->
+
+
+        <div *ngIf="(selectedIP$ | async) as selIP; else serial">
+  <span class="live">🟢</span>
+  {{ formatIPForDisplay(selIP) }}
+</div>
+
+<ng-template #serial>
+  <div *ngIf="selectedPortInfo$ | async as selPort">
+    {{ selPort?.path }}
+  </div>
+</ng-template>
+
+
+
 
       </ng-container>
 

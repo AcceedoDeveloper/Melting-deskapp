@@ -317,6 +317,55 @@ ipcMain.handle('get-ascii-data', async (e, filePath) => {
 
 
 
+// Fetch spectrum logs from server
+ipcMain.handle(
+  'get-spectrum-logs',
+  async (e, { baseUrl, start, end }) => {
+    try {
+
+      // 🔥 1. Validate baseUrl
+      if (!baseUrl || baseUrl.trim() === '') {
+        throw new Error('Base URL is empty');
+      }
+
+      // 🔥 2. Normalize baseUrl
+      if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+        baseUrl = 'http://' + baseUrl;
+      }
+
+      // 🔥 3. Build URL safely
+      const apiUrl = new URL('/spectrumLogs/', baseUrl);
+      apiUrl.searchParams.set('start', start);
+      apiUrl.searchParams.set('end', end);
+
+      console.log('📅 Calendar API URL:', apiUrl.toString());
+
+      // 🔥 4. Call API
+      const response = await fetch(apiUrl.toString(), {
+        method: 'GET'
+      });
+
+      const data = await response.json();
+
+      return {
+        success: true,
+        data
+      };
+
+    } catch (err) {
+      console.error('❌ Calendar API Error:', err.message);
+
+      return {
+        success: false,
+        error: err.message
+      };
+    }
+  }
+);
+
+
+
+
 
 
 ipcMain.handle('get-spectrum-data', async (e, args) => {

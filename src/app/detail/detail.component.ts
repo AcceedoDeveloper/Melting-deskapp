@@ -240,6 +240,7 @@ onSendClick() {
   const fileName = this.file.name;
 
   const ip = this.app.getSelectedIP();
+  console.log("Selected IP:", ip);
   const serialPort = this.app.getSelectedSerialPort();
 
   this.ngZone.run(() => this.app.showLoader("Sending data..."));
