@@ -5,6 +5,7 @@ import { PageNotFoundComponent } from './shared/components';
 import { HomeRoutingModule } from './home/home-routing.module';
 import { DetailRoutingModule } from './detail/detail-routing.module';
 import { ModeSelectorRoutingModule } from './mode-selector/mode-selector.routing.module';
+import { CalendarRoutingModule} from './calender/calendar.routing.module';
 
 const routes: Routes = [
   {
@@ -23,7 +24,8 @@ const routes: Routes = [
     RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy' }),
     HomeRoutingModule,
     DetailRoutingModule,
-    ModeSelectorRoutingModule
+    ModeSelectorRoutingModule,
+    CalendarRoutingModule
   ],
   exports: [RouterModule]
 })

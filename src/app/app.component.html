@@ -62,7 +62,7 @@
     opened
     class="side-nav">
 
-    <div class="nav-item active">
+    <div class="nav-item active" (click)="home()">  
       <img src="./assets/icons/home-button.png" />
       <span class="nav-text">Home</span>
     </div>
@@ -72,7 +72,7 @@
       <span class="nav-text">settings</span>
     </div>
 
-    <div class="nav-item">
+    <div class="nav-item" (click)="calendar()">
       <img src="./assets/icons/calendar.png" />
       <span class="nav-text">calendar</span>
     </div>

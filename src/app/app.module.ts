@@ -19,6 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { AppComponent } from './app.component';
 import { ModeSelectorModule } from './mode-selector/mode-selector.module';
+import { CalendarModule } from './calender/calendar.module';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -36,6 +37,7 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
     HomeModule,
     DetailModule,
     ModeSelectorModule,
+    CalendarModule,
     AppRoutingModule,
     MatSidenavModule,
     TranslateModule.forRoot({

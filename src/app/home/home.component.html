@@ -74,50 +74,50 @@
 
 
           </div>
-            <div class="files" *ngIf="files?.length; else noFileFoundTpl" gdColumns="repeat(auto-fit, minmax(150px, 155px))">
-             <div 
-  (click)="onFileClick(file)"
-  gdAlignRows="center center"
-  gdAlignColumns="center center"
-  class="file-container mat-elevation-z2"
-  matRipple
-  *ngFor="let file of files; trackBy: trackByFileName"
-  [class.new]="file.new"
-  [ngClass]="statusMap[file.name]"
->
-                <div class="file-card" fxLayoutAlign="center center">
-                  <img src="./assets/icons/xml.svg" alt="" height="72px" width="72px">
-                </div>
-                <div class="file-name">
-                  {{ file.name }}
-                </div>
-                <div class="file-date">
-                  {{ file.info?.birthtime | date: 'dd/MM/yy, h:mm a' }}
-                </div>
+            <div class="files"
+     *ngIf="files?.length; else noFileFoundTpl"
+     gdColumns="repeat(auto-fit, minmax(150px, 180px))">
 
+  <div
+    *ngFor="let file of files; trackBy: trackByFileName"
+    class="file-container mat-elevation-z2"
+    matRipple
+    (click)="onFileClick(file)"
+    [class.new]="file.new"
+    [ngClass]="statusMap[file.name]">
 
+   
 
+    <div class="file-container">
+  <div class="file-name">{{ file.name }}</div>
+  <div class="file-date">{{ file.info?.birthtime | date:'dd/MM/yy, h:mm a' }}</div>
 
-<!-- Actual Status -->
-<div *ngIf="getStatus(file) as status">
-  <div class="status-tag"  [ngClass]="status" >
-    {{
-      status === 'sent-data'   ? 'Sent' :
-      status === 'no-wifi'     ? 'No WiFi' :
-      status === 'no-response' ? 'No Response' :
-      ''
-    }}
+  <div class="file-meta" *ngIf="getFileMeta(file) as meta">
+    <div><span>Heat</span> {{ meta.heatNo }}</div>
+    <div><span>Stage</span> {{ meta.stage }}</div>
+    <div><span>Part</span> {{ meta.partName }}</div>
   </div>
 </div>
 
 
+    <!-- STATUS -->
+    <div *ngIf="getStatus(file) as status"
+         class="status-tag"
+         [ngClass]="status">
+      {{
+        status === 'sent-data'   ? 'Sent' :
+        status === 'no-wifi'     ? 'No WiFi' :
+        status === 'no-response' ? 'No Response' :
+        ''
+      }}
+    </div>
 
+    <!-- NEW TAG -->
+    <div *ngIf="file.new" class="new-tag">NEW</div>
 
+  </div>
+</div>
 
-                <div *ngIf="file.new" class="new-tag">new</div>
-              </div>
-           
-            </div>
 
 
    

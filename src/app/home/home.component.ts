@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnDestro
 import { AbstractControl, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ipcRenderer } from 'electron';
-
+import { Spectrum } from '../models/spectrum.model';
 import { catchError, combineLatest, finalize, map, Observable, pairwise, shareReplay, startWith, tap, throwError, BehaviorSubject } from 'rxjs';
 import { AppService } from '../core/services/app.service';
 import { FileListService } from '../core/services/file-list.service';
@@ -27,6 +27,16 @@ status$ = new BehaviorSubject<string>('all');
 sendStatus$ = this.app.fileStatus$;
 statusMap: { [key: string]: string } = {};
 selectedFileFormat$ = this.app.getSelectedFileFormatObs();
+
+fileMetaMap: {
+  [filePath: string]: {
+    heatNo?: string;
+    stage?: string;
+    partName?: string;
+  }
+} = {};
+
+
 
 
 statusInfo = {
@@ -60,6 +70,9 @@ statusInfo = {
   ) { }
 
   ngOnInit(): void {
+
+
+
 
 
 
@@ -120,6 +133,8 @@ if (!formatMap[format]?.includes(ext)) return;
     this.files$ = this.fileService.getFilesObs()
     ipcRenderer.on('reload-files', this.reloadFilesListener)
 
+
+
     if (this.fileService.getSearchDirectory()) {
       this.directoryCtrl.setValue(this.fileService.getSearchDirectory());
       this.onShowFilesClick(true);
@@ -127,61 +142,7 @@ if (!formatMap[format]?.includes(ext)) return;
       this.showSearchDirectory = true;
     }
 
-    // this.filteredFiles$ = combineLatest([
-    //   this.files$,
-    //   this.fileSearch$,
-    //   this.activeSort$
-    // ]).pipe(
-    //   map(([files, searchTerm, sort]) => {
-    //     console.log(files)
-    //     const normalizedSearch = searchTerm.toLowerCase();
-    //     const sortValue = sort.value;
-    //     let sortPerdicate;
-    //     if (sortValue === 'nameAsc') {
-    //       sortPerdicate = (fileA, fileB) => {
-    //         const a = fileA.name.toLowerCase();
-    //         const b = fileB.name.toLowerCase();
-    //         if (a < b) {
-    //           return -1;
-    //         }
-    //         if (a > b) {
-    //           return 1;
-    //         }
-    //         return 0;
-    //       }
-    //     }
-    //     if (sortValue === 'nameDesc') {
-    //       sortPerdicate = (fileA, fileB) => {
-    //         const a = fileA.name.toLowerCase();
-    //         const b = fileB.name.toLowerCase();
-    //         if (a > b) {
-    //           return -1;
-    //         }
-    //         if (a < b) {
-    //           return 1;
-    //         }
-    //         return 0;
-    //       }
-    //     }
-    //     if (sortValue === 'dateOld') {
-    //       sortPerdicate = (fileA, fileB) => (+fileA.info.birthtime as any) - (+fileB.info.birthtime as any)
-    //     }
-    //     if (sortValue === 'dateNew') {
-    //       sortPerdicate = (fileA, fileB) => (+fileB.info.birthtime as any) - (+fileA.info.birthtime as any)
-    //     }
-    //     if (sortValue === 'noAsc') {
-    //       sortPerdicate = (fileA, fileB) => (+fileB.info.birthtime as any) - (+fileA.info.birthtime as any)
-    //     }
-    //     if (sortValue === 'noDesc') {
-    //       sortPerdicate = (fileA, fileB) => (+fileB.info.birthtime as any) - (+fileA.info.birthtime as any)
-    //     }
-    //     return files.filter(file => file.name.toLowerCase().includes(normalizedSearch)).sort(sortPerdicate)
-
-
-
-    //   })
-    // )
-
+    
 
 this.filteredFiles$ = combineLatest([
   this.files$,
@@ -259,9 +220,56 @@ this.sendStatus$.subscribe(statusMap => {
 
 
 
+  // 2️⃣ subscribe to file list
+  this.files$.subscribe(files => {
+
+    if (!files || !files.length) return;
+
+    console.log('📂 TOTAL FILES:', files.length);
+
+    // 3️⃣ loop all files
+    files.forEach(file => {
+
+      console.log('🟡 FILE NAME:', file.name);
+
+     ipcRenderer.invoke('get-ascii-data', file.path)
+  .then((data: any) => {
+
+    const headers = data?.headers || [];
+
+    const heatNo   = headers.find(h => h.name === 'Heat No')?.value;
+    const stage    = headers.find(h => h.name === 'Stage')?.value;
+    const partName = headers.find(h => h.name === 'Part Name')?.value;
+
+    // 🔥 THIS WAS MISSING
+    this.fileMetaMap[file.path] = {
+      heatNo,
+      stage,
+      partName
+    };
+
+    console.log('✅ META SET FOR:', file.name, this.fileMetaMap[file.path]);
+
+    this.cdr.markForCheck(); // OnPush refresh
+  })
+  .catch(err => {
+    console.error('❌ Error reading', file.name, err);
+  });
+
+
+    });
+
+  });
+
 
 
   }
+
+
+  getFileMeta(file: AcFile) {
+  return this.fileMetaMap[file.path];
+}
+
 
   ngOnDestroy(): void {
     if (this.reloadFilesListener) {

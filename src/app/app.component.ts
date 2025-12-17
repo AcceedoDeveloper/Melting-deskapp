@@ -232,5 +232,13 @@ selectedFileFormat$: Observable<
     .replace(/\/$/, '');          // remove ending /
 }
 
+  home(){
+    this.router.navigate(['/home']);
+  }
+
+  calendar(){
+    this.router.navigate(['/calendar']);
+  }
+
 
 }
