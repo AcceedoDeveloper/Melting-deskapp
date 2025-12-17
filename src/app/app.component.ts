@@ -78,7 +78,6 @@ selectedFileFormat$: Observable<
     this.app.setMode(mode);
   });
 
-    // Subscribe to selected port changes and start/stop listening
     const portSub = this.selectedPortInfo$.subscribe(port => {
       if (this.electronService.isElectron) {
         if (port && port.path) {
@@ -148,7 +147,7 @@ selectedFileFormat$: Observable<
   const directoryPath = this.fileService.getSearchDirectory();
   if (!directoryPath) return;
 
-  const maxFiles = this.app.getAutoDetectFilesValue(); // 🔥 dynamic
+  const maxFiles = this.app.getAutoDetectFilesValue(); 
 
   this.fileService.cleanDirectory(directoryPath, maxFiles);
 }
@@ -217,17 +216,14 @@ selectedFileFormat$: Observable<
   }
 
   ngOnDestroy(): void {
-    // Clean up subscriptions
     this.subscriptions.forEach(sub => sub.unsubscribe());
     
-    // Stop serial listener
     if (this.electronService.isElectron) {
       const ipc = this.electronService.ipcRenderer;
       ipc.invoke('stop-serial-listener').then(result => {
         console.log('Serial listener stopped');
       });
       
-      // Remove IPC listeners
       ipc.removeAllListeners('serial-data-received');
       ipc.removeAllListeners('serial-data-error');
       ipc.removeAllListeners('serial-port-closed');
@@ -238,8 +234,8 @@ selectedFileFormat$: Observable<
   if (!ip) return '';
 
   return ip
-    .replace(/^https?:\/\//, '')  // remove http:// or https://
-    .replace(/\/$/, '');          // remove ending /
+    .replace(/^https?:\/\//, '') 
+    .replace(/\/$/, '');          
 }
 
   home(){

@@ -215,10 +215,8 @@ onAutoDetectFilesChange(event: Event) {
   if (!isNaN(value) && value > 0) {
     this.autoDetectValue = value;
 
-    // 🔥 store globally
     this.app.setAutoDetectFiles(value);
 
-    // optional persistence
     localStorage.setItem('autoDetectFiles', value.toString());
 
     this.isAutoDetectSaved = true;
@@ -238,10 +236,8 @@ autosentfile(event: Event) {
 
   this.autosent = checked;
 
-  // 🔥 tell app: auto-send ON / OFF
   this.app.setAutoSend(checked);
 
-  // optional persistence
   localStorage.setItem('autoSend', String(checked));
 }
 
@@ -250,17 +246,14 @@ autosentfile(event: Event) {
   const checked = (event.target as HTMLInputElement).checked;
   this.theme = checked ? 'dark' : 'light';
 
-  // localStorage.setItem('theme', this.theme);
-  // this.applyTheme(this.theme);
+
 }
 
 onFormatChange(format: 'XML' | 'TXT' | 'BAK') {
   this.selectedFormat = format;
 
-  // ✅ SEND TO SERVICE
   this.app.setSelectedFileFormat(format);
 
-  // optional persistence
   localStorage.setItem('selectedFormat', format);
 }
 
@@ -283,7 +276,6 @@ onFormatChange(format: 'XML' | 'TXT' | 'BAK') {
 
 onConnectIP() {
 
-  // 🔌 DISCONNECT
   if (this.isIpConnected) {
     this.app.setSelectedIPAddress(null);
     this.ipAddressCtrl.reset();
@@ -294,17 +286,14 @@ onConnectIP() {
   let rawIp = this.ipAddressCtrl.value?.trim();
   if (!rawIp) return;
 
-  // ✅ ADD http:// if missing
   if (!rawIp.startsWith('http://') && !rawIp.startsWith('https://')) {
     rawIp = 'http://' + rawIp;
   }
 
-  // ✅ ADD trailing slash if missing
   if (!rawIp.endsWith('/')) {
     rawIp = rawIp + '/';
   }
 
-  // 🔥 FINAL NORMALIZED IP
   console.log('Final IP:', rawIp);
 
   this.app.setSelectedIPAddress(rawIp);
@@ -320,10 +309,8 @@ onFormatSelect(event: Event) {
 
   this.selectedFormat = value;
 
-  // 🔥 send to AppService
   this.app.setSelectedFileFormat(value);
 
-  // optional persistence
   localStorage.setItem('selectedFormat', value);
 }
 
@@ -338,8 +325,8 @@ get displayIp(): string {
   if (!ip) return '';
 
   return ip
-    .replace(/^https?:\/\//, '')  // remove http:// or https://
-    .replace(/\/$/, '');          // remove trailing /
+    .replace(/^https?:\/\//, '')  
+    .replace(/\/$/, '');          
 }
 
 

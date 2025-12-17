@@ -59,7 +59,6 @@ generateCalendar() {
 
   this.calendarDays = [];
 
-  // empty cells
   for (let i = 0; i < firstDay; i++) {
     this.calendarDays.push({ currentMonth: false });
   }
@@ -109,7 +108,7 @@ prevMonth() {
   }
 
   this.generateCalendar();
-  this.loadCalendarData(); // 🔥
+  this.loadCalendarData(); 
 }
 
 nextMonth() {
@@ -121,7 +120,7 @@ nextMonth() {
   }
 
   this.generateCalendar();
-  this.loadCalendarData(); // 🔥
+  this.loadCalendarData(); 
 }
 
 
@@ -160,7 +159,6 @@ loadCalendarData() {
     })
     .then(res => {
 
-      // 🔥 IMPORTANT: Electron → Angular zone
       this.zone.run(() => {
 
         if (!res || !res.success) {
@@ -168,57 +166,44 @@ loadCalendarData() {
           return;
         }
 
-        // 🔄 RESET OLD DATA
         this.dateCountMap = {};
         this.dateFurnaceMap = {};
         this.allLogs = [];
 
-        // 📦 EXTRACT LOGS
         const logs = res.data?.data || [];
         console.log('RETRIEVED LOGS:', logs);
 
         this.allLogs = logs;
 
-        // 🔁 PROCESS EACH LOG
         logs.forEach(item => {
 
-          // 📅 DATE KEY (yyyy-mm-dd)
           const d = new Date(item.createdAt);
           const dateKey =
             d.getFullYear() + '-' +
             String(d.getMonth() + 1).padStart(2, '0') + '-' +
             String(d.getDate()).padStart(2, '0');
 
-          // 🔢 TOTAL COUNT PER DAY
           this.dateCountMap[dateKey] =
             (this.dateCountMap[dateKey] || 0) + 1;
 
-          // 🔥 FURNACE NAME
           const furnaceName = item.furnace?.name || 'Unknown Furnace';
 
-          // 🏗 INIT DATE MAP IF NEEDED
           if (!this.dateFurnaceMap[dateKey]) {
             this.dateFurnaceMap[dateKey] = {};
           }
 
-          // 🔥 FURNACE-WISE COUNT
           this.dateFurnaceMap[dateKey][furnaceName] =
             (this.dateFurnaceMap[dateKey][furnaceName] || 0) + 1;
         });
 
-        // 🧪 DEBUG LOGS
-        console.log('FINAL DATE COUNT MAP:', this.dateCountMap);
-        console.log('FINAL DATE → FURNACE MAP:', this.dateFurnaceMap);
 
-        // 🔄 REBUILD CALENDAR WITH NEW DATA
         this.generateCalendar();
 
-        // 🔥 FORCE UI UPDATE (Electron fix)
         this.cdr.detectChanges();
       });
     })
     .catch(err => {
-      console.error('❌ IPC Error:', err);
+      console.error('Error:', err);
     });
 }
 

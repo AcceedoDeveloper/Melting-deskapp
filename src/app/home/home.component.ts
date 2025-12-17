@@ -110,7 +110,6 @@ if (!formatMap[format]?.includes(ext)) return;
     });
   });
 
-  // 🔥 IMPORTANT: clear after handling
   this.fileService.clearNewFiles();
 
 });
@@ -220,17 +219,13 @@ this.sendStatus$.subscribe(statusMap => {
 
 
 
-  // 2️⃣ subscribe to file list
   this.files$.subscribe(files => {
 
     if (!files || !files.length) return;
 
-    console.log('📂 TOTAL FILES:', files.length);
 
-    // 3️⃣ loop all files
     files.forEach(file => {
 
-      console.log('🟡 FILE NAME:', file.name);
 
      ipcRenderer.invoke('get-ascii-data', file.path)
   .then((data: any) => {
@@ -241,19 +236,17 @@ this.sendStatus$.subscribe(statusMap => {
     const stage    = headers.find(h => h.name === 'Stage')?.value;
     const partName = headers.find(h => h.name === 'Part Name')?.value;
 
-    // 🔥 THIS WAS MISSING
     this.fileMetaMap[file.path] = {
       heatNo,
       stage,
       partName
     };
 
-    console.log('✅ META SET FOR:', file.name, this.fileMetaMap[file.path]);
 
-    this.cdr.markForCheck(); // OnPush refresh
+    this.cdr.markForCheck(); 
   })
   .catch(err => {
-    console.error('❌ Error reading', file.name, err);
+    console.error(' Error reading', file.name, err);
   });
 
 
@@ -295,7 +288,6 @@ this.sendStatus$.subscribe(statusMap => {
         this.filesLoading = false
       })
     ).subscribe(() => {
-      // store the directory value in localstorage, and hide the directory search
       this.showSearchDirectory = false;
       this.fileService.setSearchDirectory(this.directoryCtrl.value);
       localStorage.setItem('ac-directory', this.directoryCtrl.value)

@@ -360,24 +360,20 @@ ipcMain.handle(
   async (e, { baseUrl, start, end }) => {
     try {
 
-      // 🔥 1. Validate baseUrl
       if (!baseUrl || baseUrl.trim() === '') {
         throw new Error('Base URL is empty');
       }
 
-      // 🔥 2. Normalize baseUrl
       if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
         baseUrl = 'http://' + baseUrl;
       }
 
-      // 🔥 3. Build URL safely
       const apiUrl = new URL('/spectrumLogs/', baseUrl);
       apiUrl.searchParams.set('start', start);
       apiUrl.searchParams.set('end', end);
 
-      console.log('📅 Calendar API URL:', apiUrl.toString());
+      console.log(' Calendar API URL:', apiUrl.toString());
 
-      // 🔥 4. Call API
       const response = await fetch(apiUrl.toString(), {
         method: 'GET'
       });
@@ -390,7 +386,7 @@ ipcMain.handle(
       };
 
     } catch (err) {
-      console.error('❌ Calendar API Error:', err.message);
+      console.error('Calendar API Error:', err.message);
 
       return {
         success: false,
