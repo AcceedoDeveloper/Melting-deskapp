@@ -55,6 +55,14 @@
     {{ day.count }}
   </span>
 
+  <div class="furnace-summary" *ngIf="day.furnaceSummary">
+  <div
+    class="furnace-line"
+    *ngFor="let f of day.furnaceSummary | keyvalue">
+    {{ f.key }} - {{ f.value }}
+  </div>
+</div>
+
     </div>
   </div>
 </div>

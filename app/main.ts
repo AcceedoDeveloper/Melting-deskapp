@@ -113,17 +113,13 @@ ipcMain.handle('directory-cleanup', async (e, args) => {
   try {
     const { directoryPath, maxFiles } = args;
 
-    console.log('📂 Cleanup directory:', directoryPath);
-    console.log('📦 Keep latest files:', maxFiles);
 
     const files = await getFiles(directoryPath, () => true) as any[];
 
-    // sort newest → oldest
     const sortedFiles = files.sort(
       (a, b) => (+b.info.birthtime as any) - (+a.info.birthtime as any)
     );
 
-    // 🔥 dynamic slice
     const keepCount = Number(maxFiles) || 5;
     const deletableFiles = sortedFiles.slice(keepCount);
 
@@ -131,10 +127,9 @@ ipcMain.handle('directory-cleanup', async (e, args) => {
       try {
         if (await checkFileExists(file.path)) {
           await deleteFile(file.path);
-          console.log('🗑 Deleted:', file.name);
         }
       } catch (err) {
-        console.log('❌ Cannot delete:', file.name);
+        console.log( file.name);
       }
     }
 
@@ -223,18 +218,15 @@ ipcMain.handle('send-data-serial-port-com', async (e, path, data) => {
 
 ipcMain.handle('send-data-ip', async (e, ip, data) => {
   try {
-    // 1. Normalize base IP
     if (!ip.startsWith('http://') && !ip.startsWith('https://')) {
       ip = 'http://' + ip;
     }
 
-    // 2. Build URL safely
     const url = new URL('/spectrumResult', ip);
     url.searchParams.set('d', data);
 
     console.log('Final URL:', url.toString());
 
-    // 3. Send request
     const response = await fetch(url.toString(), {
       method: 'GET'
     });
