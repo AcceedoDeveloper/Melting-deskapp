@@ -82,26 +82,71 @@ ipcMain.handle('file-list', async (e, args) => {
   }
 });
 
+
+
+
+// ipcMain.handle('directory-cleanup', async (e, args) => {
+//   const directoryPath = args;
+//   console.log('directory clean', directoryPath)
+//   try {
+//     const files = await getFiles(directoryPath, () => true) as any[];
+//     const sortedFiles = files.sort((fileA, fileB) => (+fileB.info.birthtime as any) - (+fileA.info.birthtime as any))
+//     const deletableFiles = sortedFiles.slice(5, files.length)
+//     for (const file of deletableFiles) {
+//       try {
+//         if (await checkFileExists(file.path)) {
+//           await deleteFile(file.path)
+//         }
+//       } catch (error) {
+//         console.log(file.name, 'cannot be deleted')
+//       }
+//     }
+//   } catch (error) {
+//     console.log(error)
+//   }
+// });
+
+
+
+
 ipcMain.handle('directory-cleanup', async (e, args) => {
-  const directoryPath = args;
-  console.log('directory clean', directoryPath)
   try {
+    const { directoryPath, maxFiles } = args;
+
+    console.log('📂 Cleanup directory:', directoryPath);
+    console.log('📦 Keep latest files:', maxFiles);
+
     const files = await getFiles(directoryPath, () => true) as any[];
-    const sortedFiles = files.sort((fileA, fileB) => (+fileB.info.birthtime as any) - (+fileA.info.birthtime as any))
-    const deletableFiles = sortedFiles.slice(5, files.length)
+
+    // sort newest → oldest
+    const sortedFiles = files.sort(
+      (a, b) => (+b.info.birthtime as any) - (+a.info.birthtime as any)
+    );
+
+    // 🔥 dynamic slice
+    const keepCount = Number(maxFiles) || 5;
+    const deletableFiles = sortedFiles.slice(keepCount);
+
     for (const file of deletableFiles) {
       try {
         if (await checkFileExists(file.path)) {
-          await deleteFile(file.path)
+          await deleteFile(file.path);
+          console.log('🗑 Deleted:', file.name);
         }
-      } catch (error) {
-        console.log(file.name, 'cannot be deleted')
+      } catch (err) {
+        console.log('❌ Cannot delete:', file.name);
       }
     }
+
+    return { success: true };
+
   } catch (error) {
-    console.log(error)
+    console.error('❌ Directory cleanup error:', error);
+    return { success: false, error: error.message };
   }
 });
+
+
 
 ipcMain.on('watch-dir', async (e, args) => {
   const directoryPath = args;

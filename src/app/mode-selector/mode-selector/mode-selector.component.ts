@@ -212,11 +212,19 @@ this.app.getAutoDetectFilesObs().subscribe(value => {
 onAutoDetectFilesChange(event: Event) {
   const value = Number((event.target as HTMLInputElement).value);
 
-  if (!isNaN(value)) {
-    this.app.setAutoDetectFiles(value);   
-    this.isAutoDetectSaved = true;        
+  if (!isNaN(value) && value > 0) {
+    this.autoDetectValue = value;
+
+    // 🔥 store globally
+    this.app.setAutoDetectFiles(value);
+
+    // optional persistence
+    localStorage.setItem('autoDetectFiles', value.toString());
+
+    this.isAutoDetectSaved = true;
   }
 }
+
 
 
   saveAutoDetectValue(value: number) {

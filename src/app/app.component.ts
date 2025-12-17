@@ -135,14 +135,24 @@ selectedFileFormat$: Observable<
     this.loadPorts();
   }
 
-  cleanUpDirectory() { 
+  // cleanUpDirectory() { 
     // cleanup directory
-    const directoryPath = this.fileService.getSearchDirectory()
+  //   const directoryPath = this.fileService.getSearchDirectory()
 
-    if (directoryPath) {
-      this.fileService.cleanDirectory(directoryPath)
-    }
-  }
+  //   if (directoryPath) {
+  //     this.fileService.cleanDirectory(directoryPath)
+  //   }
+  // }
+
+  cleanUpDirectory() {
+  const directoryPath = this.fileService.getSearchDirectory();
+  if (!directoryPath) return;
+
+  const maxFiles = this.app.getAutoDetectFilesValue(); // 🔥 dynamic
+
+  this.fileService.cleanDirectory(directoryPath, maxFiles);
+}
+
 
   loadPorts() {
     this._serialPort.getSerialPorts().subscribe(ports => {

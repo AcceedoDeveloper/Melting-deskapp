@@ -77,20 +77,36 @@
     opened
     class="side-nav">
 
-    <div class="nav-item active" (click)="home()">  
-      <img src="./assets/icons/home-button.png" />
-      <span class="nav-text">Home</span>
-    </div>
 
-    <div class="nav-item" (click)="settings()">
-      <img src="./assets/icons/settings.png" />
-      <span class="nav-text">settings</span>
-    </div>
 
-    <div class="nav-item" (click)="calendar()">
-      <img src="./assets/icons/calendar.png" />
-      <span class="nav-text">calendar</span>
-    </div>
+    <div
+  class="nav-item"
+  routerLink="/home"
+  routerLinkActive="active"
+  [routerLinkActiveOptions]="{ exact: true }">
+
+  <img src="./assets/icons/home-button.png" />
+  <span class="nav-text">Home</span>
+</div>
+
+<div
+  class="nav-item"
+  routerLink="/settings"
+  routerLinkActive="active">
+
+  <img src="./assets/icons/settings.png" />
+  <span class="nav-text">Settings</span>
+</div>
+
+<div
+  class="nav-item"
+  routerLink="/calendar"
+  routerLinkActive="active">
+
+  <img src="./assets/icons/calendar.png" />
+  <span class="nav-text">Calendar</span>
+</div>
+
 
   </mat-sidenav>
 

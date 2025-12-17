@@ -28,7 +28,7 @@ export class AppService {
     selectedIP$ = new BehaviorSubject<string>(null);
     mode$ = new BehaviorSubject<'serial' | 'ip'>('serial');
     serialDataReceived$ = new BehaviorSubject<string>('');
-    autoDetectFiles$ = new BehaviorSubject<number | null>(null);
+private autoDetectFiles$ = new BehaviorSubject<number>(5); 
     selectedFileFormat$ = new BehaviorSubject<
   'XML' | 'TXT' | 'BAK' | null
 >(null);
@@ -193,14 +193,14 @@ getSerialDataReceived() {
 
 
 // setter
-setAutoDetectFiles(value: number) {
-  this.autoDetectFiles$.next(value);
-}
+// setAutoDetectFiles(value: number) {
+//   this.autoDetectFiles$.next(value);
+// }
 
 // observable
-getAutoDetectFilesObs() {
-  return this.autoDetectFiles$.asObservable();
-}
+// getAutoDetectFilesObs() {
+//   return this.autoDetectFiles$.asObservable();
+// }
 
 // sync getter (if needed)
 getAutoDetectFiles() {
@@ -248,6 +248,19 @@ setFileStatus(fileName: string, status: string) {
 
 private normalize(name: string) {
   return name.toLowerCase().replace(/\s+/g, '').replace(/-/g, '');
+}
+
+
+setAutoDetectFiles(value: number) {
+  this.autoDetectFiles$.next(value);
+}
+
+getAutoDetectFilesObs(): Observable<number> {
+  return this.autoDetectFiles$.asObservable();
+}
+
+getAutoDetectFilesValue(): number {
+  return this.autoDetectFiles$.value;
 }
 
 

@@ -73,9 +73,13 @@ export class FileListService {
         )
     }
 
-    cleanDirectory(directoryPath) {
-        return ipcRenderer.invoke('directory-cleanup', directoryPath)
-    }
+   cleanDirectory(directoryPath: string, maxFiles: number) {
+  return ipcRenderer.invoke('directory-cleanup', {
+    directoryPath,
+    maxFiles
+  });
+}
+
 
     setWatcher(directoryPath) {
         return new Observable<AcFile[]>((observer) => {
