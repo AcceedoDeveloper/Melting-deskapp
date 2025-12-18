@@ -114,14 +114,37 @@
 
         <label>Show last files</label>
 
-        <input
+         <div class="auto-detect-row">
+                  <input
           type="number"
           [value]="autoDetectValue"
           (change)="onAutoDetectFilesChange($event)" />
 
+
+<button
+  class="save-btn"
+  *ngIf="showSaveIcon"
+  title="Save"
+  (click)="onSaveAutoDetectClick()"
+>
+  <img src="assets/icons/save.png" alt="Save" />
+</button>
+
+
+    
+
+    
+
+         </div>
+
+
+
      
 
       </div>
+
+
+
 
        <div class="auto-detect-box toggle-box">
 
@@ -161,26 +184,24 @@
     
 <div class="spectrom-row">
 
-  <!-- MACHINE TYPE (UI ONLY) -->
   <div class="input-group spectrom-select">
     <label>Machine Type</label>
-
-    <select class="custom-select">
-      <option value="" disabled selected>Select machine</option>
-      <option>Amtex Dia</option>
-      <option>Amtex New</option>
+    <select
+      class="custom-select"
+      [value]="pendingMachineType ?? selectedMachineType"
+      (change)="onSpectromChange('machine', $event)">
+      <option value="" disabled>Select machine</option>
+      <option value="Amtex Dia">Amtex Dia</option>
+      <option value="Amtex New">Amtex New</option>
     </select>
   </div>
 
-  <!-- FILE TYPE -->
   <div class="input-group spectrom-select">
     <label>File Type</label>
-
     <select
       class="custom-select"
-      [value]="selectedFormat"
-      (change)="onFormatSelect($event)"
-    >
+      [value]="pendingFileType ?? selectedFormat"
+      (change)="onSpectromChange('format', $event)">
       <option value="" disabled>Select file type</option>
       <option value="XML">XML</option>
       <option value="TXT">TXT</option>
@@ -188,7 +209,17 @@
     </select>
   </div>
 
+  <!-- SAVE ICON -->
+  <button
+    class="save-btn2"
+    *ngIf="showSpectromSave"
+    title="Save"
+    (click)="onSaveSpectromClick()">
+    <img src="assets/icons/save.png" alt="Save" />
+  </button>
+
 </div>
+
 
 
 
@@ -284,4 +315,40 @@
 
 
 
+</div>
+
+
+<!-- CONFIRM SAVE POPUP -->
+<div class="confirm-overlay" *ngIf="showConfirmPopup">
+  <div class="confirm-box">
+    <h4>Confirm Save</h4>
+    <p>Do you want to save this value?</p>
+
+    <div class="confirm-actions">
+      <button class="btn cancel" (click)="cancelSaveAutoDetect()">
+        Cancel
+      </button>
+      <button class="btn confirm" (click)="confirmSaveAutoDetect()">
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="confirm-overlay" *ngIf="showSpectromConfirm">
+  <div class="confirm-box">
+    <h4>Confirm Save</h4>
+    <p>Do you want to save Spectrom settings?</p>
+
+    <div class="confirm-actions">
+      <button class="btn cancel" (click)="cancelSpectromSave()">
+        Cancel
+      </button>
+      <button class="btn confirm" (click)="confirmSpectromSave()">
+        Save
+      </button>
+    </div>
+  </div>
 </div>

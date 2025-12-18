@@ -21,7 +21,23 @@ export class ModeSelectorComponent implements OnInit {
   loginPassCtrl = new FormControl('');
   isLoggedIn = false;
   loginError = '';
-    errMsg = '';
+  errMsg = '';
+  lastEnteredIp = '';
+  selectedMachineType = '';
+
+  showSaveIcon = false;
+pendingAutoDetectValue: number | null = null;
+showConfirmPopup = false;
+// Spectrom save flow
+showSpectromSave = false;
+showSpectromConfirm = false;
+
+pendingMachineType: string | null = null;
+pendingFileType: 'XML' | 'TXT' | 'BAK' | null = null;
+
+
+
+
 
     filesLoading = false;
     showSearchDirectory = false;
@@ -53,6 +69,22 @@ modeCtrl = new FormControl('ip');
   ) {}
 
   ngOnInit(): void {
+
+
+    const savedMachine = localStorage.getItem('selectedMachineType');
+if (savedMachine) {
+  this.selectedMachineType = savedMachine;
+}
+
+
+
+
+    const savedLastIp = localStorage.getItem('lastEnteredIp');
+if (savedLastIp) {
+  this.lastEnteredIp = savedLastIp;
+  this.ipAddressCtrl.setValue(savedLastIp);
+}
+
 
 
 this.app.getModeObs().subscribe(mode => {
@@ -213,15 +245,43 @@ onAutoDetectFilesChange(event: Event) {
   const value = Number((event.target as HTMLInputElement).value);
 
   if (!isNaN(value) && value > 0) {
-    this.autoDetectValue = value;
+    this.pendingAutoDetectValue = value;
 
-    this.app.setAutoDetectFiles(value);
-
-    localStorage.setItem('autoDetectFiles', value.toString());
-
-    this.isAutoDetectSaved = true;
+    this.showSaveIcon = true;
   }
 }
+
+
+onSaveAutoDetectClick() {
+  if (this.pendingAutoDetectValue == null) return;
+  this.showConfirmPopup = true;
+}
+
+
+confirmSaveAutoDetect() {
+  if (this.pendingAutoDetectValue == null) return;
+
+  // ✅ SAVE HERE
+  this.autoDetectValue = this.pendingAutoDetectValue;
+
+  this.app.setAutoDetectFiles(this.pendingAutoDetectValue);
+  localStorage.setItem(
+    'autoDetectFiles',
+    this.pendingAutoDetectValue.toString()
+  );
+
+  // reset UI state
+  this.showSaveIcon = false;
+  this.showConfirmPopup = false;
+  this.pendingAutoDetectValue = null;
+  this.isAutoDetectSaved = true;
+}
+
+cancelSaveAutoDetect() {
+  this.showConfirmPopup = false;
+  this.pendingAutoDetectValue = null;
+}
+
 
 
 
@@ -257,31 +317,23 @@ onFormatChange(format: 'XML' | 'TXT' | 'BAK') {
   localStorage.setItem('selectedFormat', format);
 }
 
-// onConnectIP() {
 
-//   if (this.isIpConnected) {
-//     this.app.setSelectedIPAddress(null);
-//     this.ipAddressCtrl.reset();
-//     this.isIpConnected = false;
-//     return;
-//   }
-
-//   const ip = this.ipAddressCtrl.value;
-//   if (!ip) return;
-
-//   this.app.setSelectedIPAddress(ip);
-//   this.isIpConnected = true;
-// }
 
 
 onConnectIP() {
 
   if (this.isIpConnected) {
-    this.app.setSelectedIPAddress(null);
-    this.ipAddressCtrl.reset();
-    this.isIpConnected = false;
-    return;
-  }
+  this.lastEnteredIp = this.ipAddressCtrl.value || this.lastEnteredIp;
+  localStorage.setItem('lastEnteredIp', this.lastEnteredIp);
+
+  this.app.setSelectedIPAddress(null);
+  this.isIpConnected = false;
+
+  this.ipAddressCtrl.setValue(this.lastEnteredIp);
+
+  return;
+}
+
 
   let rawIp = this.ipAddressCtrl.value?.trim();
   if (!rawIp) return;
@@ -320,21 +372,118 @@ backTo(){
 }
 
 
-get displayIp(): string {
-  const ip = this.ipAddressCtrl.value;
-  if (!ip) return '';
+// get displayIp(): string {
+//   const ip = this.ipAddressCtrl.value;
+//   if (!ip) return '';
 
-  return ip
-    .replace(/^https?:\/\//, '')  
-    .replace(/\/$/, '');          
+//   return ip
+//     .replace(/^https?:\/\//, '')  
+//     .replace(/\/$/, '');          
+// }
+
+
+// get displayIp(): string {
+//   if (this.isIpConnected && this.ipAddressCtrl.value) {
+//     return this.ipAddressCtrl.value
+//       .replace(/^https?:\/\//, '')
+//       .replace(/\/$/, '');
+//   }
+
+//   return this.lastEnteredIp
+//     .replace(/^https?:\/\//, '')
+//     .replace(/\/$/, '');
+// }
+
+
+get displayIp(): string {
+  const raw =
+    this.isIpConnected
+      ? this.ipAddressCtrl.value
+      : this.lastEnteredIp;
+
+  if (!raw) return '';
+
+  return raw
+    .replace(/^https?:\/\//, '')
+    .replace(/\/$/, '');
 }
+
+
 
 
 onIpInput(event: Event) {
-  this.ipAddressCtrl.setValue(
-    (event.target as HTMLInputElement).value
-  );
+  const value = (event.target as HTMLInputElement).value;
+
+  this.ipAddressCtrl.setValue(value);
+  this.lastEnteredIp = value;   
+
+  localStorage.setItem('lastEnteredIp', value);
 }
+
+
+onMachineTypeChange(event: Event) {
+  const value = (event.target as HTMLSelectElement).value;
+  this.selectedMachineType = value;
+  localStorage.setItem('selectedMachineType', value);
+
+}
+
+onSpectromChange(
+  type: 'machine' | 'format',
+  event: Event
+) {
+  const value = (event.target as HTMLSelectElement).value;
+
+  if (type === 'machine') {
+    this.pendingMachineType = value;
+  }
+
+  if (type === 'format') {
+    this.pendingFileType = value as any;
+  }
+
+  this.showSpectromSave = true;
+}
+
+
+onSaveSpectromClick() {
+  this.showSpectromConfirm = true;
+}
+
+
+
+confirmSpectromSave() {
+
+  if (this.pendingMachineType !== null) {
+    this.selectedMachineType = this.pendingMachineType;
+    localStorage.setItem(
+      'selectedMachineType',
+      this.pendingMachineType
+    );
+  }
+
+  if (this.pendingFileType !== null) {
+    this.selectedFormat = this.pendingFileType;
+    this.app.setSelectedFileFormat(this.pendingFileType);
+    localStorage.setItem(
+      'selectedFormat',
+      this.pendingFileType
+    );
+  }
+
+  // reset state
+  this.pendingMachineType = null;
+  this.pendingFileType = null;
+  this.showSpectromSave = false;
+  this.showSpectromConfirm = false;
+}
+
+cancelSpectromSave() {
+  this.showSpectromConfirm = false;
+  this.pendingMachineType = null;
+  this.pendingFileType = null;
+}
+
 
 
 }

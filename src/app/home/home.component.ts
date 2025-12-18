@@ -27,12 +27,19 @@ status$ = new BehaviorSubject<string>('all');
 sendStatus$ = this.app.fileStatus$;
 statusMap: { [key: string]: string } = {};
 selectedFileFormat$ = this.app.getSelectedFileFormatObs();
+selectedFurnace$ = new BehaviorSubject<string>('all');
+furnaceOptions$: Observable<string[]>;
+private fileMetaChanged$ = new BehaviorSubject<void>(undefined);
+
+
+
 
 fileMetaMap: {
   [filePath: string]: {
     heatNo?: string;
     stage?: string;
     partName?: string;
+    grade? : string;
   }
 } = {};
 
@@ -70,6 +77,7 @@ statusInfo = {
   ) { }
 
   ngOnInit(): void {
+
 
 
 
@@ -149,9 +157,10 @@ this.filteredFiles$ = combineLatest([
   this.activeSort$,
   this.selectedDate$,
   this.status$,
-  this.selectedFileFormat$
+  this.selectedFileFormat$,
+  this.selectedFurnace$
 ]).pipe(
-  map(([files, searchTerm, sort, selectedDate, activeStatus, selectedFormat]) => {
+  map(([files, searchTerm, sort, selectedDate, activeStatus, selectedFormat,  selectedFurnace]) => {
     const normalizedSearch = searchTerm.toLowerCase();
     const sortValue = sort.value;
 
@@ -188,6 +197,15 @@ if (activeStatus !== 'all') {
     return status === activeStatus;
   });
 }
+
+if (selectedFurnace !== 'all') {
+  filtered = filtered.filter(file => {
+    const meta = this.fileMetaMap[file.path];
+    const furnaceKey = this.getFurnaceKey(meta?.stage);
+    return `Furnace ${furnaceKey}` === selectedFurnace;
+  });
+}
+
 
 
 if (selectedFormat) {
@@ -231,18 +249,21 @@ this.sendStatus$.subscribe(statusMap => {
   .then((data: any) => {
 
     const headers = data?.headers || [];
+    console.log('HEADERS FOR', file.name, headers);
 
     const heatNo   = headers.find(h => h.name === 'Heat No')?.value;
     const stage    = headers.find(h => h.name === 'Stage')?.value;
     const partName = headers.find(h => h.name === 'Part Name')?.value;
+    const grade    = headers.find(h => h.name === 'Grade')?.value;
 
     this.fileMetaMap[file.path] = {
       heatNo,
       stage,
-      partName
+      partName,
+      grade
     };
 
-
+    this.fileMetaChanged$.next();
     this.cdr.markForCheck(); 
   })
   .catch(err => {
@@ -254,6 +275,24 @@ this.sendStatus$.subscribe(statusMap => {
 
   });
 
+this.furnaceOptions$ = combineLatest([
+  this.files$,
+  this.fileMetaChanged$
+]).pipe(
+  map(([files]) => {
+    const set = new Set<string>();
+
+    files.forEach(file => {
+      const meta = this.fileMetaMap[file.path];
+      const furnaceKey = this.getFurnaceKey(meta?.stage);
+      if (furnaceKey) {
+        set.add(`Furnace ${furnaceKey}`);
+      }
+    });
+
+    return Array.from(set).sort();
+  })
+);
 
 
   }
@@ -262,6 +301,26 @@ this.sendStatus$.subscribe(statusMap => {
   getFileMeta(file: AcFile) {
   return this.fileMetaMap[file.path];
 }
+
+formatFurnaceName(stage: string): string {
+  if (!stage) return '';
+
+  const match = stage.match(/^([A-Z])/i);
+
+  if (!match) return stage;
+
+  const furnaceLetter = match[1].toUpperCase();
+
+  return `Furnace ${furnaceLetter}`;
+}
+
+getFurnaceKey(stage?: string): string {
+  if (!stage) return '';
+  const match = stage.match(/^([A-Z])/i);
+  return match ? match[1].toUpperCase() : '';
+}
+
+
 
 
   ngOnDestroy(): void {
@@ -388,6 +447,11 @@ getFileStatus() {
     this.statusMap = v;       
     console.log("Mapped:", this.statusMap);
   });
+}
+
+
+setFurnace(furnace: string) {
+  this.selectedFurnace$.next(furnace);
 }
 
 

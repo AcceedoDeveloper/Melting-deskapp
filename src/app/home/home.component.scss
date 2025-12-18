@@ -306,10 +306,11 @@
 /* GRID */
 .files {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, 280px);
   gap: 18px;
-  padding: 16px;
+  justify-content: flex-start; /* VERY IMPORTANT */
 }
+
 
 /* FILE CARD */
 .file-container {
@@ -330,7 +331,8 @@
 
 /* FILE NAME */
 .file-name {
-  font-size: 13px;
+  display: flex;
+  font-size: 20px;
   font-weight: 600;
   text-align: center;
   margin-bottom: 6px;
@@ -339,6 +341,7 @@
 
 /* DATE */
 .file-date {
+  display: flex;
   font-size: 11px;
   opacity: 0.6;
   text-align: center;
@@ -347,7 +350,7 @@
 
 /* META INFO */
 .file-meta {
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.6;
   border-top: 1px solid rgba(255,255,255,0.1);
   padding-top: 8px;
@@ -423,3 +426,39 @@
 }
 
 
+.files > .file-container:only-child {
+  grid-column: 1 / -1;
+  max-width: 100%;
+}
+
+
+
+.view-more{
+      position: relative;
+    bottom: 24px;
+    left: 196px;
+}
+
+.file-container {
+  position: relative; /* REQUIRED */
+}
+
+/* View more link */
+.view-more {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+
+  font-size: 13px;
+  color: #4a90e2;
+  text-decoration: underline;
+  cursor: pointer;
+
+  opacity: 0.9;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.view-more:hover {
+  color: #6aa9ff;
+  opacity: 1;
+}

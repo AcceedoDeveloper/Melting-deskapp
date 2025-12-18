@@ -47,6 +47,34 @@
 
     </div>
 
+
+    <div fxLayoutAlign="center center" fxLayoutGap="10px">
+  <div class="sort-by-chip" [matMenuTriggerFor]="furnaceMenu">
+    <span>
+      {{
+        (selectedFurnace$ | async) === 'all'
+          ? 'All Furnaces'
+          : (selectedFurnace$ | async)
+      }}
+    </span>
+    <i class="arrow"></i>
+  </div>
+
+  <mat-menu #furnaceMenu="matMenu">
+    <button mat-menu-item (click)="setFurnace('all')">
+      All Furnaces
+    </button>
+
+    <button
+      mat-menu-item
+      *ngFor="let f of furnaceOptions$ | async"
+      (click)="setFurnace(f)">
+      {{ f }}
+    </button>
+  </mat-menu>
+</div>
+
+
    <div fxLayoutAlign="center center" fxLayoutGap="10px">
   <div class="sort-by-chip"
        [matMenuTriggerFor]="statusMenu">
@@ -76,7 +104,7 @@
           </div>
             <div class="files"
      *ngIf="files?.length; else noFileFoundTpl"
-     gdColumns="repeat(auto-fit, minmax(150px, 180px))">
+    >
 
   <div
     *ngFor="let file of files; trackBy: trackByFileName"
@@ -88,16 +116,17 @@
 
    
 
-    <div class="file-container">
-  <div class="file-name">{{ file.name }}</div>
+   
+  <div class="file-name" *ngIf="getFileMeta(file) as meta" > {{ formatFurnaceName(meta.stage) }}</div>
   <div class="file-date">{{ file.info?.birthtime | date:'dd/MM/yy, h:mm a' }}</div>
 
   <div class="file-meta" *ngIf="getFileMeta(file) as meta">
-    <div><span>Heat</span> {{ meta.heatNo }}</div>
-    <div><span>Stage</span> {{ meta.stage }}</div>
+    <div><span>Heat No</span> {{ meta.heatNo }}</div>
+    <div><span>Grade</span> {{ meta.grade }}</div>
     <div><span>Part</span> {{ meta.partName }}</div>
+    <!-- <div class="view-more" >View more </div> -->
   </div>
-</div>
+
 
 
     <!-- STATUS -->
@@ -114,6 +143,11 @@
 
     <!-- NEW TAG -->
     <div *ngIf="file.new" class="new-tag">NEW</div>
+
+    <div class="view-more" >
+  View more
+</div>
+
 
   </div>
 </div>
