@@ -1,7 +1,21 @@
 
           
 
+<label class="theme-toggle" *ngIf="isLoggedIn" >
+  <input
+    type="checkbox"
+    [checked]="theme === 'dark'"
+    (change)="toggleTheme($event)"
+  />
+
+  <span class="slider2">
+    <span class="icon sun">☀️</span>
+    <span class="icon moon">🌙</span>
+  </span>
+</label>
 <!-- ================= LOGIN ================= -->
+
+
 <div class="login-box" *ngIf="!isLoggedIn">
 
   <h2 class="login-title">Admin Login</h2>
@@ -24,6 +38,10 @@
 
 <!-- ================= SETTINGS ================= -->
 <div *ngIf="isLoggedIn" class="settings-layout">
+
+
+
+
 
   <!-- ========== COMMUNICATION ========= -->
   <div class="settings-card">
@@ -252,12 +270,15 @@
             class="custom-input" />
 
           <div
-            class="input-addon"
+            class="save-btn2"
             *ngIf="directoryCtrl.value"
             (click)="clearInput(directorSearch, directoryCtrl)">
-            <mat-icon>
-              <img src="./assets/icons/clear_white_24dp.svg" />
-            </mat-icon>
+                    <mat-icon>
+                                                        <img src="./assets/icons/close.png" />
+
+                    </mat-icon>
+
+                   
           </div>
         </div>
 
@@ -268,13 +289,13 @@
           Show Files
         </button>
 
-        <button
+        <button class="save-btn2"
           mat-icon-button
           matTooltip="Hide Directory"
           (click)="onHideDirectoryClick()">
-          <mat-icon>
-            <img src="./assets/icons/hide_image_white_24dp.svg" />
-          </mat-icon>
+            <img src="./assets/icons/hide.png" />
+
+         
         </button>
 
       </ng-container>
@@ -286,21 +307,25 @@
 
         <div class="location-actions">
           <button
+          class="save-btn2" 
             mat-icon-button
             matTooltip="Change Directory"
             (click)="onShowSearchDirectory()">
-            <mat-icon>
-              <img src="./assets/icons/drive_file_rename_outline_white_24dp.svg" />
-            </mat-icon>
+         
+            <img src="./assets/icons/edit.png" />
+         
+              
+           
           </button>
 
           <button
+          class="save-btn2"
             mat-icon-button
             matTooltip="Reload Files"
             (click)="onShowFilesClick(false)">
-            <mat-icon>
-              <img src="./assets/icons/refresh_white_24dp.svg" />
-            </mat-icon>
+           
+              <img src="./assets/icons/refresh.png" />
+            
           </button>
         </div>
 
@@ -352,3 +377,5 @@
     </div>
   </div>
 </div>
+
+

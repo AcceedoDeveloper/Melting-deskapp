@@ -1,39 +1,53 @@
-:host {
-  
+:host {}
+
+/* =========================
+   LAYOUT
+========================= */
+
+.mat-sidenav-container {
+  height: 100vh;
 }
 
-
-
-.mat-sidenav-container{
-    height: 100vh;
-}
-
-.container{
+.container {
   min-height: 100vh;
   background: transparent;
   padding: 25px;
 }
 
+/* =========================
+   HEADER
+========================= */
 
-.app-logo {
-  height: 50px;          
-  width: auto;
-  object-fit: contain;
-  margin-left: 6px;
+.app-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-color);
 }
 
-.notification-icon{
-  height: 24px;
-  width: 24px;
-  object-fit: contain;
-  cursor: pointer;
-  margin-left: 15px;
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-right: 40px;
 }
 
-.offline{
-  margin-right: 4px;
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+.right-section {
+  display: flex;
+  align-items: center;
+}
+
+/* =========================
+   TITLE / TEXT
+========================= */
 
 .title {
   font-family: 'Poppins', 'Segoe UI', Roboto, sans-serif;
@@ -41,29 +55,91 @@
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: capitalize;
-  color: #ffffff;
+  color: var(--text-main);
 }
 
-
-.container{
-    padding: 25px;
+.usage-info {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-main);
 }
 
-.btn-container{
-    height: 40px;
-    width: 40px;
+.usage-none {
+  font-size: 14px;
+  opacity: 0.6;
+  font-style: italic;
+  color: var(--text-muted);
 }
 
-.m-r-10{
-    margin-right: 10px;
+/* =========================
+   ICONS / IMAGES
+========================= */
+
+.app-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  margin-left: 6px;
 }
 
-/* Container adjustment */
+.notification-icon {
+  height: 24px;
+  width: 24px;
+  object-fit: contain;
+  cursor: pointer;
+  margin-left: 15px;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.icon-setting {
+  cursor: pointer;
+  position: relative;
+  bottom: 3px;
+  right: 10px;
+}
+
+/* =========================
+   SETTINGS BUTTON
+========================= */
+
+.settings-btn {
+  padding: 6px 16px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.settings-icon-btn {
+  width: 40px;
+  height: 40px;
+  color: var(--text-main);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.settings-img-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+/* =========================
+   MODE / SERIAL / IP BLOCK
+========================= */
+
 .mode-select {
   width: 220px;
 }
 
-/* Serial / IP block layout */
 .serial-block,
 .ip-block {
   display: flex;
@@ -72,45 +148,37 @@
   gap: 12px;
   padding: 16px 20px;
   border-radius: 10px;
-  background: #1e1e1e;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.08);
-  width: 320px; 
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+  width: 320px;
   margin-top: 10px;
 }
 
-/* Label style */
 .m-r-10 {
   font-size: 14px;
   font-weight: 500;
   margin-bottom: -5px !important;
-  color: #fff;
+  color: var(--text-main);
 }
 
-/* IP input styling */
 .mat-form-field {
   width: 100% !important;
 }
 
-
-/* Serial dropdown styling */
 .mat-select-trigger {
-  color: #fff;
+  color: var(--text-main);
 }
 
-/* Icon button */
 .mat-icon-button {
-position: relative;
-    bottom: 3px;}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .serial-block,
-  .ip-block,
-  .mode-select {
-    width: 95%;
-  }
+  position: relative;
+  bottom: 3px;
 }
-/* ROW CONTAINER */
+
+/* =========================
+   MODE ROW
+========================= */
+
 .mode-row {
   display: flex;
   align-items: center;
@@ -119,12 +187,6 @@ position: relative;
   margin-left: 50%;
 }
 
-/* Mode dropdown width */
-.mode-select {
-  width: 200px;
-}
-
-/* Serial/IP area */
 .mode-content {
   display: flex;
   align-items: center;
@@ -132,7 +194,6 @@ position: relative;
   margin-top: 10px;
 }
 
-/* Fix input/dropdown width */
 .mode-content mat-form-field {
   width: 250px;
 }
@@ -141,113 +202,27 @@ button {
   height: 48px;
 }
 
-/* Mobile responsive */
-@media (max-width: 600px) {
-  .mode-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .mode-content mat-form-field,
-  .mode-select {
-    width: 100%;
-  }
+.connect-button {
+  margin-bottom: 20px;
 }
 
+/* =========================
+   SERIAL DATA DISPLAY
+========================= */
 
-.connect-button{
-margin-bottom: 20px;
-}
-
-/* MAIN HEADER ROW */
-.header-row {
-  display: flex;
-  justify-content: space-between; /* Left and right side alignment */
-  align-items: center;
-  width: 100%;
-  padding-right: 40px;
-}
-
-/* LEFT SIDE TITLE */
-.title-section {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* RIGHT SIDE BUTTON + INFO */
-.right-section {
-  display: flex;
-  align-items: center;
-}
-
-/* Usage message */
-.usage-info {
-  display: flex;
-  gap: 12px;
-  font-size: 14px;
-  color: #fff;
-}
-
-.usage-none {
-  font-size: 14px;
-  opacity: 0.6;
-  font-style: italic;
-  color: #bbb;
-}
-
-/* Settings button style (optional) */
-.settings-btn {
-  padding: 6px 16px;
-  background: #444;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-/* Mobile fix */
-@media (max-width: 600px) {
-  .header-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-}
-
-
-.settings-icon-btn {
-  color: white;
-}
-.settings-img-icon img {
-  width: 24px;           /* Material icon size */
-  height: 24px;
-  object-fit: contain;   /* Prevents distortion */
-  // filter: invert(1);     /* Makes icon white on dark background */
-}
-
-.settings-icon-btn {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Serial Data Display */
 .serial-data-display {
   margin-top: 12px;
   padding: 12px;
-  background: #2a2a2a;
+  background: var(--bg-card);
   border-radius: 6px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
   min-width: 200px;
   max-width: 400px;
 }
 
 .serial-data-label {
   font-size: 12px;
-  color: #aaa;
+  color: var(--text-muted);
   margin-bottom: 6px;
   font-weight: 500;
 }
@@ -261,51 +236,22 @@ margin-bottom: 20px;
   max-height: 150px;
   overflow-y: auto;
   padding: 4px;
-  background: #1a1a1a;
+  background: var(--bg-main);
   border-radius: 4px;
 }
 
-.input-addon{
-  cursor: pointer;
-  margin-right: 10px;
-}
+/* =========================
+   SIDENAV
+========================= */
 
-
-.header-icon{
-  display: flex;
-  align-items: center;
-  margin-right: 10px;
-}
-
-.icon-setting{
-  cursor: pointer;
-      position: relative;
-    bottom: 3px;
-    right: 10px;
-}
-
-/* HEADER */
-.app-header {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  background: linear-gradient(145deg, #1c1c1c, #242424);
-  border-bottom: 1px solid #333;
-}
-
-/* BODY */
-.body-container {
-  height: calc(100vh - 64px);
-}
-
-/* SIDENAV */
 .side-nav {
   width: 64px;
-  background: #1b1b1b;
+  background: var(--bg-card);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 20px;
+  border-right: 1px solid var(--border-color);
 }
 
 .nav-item {
@@ -313,7 +259,7 @@ margin-bottom: 20px;
   padding: 10px 0;
   border-radius: 10px;
   display: flex;
-  flex-direction: column;      /* 👈 vertical layout */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -322,37 +268,62 @@ margin-bottom: 20px;
 }
 
 .nav-item:hover {
-  background: #2a2a2a;
+  background: var(--bg-main);
 }
 
-
-/* ICON */
 .nav-item img {
   width: 30px;
   height: 30px;
 }
 
-/* TEXT UNDER ICON */
 .nav-text {
   font-size: 11px;
-  color: #bdbdbd;
+  color: var(--text-muted);
   text-align: center;
-  line-height: 1;
   user-select: none;
 }
 
-/* ACTIVE TEXT COLOR */
 .nav-item.active .nav-text {
-  color: #4caf50; /* or your brand green */
+  color: var(--accent);
 }
 
-/* CONTENT */
-.container {
-  padding: 25px;
+/* =========================
+   BODY
+========================= */
+
+.body-container {
+  height: calc(100vh - 64px);
 }
 
-
-.live{
+.live {
   font-size: 18px;
   margin-right: 6px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 600px) {
+  .serial-block,
+  .ip-block,
+  .mode-select {
+    width: 95%;
+  }
+
+  .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .mode-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mode-content mat-form-field,
+  .mode-select {
+    width: 100%;
+  }
 }

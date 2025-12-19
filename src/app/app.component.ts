@@ -31,6 +31,8 @@ selectedFileFormat$: Observable<
   'XML' | 'TXT' | 'BAK'
 >;
 
+theme : string = '';
+
 
 
 
@@ -58,6 +60,15 @@ selectedFileFormat$: Observable<
     }
   }
   ngOnInit(): void {
+
+     this.app.getThemeObs().subscribe(theme => {
+      this.theme = theme; 
+    document.body.classList.toggle('dark-theme', theme === 'dark');
+  });
+
+
+
+  
     this.showBackBtn$ = this.app.isBackBtnShowObs();
     this.serialPorts$ = this.app.getSerialPortsObs();
 

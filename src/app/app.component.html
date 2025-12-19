@@ -4,19 +4,15 @@
   <div class="header-row">
 
     <div class="title-section">
-      <!-- <div class="btn-container">
-        <button
-          (click)="backTo()"
-          mat-icon-button
-          *ngIf="showBackBtn$ | async">
-          <mat-icon>
-            <img src="./assets/icons/arrow_back_white_24dp.svg" />
-          </mat-icon>
-        </button>
-      </div> -->
+   
 
-      <img
+      <img *ngIf="theme === 'dark'"
         src="./assets/icons/ChatGPT_Image_Dec_16__2025__10_13_30_AM-removebg-preview.png"
+        class="app-logo"
+        alt="Acceedo Melt Pro" />
+
+        <img *ngIf="theme === 'light'"
+        src="./assets/icons/blacklogo-removebg-preview.png"
         class="app-logo"
         alt="Acceedo Melt Pro" />
     </div>
@@ -54,13 +50,13 @@
       </ng-container>
 
       <ng-template #noneSelected>
-        <img src="./assets/icons/cloud-computing.png" alt="Help" class="notification-icon  offline" >
+        <img src="./assets/icons/offline.png" alt="Help" class="notification-icon  offline" >
 
         <div class="usage-none">No Serial or IP Selected</div>
       </ng-template>
 
       <img
-        src="./assets/icons/notification.png"
+        src="./assets/icons/notification-bell.png"
         class="notification-icon" />
 
     </div>

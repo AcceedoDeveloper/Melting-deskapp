@@ -1,23 +1,77 @@
-/* You can add global styles to this file, and also import other style files */
-html, body {
+/* ======================================================
+   GLOBAL THEME VARIABLES
+   ====================================================== */
+
+/* ---------- LIGHT THEME (DEFAULT) ---------- */
+:root {
+  --bg-main: #f5f6f8;
+  --bg-card: #ffffff;
+  --bg-header: #ffffff;
+
+ --text-main: #000000;      /* darker than before */
+  --text-muted: #252525;    /* labels, secondary text */
+
+  --border-color: #dcdcdc;
+  --accent: #62a4f0;
+
+  --scrollbar-thumb: #b0b0b0;
+}
+
+/* ---------- DARK THEME ---------- */
+body.dark-theme {
+  --bg-main: #121212;
+  --bg-card: #1e1e1e;
+  --bg-header: linear-gradient(145deg, #1c1c1c, #242424);
+
+  --text-main: #ffffff;
+  --text-muted: #bdbdbd;
+
+  --border-color: #333;
+  --accent: #4a90e2;
+
+  --scrollbar-thumb: #909090;
+}
+
+/* ======================================================
+   GLOBAL BASE STYLES
+   ====================================================== */
+
+html,
+body {
   margin: 0;
   padding: 0;
-
   height: 100%;
+
   font-family: Arial, Helvetica, sans-serif;
-   background: linear-gradient(145deg, #1c1c1c, #242424);
-  color: #ffffff
+
+  background: var(--bg-main);
+  color: var(--text-main);
 }
+
+/* ======================================================
+   ANGULAR MATERIAL LAYOUT FIX
+   ====================================================== */
 
 mat-sidenav-container,
 mat-sidenav-content {
   background: transparent !important;
 }
 
-.container{
+/* ======================================================
+   COMMON CONTAINERS
+   ====================================================== */
+
+.container {
   height: calc(100% - 55px);
-  // color: white;
-  // background-color: #121212;
+  background: transparent;
+}
+
+/* ======================================================
+   SCROLLBAR (THEME AWARE)
+   ====================================================== */
+
+::-webkit-scrollbar {
+  width: 16px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -25,9 +79,21 @@ mat-sidenav-content {
   border-radius: 8px;
   border: 4px solid transparent;
   background-clip: content-box;
-  background-color: #909090;
+  background-color: var(--scrollbar-thumb);
 }
 
-::-webkit-scrollbar {
-  width: 16px;
+/* ======================================================
+   OPTIONAL GLOBAL UTILITIES
+   ====================================================== */
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.bg-card {
+  background: var(--bg-card);
+}
+
+.border-default {
+  border: 1px solid var(--border-color);
 }

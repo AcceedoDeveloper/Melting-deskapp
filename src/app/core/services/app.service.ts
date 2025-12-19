@@ -33,6 +33,12 @@ private autoDetectFiles$ = new BehaviorSubject<number>(5);
   'XML' | 'TXT' | 'BAK' | null
 >(null);
 
+
+private theme$ = new BehaviorSubject<'dark' | 'light'>(
+  (localStorage.getItem('theme') as 'dark' | 'light') || 'dark'
+);
+
+
 fileStatus$ = new BehaviorSubject<{ [fileId: string]: string }>({});
 autoSend$ = new BehaviorSubject<boolean>(false);
 
@@ -263,6 +269,19 @@ getAutoDetectFilesValue(): number {
   return this.autoDetectFiles$.value;
 }
 
+
+setTheme(theme: 'dark' | 'light') {
+  this.theme$.next(theme);
+  localStorage.setItem('theme', theme);
+}
+
+getThemeObs() {
+  return this.theme$.asObservable();
+}
+
+getTheme() {
+  return this.theme$.value;
+}
 
 
 }

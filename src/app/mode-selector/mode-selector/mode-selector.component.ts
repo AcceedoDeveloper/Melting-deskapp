@@ -71,6 +71,10 @@ modeCtrl = new FormControl('ip');
   ngOnInit(): void {
 
 
+    const currentTheme = this.app.getTheme();
+  this.theme = currentTheme;
+
+
     const savedMachine = localStorage.getItem('selectedMachineType');
 if (savedMachine) {
   this.selectedMachineType = savedMachine;
@@ -302,12 +306,13 @@ autosentfile(event: Event) {
 }
 
 
-  toggleTheme(event: Event) {
+toggleTheme(event: Event) {
   const checked = (event.target as HTMLInputElement).checked;
-  this.theme = checked ? 'dark' : 'light';
+  const theme = checked ? 'dark' : 'light';
 
-
+  this.app.setTheme(theme);
 }
+
 
 onFormatChange(format: 'XML' | 'TXT' | 'BAK') {
   this.selectedFormat = format;

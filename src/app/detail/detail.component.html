@@ -2,11 +2,14 @@
   <div class="report-view">
     <div class="title"> <span> 
     
-        
-          <mat-icon   (click)="backTo()"
-          mat-icon-button>
-            <img src="./assets/icons/arrow_back_white_24dp.svg" />
-          </mat-icon>
+        <button class="save-btn2"
+          mat-icon-button
+          matTooltip="go back"  (click)="backTo()">
+                      <img src="./assets/icons/back.png" />
+
+
+        </button>
+          
        
     </span>  Element Concentration</div>
     <div class="content-area" *ngIf="spectrum">
