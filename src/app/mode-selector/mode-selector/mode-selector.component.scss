@@ -2,18 +2,16 @@
   display: block;
 }
 
-/* ================= GLOBAL ================= */
 * {
   box-sizing: border-box;
   font-family: "Segoe UI", Roboto, sans-serif;
 }
 
-/* ================= LOGIN ================= */
 .login-box {
   width: 360px;
   padding: 30px;
   margin: 90px auto;
-  background: rgba(255, 255, 255, 0.04); /* keep glass effect */
+  background: rgba(255, 255, 255, 0.04); 
   border-radius: 14px;
   text-align: center;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
@@ -32,7 +30,6 @@
   color: #ff6b6b;
 }
 
-/* ================= SETTINGS LAYOUT ================= */
 .settings-layout {
   width: 100%;
   padding: 30px 40px;
@@ -41,10 +38,9 @@
   gap: 25px;
 }
 
-/* ================= SETTINGS CARD ================= */
 .settings-card {
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04); /* unchanged */
+  background: rgba(255, 255, 255, 0.04); 
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 20px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55);
@@ -57,7 +53,6 @@
   grid-column: 1 / -1;
 }
 
-/* ================= SECTION TITLES ================= */
 .section-title {
   font-size: 16px;
   font-weight: 600;
@@ -67,7 +62,6 @@
   margin-bottom: 10px;
 }
 
-/* ================= SECTION CONTENT ================= */
 .section-content {
   display: flex;
   align-items: center;
@@ -75,7 +69,6 @@
   gap: 16px;
 }
 
-/* ================= INPUT GROUP ================= */
 .input-group {
   display: flex;
   flex-direction: column;
@@ -95,7 +88,6 @@
   border-radius: 8px;
   border: 1px solid var(--border-color);
 
-  /* 🔥 FIXED */
   background: var(--bg-card);
   color: var(--text-main);
 
@@ -117,7 +109,6 @@
 }
 
 
-/* 🔥 Focus POP */
 .input-group input:focus,
 .input-group select:focus,
 .custom-input:focus,
@@ -132,14 +123,12 @@
   border-color: var(--accent);
 }
 
-/* ================= MODE CONTENT ================= */
 .mode-content {
   display: flex;
   align-items: flex-end;
   gap: 12px;
 }
 
-/* ================= BUTTONS ================= */
 .login-btn,
 .connect-btn,
 .refresh-btn {
@@ -175,7 +164,6 @@
   background: #444;
 }
 
-/* ================= DIRECTORY ================= */
 .heading {
   font-weight: 600;
   font-size: 14px;
@@ -208,7 +196,6 @@
   gap: 10px;
 }
 
-/* ================= AUTO DETECT ================= */
 .auto-detect-box {
   display: flex;
   align-items: center;
@@ -230,7 +217,6 @@
   background: rgba(76, 175, 80, 0.15);
 }
 
-/* ================= TOGGLE SWITCH ================= */
 .toggle-switch {
   position: relative;
   width: 48px;
@@ -267,7 +253,6 @@
   transform: translateX(22px);
 }
 
-/* ================= RADIO ================= */
 .radio-item {
   border: 1px solid var(--border-color);
   background: #262626;
@@ -281,7 +266,6 @@
   color: var(--text-muted);
 }
 
-/* ================= CONFIRM ================= */
 
 .confirm-overlay {
   position: fixed;
@@ -342,14 +326,14 @@
   display: flex;
   gap: 16px;
   width: 100%;
-  align-items: flex-end; /* 🔥 button align */
+  align-items: flex-end; 
 }
 
 
 .auto-detect-row {
   display: flex;
   gap: 16px;
-  align-items: center; /* 🔥 IMPORTANT */
+  align-items: center; 
 }
 
 
