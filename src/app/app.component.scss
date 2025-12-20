@@ -366,3 +366,14 @@ button {
 .status-row.no-wifi {
   color: #dc2626;
 }
+
+.header-notifcatio{
+  display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.close{
+  margin-top: 15px;
+    height: 14px;
+}

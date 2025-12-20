@@ -123,7 +123,11 @@
   *ngIf="showNotificationPopup"
   (clickOutside)="closeNotificationPopup()">
 
+  <div class="header-notifcatio"  >
   <h4>Status Summary</h4>
+<span (click)="closeNotificationPopup()"    > <img  src="./assets/icons/close.png"  class="notification-icon close "  alt="close" /></span>
+  </div>
+
 
   <ng-container *ngIf="fileStatusCount$ | async as status">
     <div class="status-row sent">
