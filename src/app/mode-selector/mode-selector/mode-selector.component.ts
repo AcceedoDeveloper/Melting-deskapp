@@ -126,7 +126,7 @@ this.app.getSelectedIPObs().subscribe(ip => {
     this.app.getSelectedFileFormatObs().subscribe(format => {
     if (format) {
       this.selectedFormat = format;
-      this.cdr.markForCheck(); // IMPORTANT (OnPush safety)
+      this.cdr.markForCheck(); 
     }
   });
 
@@ -134,11 +134,9 @@ this.app.getSelectedIPObs().subscribe(ip => {
       this.app.setShowBackBtn(true);
       this.app.backRoute = ['/home'];
     });
-    // Update mode
     this.app.setMode(this.modeCtrl.value);
     this.modeCtrl.valueChanges.subscribe(m => this.app.setMode(m));
 
-    // Load serial ports
     this.serialPorts$ = this.app.getSerialPortsObs();
 
     this.loadPorts();
@@ -178,7 +176,6 @@ this.app.getAutoDetectFilesObs().subscribe(value => {
   }
 
 
-   // LOGIN FUNCTION
   login() {
     const username = this.loginUserCtrl.value;
     const password = this.loginPassCtrl.value;
@@ -215,7 +212,6 @@ this.app.getAutoDetectFilesObs().subscribe(value => {
             this.filesLoading = false
           })
         ).subscribe(() => {
-          // store the directory value in localstorage, and hide the directory search
           this.showSearchDirectory = false;
           this.fileService.setSearchDirectory(this.directoryCtrl.value);
           localStorage.setItem('ac-directory', this.directoryCtrl.value)
@@ -265,7 +261,6 @@ onSaveAutoDetectClick() {
 confirmSaveAutoDetect() {
   if (this.pendingAutoDetectValue == null) return;
 
-  // ✅ SAVE HERE
   this.autoDetectValue = this.pendingAutoDetectValue;
 
   this.app.setAutoDetectFiles(this.pendingAutoDetectValue);
@@ -274,7 +269,6 @@ confirmSaveAutoDetect() {
     this.pendingAutoDetectValue.toString()
   );
 
-  // reset UI state
   this.showSaveIcon = false;
   this.showConfirmPopup = false;
   this.pendingAutoDetectValue = null;
@@ -377,27 +371,6 @@ backTo(){
 }
 
 
-// get displayIp(): string {
-//   const ip = this.ipAddressCtrl.value;
-//   if (!ip) return '';
-
-//   return ip
-//     .replace(/^https?:\/\//, '')  
-//     .replace(/\/$/, '');          
-// }
-
-
-// get displayIp(): string {
-//   if (this.isIpConnected && this.ipAddressCtrl.value) {
-//     return this.ipAddressCtrl.value
-//       .replace(/^https?:\/\//, '')
-//       .replace(/\/$/, '');
-//   }
-
-//   return this.lastEnteredIp
-//     .replace(/^https?:\/\//, '')
-//     .replace(/\/$/, '');
-// }
 
 
 get displayIp(): string {
@@ -476,7 +449,6 @@ confirmSpectromSave() {
     );
   }
 
-  // reset state
   this.pendingMachineType = null;
   this.pendingFileType = null;
   this.showSpectromSave = false;

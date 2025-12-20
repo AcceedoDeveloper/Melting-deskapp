@@ -1,8 +1,15 @@
 import * as fs from 'fs';
 import { parseStringPromise } from 'xml2js';
+import { getCachedXmlSummary, setCachedXmlSummary } from './xml-cache';
 
 export async function readXmlSummary(filePath: string) {
-  const xml = fs.readFileSync(filePath, 'utf16le');
+
+  const cached = getCachedXmlSummary(filePath);
+  if (cached) {
+    return cached;
+  }
+
+  const xml = await fs.promises.readFile(filePath, 'utf16le');
 
   const json = await parseStringPromise(xml, {
     explicitArray: true,
@@ -12,16 +19,13 @@ export async function readXmlSummary(filePath: string) {
   const sampleResults =
     json?.SampleResults ||
     json?.['ns:SampleResults'] ||
-    Object.values(json)[0]; 
+    Object.values(json)[0];
 
   const sample =
     sampleResults?.SampleResult?.[0] ||
     sampleResults?.SampleResult;
 
-  if (!sample) {
-    console.error('❌ SampleResult not found');
-    return { headers: [] };
-  }
+  if (!sample) return { headers: [] };
 
   const sampleIDs =
     sample?.SampleIDs?.[0]?.SampleID ||
@@ -37,5 +41,9 @@ export async function readXmlSummary(filePath: string) {
       ['Heat No', 'Stage', 'Grade', 'Part Name'].includes(h.name)
     );
 
-  return { headers };
+  const result = { headers };
+
+  setCachedXmlSummary(filePath, result);
+
+  return result;
 }

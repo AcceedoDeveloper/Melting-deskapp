@@ -39,29 +39,34 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.readXmlSummary = void 0;
 var fs = require("fs");
 var xml2js_1 = require("xml2js");
+var xml_cache_1 = require("./xml-cache");
 function readXmlSummary(filePath) {
     var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function () {
-        var xml, json, sampleResults, sample, sampleIDs, headers;
+        var cached, xml, json, sampleResults, sample, sampleIDs, headers, result;
         return __generator(this, function (_e) {
             switch (_e.label) {
                 case 0:
-                    xml = fs.readFileSync(filePath, 'utf16le');
+                    cached = (0, xml_cache_1.getCachedXmlSummary)(filePath);
+                    if (cached) {
+                        return [2 /*return*/, cached];
+                    }
+                    return [4 /*yield*/, fs.promises.readFile(filePath, 'utf16le')];
+                case 1:
+                    xml = _e.sent();
                     return [4 /*yield*/, (0, xml2js_1.parseStringPromise)(xml, {
                             explicitArray: true,
                             trim: true
                         })];
-                case 1:
+                case 2:
                     json = _e.sent();
                     sampleResults = (json === null || json === void 0 ? void 0 : json.SampleResults) ||
                         (json === null || json === void 0 ? void 0 : json['ns:SampleResults']) ||
                         Object.values(json)[0];
                     sample = ((_a = sampleResults === null || sampleResults === void 0 ? void 0 : sampleResults.SampleResult) === null || _a === void 0 ? void 0 : _a[0]) ||
                         (sampleResults === null || sampleResults === void 0 ? void 0 : sampleResults.SampleResult);
-                    if (!sample) {
-                        console.error('❌ SampleResult not found');
+                    if (!sample)
                         return [2 /*return*/, { headers: [] }];
-                    }
                     sampleIDs = ((_c = (_b = sample === null || sample === void 0 ? void 0 : sample.SampleIDs) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.SampleID) ||
                         ((_d = sample === null || sample === void 0 ? void 0 : sample.SampleIDs) === null || _d === void 0 ? void 0 : _d.SampleID) ||
                         [];
@@ -76,7 +81,9 @@ function readXmlSummary(filePath) {
                         .filter(function (h) {
                         return ['Heat No', 'Stage', 'Grade', 'Part Name'].includes(h.name);
                     });
-                    return [2 /*return*/, { headers: headers }];
+                    result = { headers: headers };
+                    (0, xml_cache_1.setCachedXmlSummary)(filePath, result);
+                    return [2 /*return*/, result];
             }
         });
     });

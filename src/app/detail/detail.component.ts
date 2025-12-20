@@ -360,7 +360,6 @@ private sendViaIP(ip: string, data: string, fileName: string) {
     return;
   }
 
-  // 🔵 MANUAL SEND → show popup
   setTimeout(()=>{
       this.dialog.open(ErrorDialogComponent, {
     data: {

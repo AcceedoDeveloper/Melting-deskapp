@@ -141,9 +141,8 @@ this.fileService.getNewFilesObs().subscribe(files => {
     return;
   }
 
-  // ⛔ ONLY block auto-navigation, NOT NEW tag
   if (!this.app.getAutoSend()) {
-    return; // just skip auto send
+    return; 
   }
 
   if (!files || !files.length) return;
@@ -166,7 +165,6 @@ this.fileService.getNewFilesObs().subscribe(files => {
     const serial = this.app.getSelectedSerialPort();
     if (!ip && !serial) return;
 
-    // 🔴 ONLY HERE auto navigation
     this.fileService.setSelectedFile(file);
     this.router.navigate(['/detail'], {
       queryParams: { auto: true }
@@ -362,7 +360,7 @@ from(files)
             map(data => ({ file, data }))
           );
       },
-      2 // 🔥 process ONLY 2 files at a time
+      2 
     )
   )
   .subscribe({

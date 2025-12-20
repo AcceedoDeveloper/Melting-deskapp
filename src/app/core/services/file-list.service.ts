@@ -58,14 +58,12 @@ getFileList(directoryPath: string) {
         const isNew = !opened.has(file.name);
         file.new = isNew;
 
-        // ✅ SAFETY GUARD (NO LOOP)
         if (isNew && !this.autoSentFiles.has(file.name)) {
           newFiles.push(file);
           this.autoSentFiles.add(file.name);
         }
       });
 
-      // emit ONLY real new files
       if (newFiles.length) {
         this.newFiles$.next(newFiles);
       }

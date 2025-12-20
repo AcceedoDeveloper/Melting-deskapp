@@ -135,7 +135,6 @@ autoSend$ = new BehaviorSubject<boolean>(false);
     setSerialPorts(ports: PortInfo[]) {
         this.serialPorts$.next(ports)
     };
-    // serial ports
 
     geSelectedtSerialPortObs() {
         return this.selectedPort$.asObservable();
@@ -185,7 +184,6 @@ getMode() {
   return getOnce(this.mode$.asObservable());
 }
 
-// Serial data received
 setSerialDataReceived(data: string) {
   this.serialDataReceived$.next(data);
 }
@@ -198,23 +196,7 @@ getSerialDataReceived() {
   return getOnce(this.serialDataReceived$.asObservable());
 }
 
-// setFileStatus(fileId: string, status: string) {
-//   const current = this.fileStatus$.value;
-//   this.fileStatus$.next({ ...current, [fileId]: status });
-// }
 
-
-// setter
-// setAutoDetectFiles(value: number) {
-//   this.autoDetectFiles$.next(value);
-// }
-
-// observable
-// getAutoDetectFilesObs() {
-//   return this.autoDetectFiles$.asObservable();
-// }
-
-// sync getter (if needed)
 getAutoDetectFiles() {
   return getOnce(this.autoDetectFiles$.asObservable());
 }
@@ -224,28 +206,23 @@ setSelectedFileFormat(format: 'XML' | 'TXT' | 'BAK') {
   this.selectedFileFormat$.next(format);
 }
 
-// observable
 getSelectedFileFormatObs() {
   return this.selectedFileFormat$.asObservable();
 }
 
-// sync getter (optional)
 getSelectedFileFormat() {
   return getOnce(this.selectedFileFormat$.asObservable());
 }
 
 
-// setter
 setAutoSend(value: boolean) {
   this.autoSend$.next(value);
 }
 
-// observable
 getAutoSendObs() {
   return this.autoSend$.asObservable();
 }
 
-// sync getter
 getAutoSend() {
   return getOnce(this.autoSend$.asObservable());
 }
@@ -265,19 +242,16 @@ setFileStatus(
 
   const key = this.normalize(fileName);
 
-  // 1️⃣ update file status map
   const current = { ...this.fileStatus$.value };
   current[key] = status;
   this.fileStatus$.next(current);
 
-  // 2️⃣ calculate counts
   const statuses = Object.values(current);
 
   const sent = statuses.filter(s => s === 'sent-data').length;
   const noResponse = statuses.filter(s => s === 'no-response').length;
   const noWifi = statuses.filter(s => s === 'no-wifi').length;
 
-  // 3️⃣ push counts
   this.fileStatusCount$.next({
     sent,
     noResponse,

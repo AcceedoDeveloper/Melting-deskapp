@@ -1,8 +1,4 @@
-/* ======================================================
-   GLOBAL THEME VARIABLES
-   ====================================================== */
 
-/* ---------- LIGHT THEME (DEFAULT) ---------- */
 :root {
   --bg-main: #f5f6f8;
   --bg-card: #ffffff;
@@ -17,7 +13,6 @@
   --scrollbar-thumb: #b0b0b0;
 }
 
-/* ---------- DARK THEME ---------- */
 body.dark-theme {
   --bg-main: #121212;
   --bg-card: #1e1e1e;
@@ -32,9 +27,7 @@ body.dark-theme {
   --scrollbar-thumb: #909090;
 }
 
-/* ======================================================
-   GLOBAL BASE STYLES
-   ====================================================== */
+
 
 html,
 body {
@@ -48,27 +41,20 @@ body {
   color: var(--text-main);
 }
 
-/* ======================================================
-   ANGULAR MATERIAL LAYOUT FIX
-   ====================================================== */
+
 
 mat-sidenav-container,
 mat-sidenav-content {
   background: transparent !important;
 }
 
-/* ======================================================
-   COMMON CONTAINERS
-   ====================================================== */
 
 .container {
   height: calc(100% - 55px);
   background: transparent;
 }
 
-/* ======================================================
-   SCROLLBAR (THEME AWARE)
-   ====================================================== */
+
 
 ::-webkit-scrollbar {
   width: 16px;
@@ -82,9 +68,6 @@ mat-sidenav-content {
   background-color: var(--scrollbar-thumb);
 }
 
-/* ======================================================
-   OPTIONAL GLOBAL UTILITIES
-   ====================================================== */
 
 .text-muted {
   color: var(--text-muted);

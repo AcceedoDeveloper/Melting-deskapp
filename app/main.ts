@@ -322,10 +322,8 @@ ipcMain.handle('clear-serial-buffer', async () => {
 ipcMain.handle('get-ascii-data', async (e, filePath) => {
   try {
 
-    // Read file as UTF-16LE (REAL ENCODING)
     const content = fs.readFileSync(filePath, "utf16le");
 
-    // Convert ASCII → Spectrum
     const spectrum = convertAsciiToSpectrum(content);
 
     return spectrum;
@@ -452,16 +450,12 @@ function convertAsciiToSpectrum(content: string) {
   }
 
 
-  // SPLIT EACH COLUMN BY TAB
   const parts = avgLine.split("\t").map(p => p.trim());
 
-  // GET HEADER_1 for element names
   const headerParts = lines[0].split("\t").map(p => p.trim());
 
-  // Element names start AFTER column 15
   const elementNames = headerParts.slice(15);
 
-  // Values also start at index 15
   const elementValues = parts.slice(15);
 
   const elements = [];
@@ -470,7 +464,6 @@ function convertAsciiToSpectrum(content: string) {
     const name = elementNames[i];
     let val = elementValues[i] ?? "";
 
-    // Clean <, >, ++
     val = val.replace(/[<>+]/g, "").trim();
 
     elements.push({
@@ -483,7 +476,6 @@ function convertAsciiToSpectrum(content: string) {
     });
   }
 
-  // Create headers matching XML format
   const headers = [
     { name: "Date",      value: parts[1] },
     { name: "Time",      value: parts[1] },
