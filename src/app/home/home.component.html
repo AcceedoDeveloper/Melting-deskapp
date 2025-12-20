@@ -8,14 +8,14 @@
           <div>
 
               <div class="search-input" fxLayoutAlign="start" fxLayoutGap="1rem">
-            <div class="input-container search-ctrl">
+            <!-- <div class="input-container search-ctrl">
               <input [value]="(fileSearch$ | async)" (input)="onFileSearchInput($event.target)" placeholder="Search Files" #fileSearch id="search-directory" type=" text" class="custom-input">
               <div class="input-addon" *ngIf="fileSearch.value" (click)="clearInput(fileSearch); resetFileSearch()">
                 <mat-icon>
                   <img src="./assets/icons/clear_white_24dp.svg" alt="">
                 </mat-icon>
               </div>
-            </div>
+            </div> -->
             
 
 
@@ -129,20 +129,25 @@
 
 
 
-    <!-- STATUS -->
-    <div *ngIf="getStatus(file) as status"
-         class="status-tag"
-         [ngClass]="status">
-      {{
-        status === 'sent-data'   ? 'Sent' :
-        status === 'no-wifi'     ? 'No WiFi' :
-        status === 'no-response' ? 'No Response' :
-        ''
-      }}
-    </div>
 
-    <!-- NEW TAG -->
-    <div *ngIf="file.new" class="new-tag">NEW</div>
+
+<div
+  *ngIf="getStatus(file) as status"
+  class="status-tag"
+  [ngClass]="status">
+
+  <img
+    [src]="getStatusIcon(status)"
+    class="status-icon"
+    [alt]="status" />
+
+</div>
+
+
+
+
+
+    <div *ngIf = "file.new" class="status-tag"  > <img  src="assets/icons/new.png"   class="status-icon"        alt="new"  /> </div>
 
     <div class="view-more" >
   View more

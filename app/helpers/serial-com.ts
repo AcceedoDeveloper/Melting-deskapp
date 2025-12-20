@@ -10,7 +10,6 @@ const parseXml = (xmlContent) => {
                 console.log(err)
                 reject(err)
             } else {
-                console.log('test')
                 const opData = {}
                 const sampleResult = results.SampleResults.SampleResult[0];
                 const headerResults = sampleResult.SampleIDs[0].SampleID || [];

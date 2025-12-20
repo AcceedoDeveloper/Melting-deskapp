@@ -5,6 +5,7 @@ import * as url from 'url';
 import * as net from 'net';
 import { checkFileExists, deleteFile, getFilePaths, getFiles } from './helpers/get-file-name';
 import { readFileAndGetJson, sendDataSerialPort } from './helpers/serial-com';
+import { readXmlSummary } from './helpers/xml-summary';
 
 const fetch = require("node-fetch");
 import { SerialPort } from 'serialport';
@@ -173,7 +174,6 @@ ipcMain.on('watch-dir', async (e, args) => {
 
 
 ipcMain.handle('send-data-serial-port-com', async (e, path, data) => {
-  console.log('data sent to serial port', data);
   try {
     // Use existing open serialPortListener
     if (serialPortListener && serialPortListener.isOpen) {
@@ -193,27 +193,16 @@ ipcMain.handle('send-data-serial-port-com', async (e, path, data) => {
   }
 });
 
+ipcMain.handle('get-xml-summary', async (e, filePath) => {
+  try {
+    return await readXmlSummary(filePath);
+  } catch (err) {
+    console.error('XML summary error:', err);
+    return { headers: [] };
+  }
+});
 
-// ipcMain.handle('send-data-ip', async (e, ip, data) => {
-//   console.log("Sending to IP:", ip, data);
 
-//   try {
-//     const fullUrl = `${ip}spectrumResult?d=${encodeURIComponent(data)}`;
-//     console.log("Final URL:", fullUrl);
-
-//     const response = await fetch(fullUrl, {
-//       method: "GET"
-//     });
-
-//     const text = await response.text(); 
-//     console.log("Raw Response:", text);
-
-//     return text;
-//   } catch (err) {
-//     console.error("IP HTTP Error:", err);
-//     throw err;
-//   }
-// });
 
 
 ipcMain.handle('send-data-ip', async (e, ip, data) => {
@@ -225,14 +214,12 @@ ipcMain.handle('send-data-ip', async (e, ip, data) => {
     const url = new URL('/spectrumResult', ip);
     url.searchParams.set('d', data);
 
-    console.log('Final URL:', url.toString());
 
     const response = await fetch(url.toString(), {
       method: 'GET'
     });
 
     const text = await response.text();
-    console.log('Raw Response:', text);
 
     return text;
   } catch (err) {
@@ -266,7 +253,6 @@ ipcMain.handle('start-serial-listener', async (e, portPath) => {
         if (err) {
           reject(err);
         } else {
-          console.log("Serial port OPEN:", portPath);
           resolve(true);
         }
       });
@@ -276,7 +262,6 @@ ipcMain.handle('start-serial-listener', async (e, portPath) => {
 
 serialPortListener.on('data', (chunk) => {
   const data = chunk.toString();
-  console.log("SERIAL CHUNK:", data);
 
   serialBuffer += data;  
 
@@ -336,7 +321,6 @@ ipcMain.handle('clear-serial-buffer', async () => {
 //to ready ascii data from file
 ipcMain.handle('get-ascii-data', async (e, filePath) => {
   try {
-    console.log("Reading ASCII file:", filePath);
 
     // Read file as UTF-16LE (REAL ENCODING)
     const content = fs.readFileSync(filePath, "utf16le");
@@ -372,7 +356,6 @@ ipcMain.handle(
       apiUrl.searchParams.set('start', start);
       apiUrl.searchParams.set('end', end);
 
-      console.log(' Calendar API URL:', apiUrl.toString());
 
       const response = await fetch(apiUrl.toString(), {
         method: 'GET'
@@ -405,7 +388,6 @@ ipcMain.handle('get-spectrum-data', async (e, args) => {
   const filePath = args;
   return await readFileAndGetJson(filePath);
 })
-console.log('welcome check')
 
 
 try {
@@ -463,16 +445,12 @@ function convertAsciiToSpectrum(content: string) {
     .map(l => l.trim())
     .filter(l => l.length > 0);
 
-  console.log("RAW LINES:");
-  lines.forEach((l, i) => console.log(i, JSON.stringify(l)));
 
   const avgLine = lines.find(l => l.startsWith("Average"));
   if (!avgLine) {
-    console.log("NO AVERAGE LINE FOUND");
     return { headers: [], elements: [] };
   }
 
-  console.log("FOUND AVERAGE LINE:", avgLine);
 
   // SPLIT EACH COLUMN BY TAB
   const parts = avgLine.split("\t").map(p => p.trim());

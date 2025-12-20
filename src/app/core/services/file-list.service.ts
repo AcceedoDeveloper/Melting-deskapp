@@ -16,6 +16,14 @@ export class FileListService {
     selectedFile$ = new BehaviorSubject<AcFile>(null);
     seacrhDirectory$ = new BehaviorSubject<string>('');
     newFiles$ = new BehaviorSubject<AcFile[]>([]);
+ private openedFiles$ = new BehaviorSubject<Set<string>>(
+    new Set(JSON.parse(localStorage.getItem('openedFiles') || '[]'))
+  );
+
+  private autoSentFiles = new Set<string>();
+  private manualOpenInProgress = false;
+
+
 
 
     getFiles() {
@@ -34,44 +42,42 @@ export class FileListService {
         return files
     }
 
-    getFileList(directoryPath) {
-        return new Observable<AcFile[]>((observer) => {
-            ipcRenderer.invoke('file-list', directoryPath).then((files) => {
-                if (files.err) {
-                    observer.error(files.code)
-                } else {
-                    observer.next(files)
-                    observer.complete()
-                }
-            })
-        }).pipe(
-            tap(files => {
-  const oldFiles = this.getFiles();
-  const newlyAddedFiles: AcFile[] = [];
-
-  if (oldFiles.length) {
-    const oldMap = oldFiles.reduce((acc, f) => {
-      acc[f.name] = true;
-      return acc;
-    }, {});
-    
-    files.forEach(file => {
-      if (!oldMap[file.name]) {
-        file.new = true;
-        newlyAddedFiles.push(file);
-      }
+getFileList(directoryPath: string) {
+  return new Observable<AcFile[]>(observer => {
+    ipcRenderer.invoke('file-list', directoryPath).then(files => {
+      observer.next(files);
+      observer.complete();
     });
-  }
+  }).pipe(
+    tap((files: AcFile[]) => {
 
-  this.files$.next(files);
+      const opened = this.openedFiles$.value;
+      const newFiles: AcFile[] = [];
 
-  if (newlyAddedFiles.length) {
-    this.newFiles$.next(newlyAddedFiles);
-  }
-})
+      files.forEach(file => {
+        const isNew = !opened.has(file.name);
+        file.new = isNew;
 
-        )
-    }
+        // ✅ SAFETY GUARD (NO LOOP)
+        if (isNew && !this.autoSentFiles.has(file.name)) {
+          newFiles.push(file);
+          this.autoSentFiles.add(file.name);
+        }
+      });
+
+      // emit ONLY real new files
+      if (newFiles.length) {
+        this.newFiles$.next(newFiles);
+      }
+
+      this.files$.next(files);
+    })
+  );
+}
+
+
+
+
 
    cleanDirectory(directoryPath: string, maxFiles: number) {
   return ipcRenderer.invoke('directory-cleanup', {
@@ -136,5 +142,37 @@ export class FileListService {
 clearNewFiles() {
   this.newFiles$.next([]);
 }
+
+ markFileOpened(fileName: string) {
+    const opened = new Set(this.openedFiles$.value);
+    opened.add(fileName);
+
+    this.openedFiles$.next(opened);
+localStorage.setItem(
+  'openedFiles',
+  JSON.stringify(Array.from(opened))
+);
+
+    const files = this.files$.value.map(f =>
+      f.name === fileName ? { ...f, new: false } : f
+    );
+
+    this.files$.next(files);
+  }
+
+getOpenedFiles(): Set<string> {
+  return this.openedFiles$.value;
+}
+
+setManualOpen(value: boolean) {
+  this.manualOpenInProgress = value;
+}
+
+isManualOpen() {
+  return this.manualOpenInProgress;
+}
+
+
+
 
 }

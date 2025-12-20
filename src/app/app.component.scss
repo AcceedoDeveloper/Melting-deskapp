@@ -245,7 +245,7 @@ button {
 ========================= */
 
 .side-nav {
-  width: 64px;
+  width: 70px;
   background: var(--bg-card);
   display: flex;
   flex-direction: column;
@@ -326,4 +326,43 @@ button {
   .mode-select {
     width: 100%;
   }
+}
+
+
+.notification-popup {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  width: 260px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  padding: 16px;
+  z-index: 1000;
+}
+
+.notification-popup h4 {
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+.status-row.sent {
+  color: #16a34a;
+}
+
+.status-row.no-response {
+  color: #f59e0b;
+}
+
+.status-row.no-wifi {
+  color: #dc2626;
 }

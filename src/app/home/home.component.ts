@@ -7,7 +7,8 @@ import { catchError, combineLatest, finalize, map, Observable, pairwise, shareRe
 import { AppService } from '../core/services/app.service';
 import { FileListService } from '../core/services/file-list.service';
 import { AcFile } from '../models/file-model';
-
+import {  from } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -32,6 +33,9 @@ furnaceOptions$: Observable<string[]>;
 private fileMetaChanged$ = new BehaviorSubject<void>(undefined);
 
 
+ private openedFiles$ = new BehaviorSubject<Set<string>>(
+    new Set(JSON.parse(localStorage.getItem('openedFiles') || '[]'))
+  );
 
 
 fileMetaMap: {
@@ -84,9 +88,64 @@ statusInfo = {
 
 
 
+// this.fileService.getNewFilesObs().subscribe(files => {
+
+
+//   if (this.fileService.isManualOpen()) {
+//     this.fileService.setManualOpen(false);
+//     return;
+//   }
+
+//   if (!this.app.getAutoSend()) return;
+//   if (!files || !files.length) return;
+
+//   files.forEach(file => {
+
+//     const format = this.app.getSelectedFileFormat();
+//     if (!format) return;
+
+// const ext = file.name.split('.').pop()?.toLowerCase();
+
+// const formatMap = {
+//   XML: ['xml'],
+//   TXT: ['txt', 'asc'],
+//   BAK: ['bak']
+// };
+
+// if (!formatMap[format]?.includes(ext)) return;
+
+
+//     const ip = this.app.getSelectedIP();
+//     const serial = this.app.getSelectedSerialPort();
+//     if (!ip && !serial) return;
+
+//     console.log('AUTO SEND FILE:', file.name);
+
+//     this.fileService.setSelectedFile(file);
+
+//     this.router.navigate(['/detail'], {
+//       queryParams: { auto: true }
+//     });
+//   });
+
+//   this.fileService.clearNewFiles();
+
+// });
+
+
+
 this.fileService.getNewFilesObs().subscribe(files => {
 
-  if (!this.app.getAutoSend()) return;
+  if (this.fileService.isManualOpen()) {
+    this.fileService.setManualOpen(false);
+    return;
+  }
+
+  // ⛔ ONLY block auto-navigation, NOT NEW tag
+  if (!this.app.getAutoSend()) {
+    return; // just skip auto send
+  }
+
   if (!files || !files.length) return;
 
   files.forEach(file => {
@@ -94,33 +153,29 @@ this.fileService.getNewFilesObs().subscribe(files => {
     const format = this.app.getSelectedFileFormat();
     if (!format) return;
 
-const ext = file.name.split('.').pop()?.toLowerCase();
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const formatMap = {
+      XML: ['xml'],
+      TXT: ['txt', 'asc'],
+      BAK: ['bak']
+    };
 
-const formatMap = {
-  XML: ['xml'],
-  TXT: ['txt', 'asc'],
-  BAK: ['bak']
-};
-
-if (!formatMap[format]?.includes(ext)) return;
-
+    if (!formatMap[format]?.includes(ext)) return;
 
     const ip = this.app.getSelectedIP();
     const serial = this.app.getSelectedSerialPort();
     if (!ip && !serial) return;
 
-    console.log('AUTO SEND FILE:', file.name);
-
+    // 🔴 ONLY HERE auto navigation
     this.fileService.setSelectedFile(file);
-
     this.router.navigate(['/detail'], {
       queryParams: { auto: true }
     });
   });
 
   this.fileService.clearNewFiles();
-
 });
+
 
 
     this.getFileStatus();
@@ -242,36 +297,93 @@ this.sendStatus$.subscribe(statusMap => {
     if (!files || !files.length) return;
 
 
-    files.forEach(file => {
+  //   files.forEach(file => {
 
 
-     ipcRenderer.invoke('get-ascii-data', file.path)
-  .then((data: any) => {
+  //    ipcRenderer.invoke('get-ascii-data', file.path)
+  // .then((data: any) => {
 
-    const headers = data?.headers || [];
-    console.log('HEADERS FOR', file.name, headers);
+  //   const headers = data?.headers || [];
+  //   console.log('HEADERS FOR', file.name, headers);
 
-    const heatNo   = headers.find(h => h.name === 'Heat No')?.value;
-    const stage    = headers.find(h => h.name === 'Stage')?.value;
-    const partName = headers.find(h => h.name === 'Part Name')?.value;
-    const grade    = headers.find(h => h.name === 'Grade')?.value;
+  //   const heatNo   = headers.find(h => h.name === 'Heat No')?.value;
+  //   const stage    = headers.find(h => h.name === 'Stage')?.value;
+  //   const partName = headers.find(h => h.name === 'Part Name')?.value;
+  //   const grade    = headers.find(h => h.name === 'Grade')?.value;
 
-    this.fileMetaMap[file.path] = {
-      heatNo,
-      stage,
-      partName,
-      grade
-    };
+  //   this.fileMetaMap[file.path] = {
+  //     heatNo,
+  //     stage,
+  //     partName,
+  //     grade
+  //   };
 
-    this.fileMetaChanged$.next();
-    this.cdr.markForCheck(); 
-  })
-  .catch(err => {
-    console.error(' Error reading', file.name, err);
+  //   this.fileMetaChanged$.next();
+  //   this.cdr.markForCheck(); 
+  // })
+  // .catch(err => {
+  //   console.error(' Error reading', file.name, err);
+  // });
+
+
+  //   });
+
+
+// files.forEach(file => {
+//   const isXML = file.name.toLowerCase().endsWith('.xml');
+//   const reader = isXML ? 'get-xml-summary' : 'get-ascii-data';
+
+//   ipcRenderer.invoke(reader, file.path)
+//     .then((data: any) => {
+//       console.log('data', data);
+//       const headers = data?.headers || [];
+
+//       this.fileMetaMap[file.path] = {
+//         heatNo: headers.find(h => h.name === 'Heat No')?.value,
+//         stage: headers.find(h => h.name === 'Stage')?.value,
+//         partName: headers.find(h => h.name === 'Part Name')?.value,
+//         grade: headers.find(h => h.name === 'Grade')?.value
+//       };
+
+//       this.fileMetaChanged$.next();
+//       this.cdr.markForCheck();
+//     });
+// });
+
+from(files)
+  .pipe(
+    mergeMap(
+      file => {
+        const isXML = file.name.toLowerCase().endsWith('.xml');
+        const reader = isXML ? 'get-xml-summary' : 'get-ascii-data';
+
+        return from(ipcRenderer.invoke(reader, file.path))
+          .pipe(
+            map(data => ({ file, data }))
+          );
+      },
+      2 // 🔥 process ONLY 2 files at a time
+    )
+  )
+  .subscribe({
+    next: ({ file, data }) => {
+      const headers = data?.headers || [];
+
+      this.fileMetaMap[file.path] = {
+        heatNo: headers.find(h => h.name === 'Heat No')?.value,
+        stage: headers.find(h => h.name === 'Stage')?.value,
+        partName: headers.find(h => h.name === 'Part Name')?.value,
+        grade: headers.find(h => h.name === 'Grade')?.value
+      };
+
+      this.fileMetaChanged$.next();
+      this.cdr.markForCheck();
+    },
+    error: err => {
+      console.error('Metadata read error:', err);
+    }
   });
 
-
-    });
 
   });
 
@@ -395,9 +507,11 @@ getFurnaceKey(stage?: string): string {
   }
 
   onFileClick(file: AcFile) {
+    this.fileService.setManualOpen(true);
+    this.fileService.markFileOpened(file.name);
     this.fileService.setSelectedFile(file);
-    this.router.navigate(['/detail'])
-    this.cdr.detectChanges()
+this.router.navigate(['/detail']
+);    this.cdr.detectChanges()
   }
 
   setActiveSort(sort) {
@@ -453,6 +567,24 @@ getFileStatus() {
 setFurnace(furnace: string) {
   this.selectedFurnace$.next(furnace);
 }
+
+getStatusIcon(status: string): string {
+  switch (status) {
+    case 'sent-data':
+      return 'assets/icons/status-sent.png';
+
+    case 'no-response':
+      return 'assets/icons/status-no-response.png';
+
+    case 'no-wifi':
+      return 'assets/icons/status-no-wifi.png';
+
+    default:
+      return '';
+  }
+}
+
+
 
 
 }

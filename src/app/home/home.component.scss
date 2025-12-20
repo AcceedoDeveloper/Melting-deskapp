@@ -105,17 +105,17 @@
    STATUS BORDERS
 ========================= */
 
-.file-container.sent-data {
-  border: 2px solid #29e36e;
-}
+// .file-container.sent-data {
+//   border: 2px solid #29e36e;
+// }
 
-.file-container.no-wifi {
-  border: 2px solid #e67e22;
-}
+// .file-container.no-wifi {
+//   border: 2px solid #e67e22;
+// }
 
-.file-container.no-response {
-  border: 2px solid #e74c3c;
-}
+// .file-container.no-response {
+//   border: 2px solid #e74c3c;
+// }
 
 /* =========================
    TAGS
@@ -144,24 +144,23 @@
   font-weight: 600;
   line-height: 9px;
   color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.35);
   z-index: 2;
 }
 
-.status-tag.sent-data {
-  background: #0e5f3a;
-  border-color: #29e36e;
-}
+// .status-tag.sent-data {
+//   background: #0e5f3a;
+//   border-color: #29e36e;
+// }
 
-.status-tag.no-wifi {
-  background: #e67e22;
-  border-color: #ffb067;
-}
+// .status-tag.no-wifi {
+//   background: #e67e22;
+//   border-color: #ffb067;
+// }
 
-.status-tag.no-response {
-  background: #e74c3c;
-  border-color: #ff7b6b;
-}
+// .status-tag.no-response {
+//   background: #e74c3c;
+//   border-color: #ff7b6b;
+// }
 
 /* =========================
    SEARCH / INPUT
@@ -318,4 +317,14 @@
 
 .view-more:hover {
   opacity: 1;
+}
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon {
+  width: 18px;
+  height: 18px;
 }

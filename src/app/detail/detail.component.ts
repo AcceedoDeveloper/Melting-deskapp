@@ -231,7 +231,47 @@ export class DetailComponent implements OnInit {
 
 
 
+// onSendClick() {
+
+//   const furnaceNo = this.furnaceCtrl.value;
+//   const sendData = `${this.sendableData},fur:${furnaceNo}`;
+//   const finalSerialData = `$${sendData}#`;
+//   const finalIPData = sendData;
+//   const fileName = this.file.name;
+
+//   const ip = this.app.getSelectedIP();
+//   console.log("Selected IP:", ip);
+//   const serialPort = this.app.getSelectedSerialPort();
+
+//   this.ngZone.run(() => this.app.showLoader("Sending data..."));
+
+
+//   if (ip) {
+//     this.sendViaIP(ip, finalIPData, fileName);
+//     return;
+//   }
+
+
+//   if (serialPort) {
+//     this.sendViaSerial(serialPort.path, finalSerialData, fileName);
+//     return;
+//   }
+
+
+//   this.app.hideLoader();
+//   this.dialog.open(ErrorDialogComponent, {
+//     data: {
+//       message: "No IP or Serial connection available.",
+//       title: "Connection Error",
+//       iconPath: "./assets/icons/error_outline_white_24dp.svg"
+//     }
+//   });
+// }
+
 onSendClick() {
+
+ 
+
 
   const furnaceNo = this.furnaceCtrl.value;
   const sendData = `${this.sendableData},fur:${furnaceNo}`;
@@ -240,23 +280,21 @@ onSendClick() {
   const fileName = this.file.name;
 
   const ip = this.app.getSelectedIP();
-  console.log("Selected IP:", ip);
   const serialPort = this.app.getSelectedSerialPort();
 
-  this.ngZone.run(() => this.app.showLoader("Sending data..."));
-
+  this.ngZone.run(() => {
+    this.app.showLoader("Sending data...");
+  });
 
   if (ip) {
     this.sendViaIP(ip, finalIPData, fileName);
     return;
   }
 
-
   if (serialPort) {
     this.sendViaSerial(serialPort.path, finalSerialData, fileName);
     return;
   }
-
 
   this.app.hideLoader();
   this.dialog.open(ErrorDialogComponent, {
@@ -267,7 +305,6 @@ onSendClick() {
     }
   });
 }
-
 
 
 private sendViaIP(ip: string, data: string, fileName: string) {

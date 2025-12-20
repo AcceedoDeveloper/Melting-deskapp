@@ -39,6 +39,12 @@ private theme$ = new BehaviorSubject<'dark' | 'light'>(
 );
 
 
+private fileStatusCount$ = new BehaviorSubject({
+  sent: 0,
+  noResponse: 0,
+  noWifi: 0
+});
+
 fileStatus$ = new BehaviorSubject<{ [fileId: string]: string }>({});
 autoSend$ = new BehaviorSubject<boolean>(false);
 
@@ -245,10 +251,38 @@ getAutoSend() {
 }
 
 
-setFileStatus(fileName: string, status: string) {
+// setFileStatus(fileName: string, status: string) {
+//   const key = this.normalize(fileName);
+//   const current = this.fileStatus$.value;
+//   this.fileStatus$.next({ ...current, [key]: status });
+// }
+
+
+setFileStatus(
+  fileName: string,
+  status: 'sent-data' | 'no-response' | 'no-wifi'
+): void {
+
   const key = this.normalize(fileName);
-  const current = this.fileStatus$.value;
-  this.fileStatus$.next({ ...current, [key]: status });
+
+  // 1️⃣ update file status map
+  const current = { ...this.fileStatus$.value };
+  current[key] = status;
+  this.fileStatus$.next(current);
+
+  // 2️⃣ calculate counts
+  const statuses = Object.values(current);
+
+  const sent = statuses.filter(s => s === 'sent-data').length;
+  const noResponse = statuses.filter(s => s === 'no-response').length;
+  const noWifi = statuses.filter(s => s === 'no-wifi').length;
+
+  // 3️⃣ push counts
+  this.fileStatusCount$.next({
+    sent,
+    noResponse,
+    noWifi
+  });
 }
 
 
@@ -282,6 +316,12 @@ getThemeObs() {
 getTheme() {
   return this.theme$.value;
 }
+
+
+getFileStatusCountObs() {
+  return this.fileStatusCount$.asObservable();
+}
+
 
 
 }

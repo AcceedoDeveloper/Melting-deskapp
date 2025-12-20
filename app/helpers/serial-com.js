@@ -59,7 +59,6 @@ var parseXml = function (xmlContent) {
                 reject(err);
             }
             else {
-                console.log('test');
                 var opData = {};
                 var sampleResult = results.SampleResults.SampleResult[0];
                 var headerResults = sampleResult.SampleIDs[0].SampleID || [];

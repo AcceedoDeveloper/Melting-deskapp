@@ -57,7 +57,7 @@
 
       <img
         src="./assets/icons/notification-bell.png"
-        class="notification-icon" />
+        class="notification-icon" (click)="toggleNotificationPopup()" />
 
     </div>
   </div>
@@ -114,3 +114,32 @@
   </mat-sidenav-content>
 
 </mat-sidenav-container>
+
+
+
+
+<div
+  class="notification-popup"
+  *ngIf="showNotificationPopup"
+  (clickOutside)="closeNotificationPopup()">
+
+  <h4>Status Summary</h4>
+
+  <ng-container *ngIf="fileStatusCount$ | async as status">
+    <div class="status-row sent">
+      <span>Sent</span>
+      <span>{{ status.sent }}</span>
+    </div>
+
+    <div class="status-row no-response">
+      <span>No Response</span>
+      <span>{{ status.noResponse }}</span>
+    </div>
+
+    <div class="status-row no-wifi">
+      <span>No WiFi</span>
+      <span>{{ status.noWifi }}</span>
+    </div>
+  </ng-container>
+
+</div>

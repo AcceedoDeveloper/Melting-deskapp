@@ -34,6 +34,10 @@ selectedFileFormat$: Observable<
 theme : string = '';
 
 
+showNotificationPopup = false;
+
+
+fileStatusCount$ = this.app.getFileStatusCountObs();
 
 
 
@@ -256,6 +260,16 @@ theme : string = '';
   calendar(){
     this.router.navigate(['/calendar']);
   }
+
+  toggleNotificationPopup(): void {
+  this.showNotificationPopup = !this.showNotificationPopup;
+}
+
+closeNotificationPopup(): void {
+  this.showNotificationPopup = false;
+}
+
+
 
 
 }
