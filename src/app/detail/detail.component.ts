@@ -310,6 +310,8 @@ onSendClick() {
 private sendViaIP(ip: string, data: string, fileName: string) {
 
   let responseReceived = false;
+  let isErrorResponse = false; 
+  let errorMessage = ''; 
 
   const timeout = setTimeout(() => {
     if (!responseReceived) {
@@ -337,13 +339,64 @@ private sendViaIP(ip: string, data: string, fileName: string) {
       })
     )
     .subscribe({
-      next: (resp: string) => {
-        responseReceived = true;
-        console.log("IP RESPONSE:", resp);
-      },
-      complete: () => {
+
+
+
+next: (resp: string) => {
   responseReceived = true;
+  console.log("IP RESPONSE:", resp);
+
+  if (resp?.includes('$ERR')) {
+    isErrorResponse = true;
+
+    const errorCode = resp
+      .replace('$ERR,', '')
+      .replace('#', '')
+      .trim();
+
+    if (errorCode === 'HEATNO_ALREADY_EXISTS') {
+      errorMessage = 'Heat No already exists';
+    }
+    else if (errorCode === 'FURNACE_NOT_FOUND'){
+      errorMessage = 'Furnace not found';
+    } 
+    else if (errorCode === 'CHARGE_MIX_NOT_EXIST'){
+      errorMessage = 'Charge mix not exist';
+    }
+    else {
+      errorMessage = 'Unknown error from device';
+    }
+
+    this.app.setFileStatus(fileName, 'no-response');
+  }
+},
+
+
+
+
+complete: () => {
   clearTimeout(timeout);
+
+  if (isErrorResponse) {
+
+    this.ngZone.run(() => {
+      this.app.hideLoader();
+
+       setTimeout(() => {
+      this.dialog.open(ErrorDialogComponent, {
+        disableClose: true,
+        data: {
+          message: errorMessage,
+          title: 'Error',
+          iconPath: './assets/icons/error_outline_white_24dp.svg'
+        }
+      });
+    }); }, 200);
+
+    return; 
+  }
+
+  responseReceived = true;
 
   this.ngZone.run(() => {
     this.app.hideLoader();
@@ -360,18 +413,18 @@ private sendViaIP(ip: string, data: string, fileName: string) {
     return;
   }
 
-  setTimeout(()=>{
-      this.dialog.open(ErrorDialogComponent, {
-    data: {
-      message: "Data sent successfully via IP.",
-      title: "Success",
-      iconPath: "./assets/icons/done_white_24dp.svg"
-    }
-  });
-
-  }, 200)
-
+  setTimeout(() => {
+    this.dialog.open(ErrorDialogComponent, {
+      data: {
+        message: "Data sent successfully via IP.",
+        title: "Success",
+        iconPath: "./assets/icons/done_white_24dp.svg"
+      }
+    });
+  }, 200);
 }
+
+
 
     });
 }
