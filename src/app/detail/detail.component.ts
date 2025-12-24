@@ -363,6 +363,9 @@ next: (resp: string) => {
     else if (errorCode === 'CHARGE_MIX_NOT_EXIST'){
       errorMessage = 'Charge mix not exist';
     }
+    else if(errorCode === 'PLANNING_NOT_SELECTED'){
+      errorMessage = 'Planning not selected';
+    }
     else {
       errorMessage = 'Unknown error from device';
     }
