@@ -146,9 +146,31 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 14px;
 }
-
-.log-card {
+.log-card.dark {
   // background: var(--accent);
+  background-color: #4a6076;
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.15s ease;
+      color: var(--text-main);
+}
+
+.log-card.light {
+  background-color: #d1e0ea;
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.15s ease;
+      color: var(--text-main);
+}
+.log-card {
   background-color: #6e7f93;
   border-radius: 14px;
   padding: 16px;

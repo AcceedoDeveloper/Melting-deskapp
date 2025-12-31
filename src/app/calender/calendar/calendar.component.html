@@ -76,7 +76,7 @@
   </div>
 
   <div class="popup-body">
-    <div class="log-card" *ngFor="let log of selectedDayLogs">
+    <div class="log-card" *ngFor="let log of selectedDayLogs" [ngClass]="theme"  >
       <div><b>Heat No:</b> {{ log.heatNo }}</div>
       <div><b>Grade:</b> {{ log.ironGrade }}</div>
       <div><b>Stage:</b> {{ log.stage }}</div>

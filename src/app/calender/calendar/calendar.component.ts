@@ -9,6 +9,8 @@ import { AppService } from '../../core/services/app.service';
 })
 export class CalendarComponent implements OnInit {
 
+  theme : string = this.app.getTheme();
+
 
   dateFurnaceMap: {
   [date: string]: { [furnaceName: string]: number }
