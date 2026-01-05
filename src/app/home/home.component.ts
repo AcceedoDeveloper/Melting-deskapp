@@ -84,6 +84,8 @@ statusInfo = {
 
 
 
+    console.log('file format:', this.app.getSelectedFileFormat());
+
 
 
 
@@ -156,7 +158,8 @@ this.fileService.getNewFilesObs().subscribe(files => {
     const formatMap = {
       XML: ['xml'],
       TXT: ['txt', 'asc'],
-      BAK: ['bak']
+      BAK: ['bak'],
+      CSV: ['csv']
     };
 
     if (!formatMap[format]?.includes(ext)) return;
@@ -265,7 +268,8 @@ if (selectedFormat) {
       const extMap = {
         XML: '.xml',
         TXT: '.txt',
-        BAK: '.bak'
+        BAK: '.bak',
+        CSV: '.csv'
       };
       filtered = filtered.filter(file =>
         file.name.toLowerCase().endsWith(extMap[selectedFormat])
@@ -352,8 +356,19 @@ from(files)
   .pipe(
     mergeMap(
       file => {
-        const isXML = file.name.toLowerCase().endsWith('.xml');
-        const reader = isXML ? 'get-xml-summary' : 'get-ascii-data';
+        // const isXML = file.name.toLowerCase().endsWith('.xml');
+        // const reader = isXML ? 'get-xml-summary' : 'get-ascii-data';
+
+        const ext = file.name.toLowerCase();
+
+let reader = 'get-ascii-data';
+
+if (ext.endsWith('.xml')) {
+  reader = 'get-xml-summary';
+} else if (ext.endsWith('.csv')) {
+  reader = 'get-csv-data';
+}
+
 
         return from(ipcRenderer.invoke(reader, file.path))
           .pipe(
@@ -366,6 +381,8 @@ from(files)
   .subscribe({
     next: ({ file, data }) => {
       const headers = data?.headers || [];
+
+      console.log('HEADERS FOR', file.name, headers);
 
       this.fileMetaMap[file.path] = {
         heatNo: headers.find(h => h.name === 'Heat No')?.value,

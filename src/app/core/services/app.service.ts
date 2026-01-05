@@ -30,7 +30,7 @@ export class AppService {
     serialDataReceived$ = new BehaviorSubject<string>('');
 private autoDetectFiles$ = new BehaviorSubject<number>(5); 
     selectedFileFormat$ = new BehaviorSubject<
-  'XML' | 'TXT' | 'BAK' | null
+  'XML' | 'TXT' | 'BAK' | 'CSV' | null
 >(null);
 
 
@@ -202,7 +202,7 @@ getAutoDetectFiles() {
 }
 
 
-setSelectedFileFormat(format: 'XML' | 'TXT' | 'BAK') {
+setSelectedFileFormat(format: 'XML' | 'TXT' | 'BAK' | 'CSV') {
   this.selectedFileFormat$.next(format);
 }
 

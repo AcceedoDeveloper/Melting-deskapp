@@ -334,6 +334,16 @@ ipcMain.handle('get-ascii-data', async (e, filePath) => {
   }
 });
 
+// Read CSV file
+ipcMain.handle('get-csv-data', async (e, filePath) => {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    return convertCsvToSpectrum(content);
+  } catch (err) {
+    console.error('CSV read error:', err);
+    return { headers: [], elements: [] };
+  }
+});
 
 
 // Fetch spectrum logs from server
@@ -494,3 +504,54 @@ function convertAsciiToSpectrum(content: string) {
   };
 }
 
+function convertCsvToSpectrum(content: string) {
+
+  const tokens = content
+    .split(',')
+    .map(t => t.trim())
+    .filter(Boolean);
+
+  if (tokens.length < 4) {
+    return { headers: [], elements: [] };
+  }
+
+  // -------- HEADERS --------
+  const dateTime = tokens[0];            // 2026-01-03T11:46:47
+  const heatInfo = tokens[1];            // 26A02B -   - MEI
+  const grade    = tokens[2];            // 28
+  const stage    = tokens[3];            // C
+
+  const headers = [
+    { name: 'Date', value: dateTime.split('T')[0] },
+    { name: 'Time', value: dateTime.split('T')[1] },
+    { name: 'Heat No', value: heatInfo },
+    { name: 'Grade', value: grade },
+    { name: 'Stage', value: stage }
+  ];
+
+  // -------- ELEMENTS --------
+  const elements = [];
+
+  // start after first 4 tokens
+  for (let i = 4; i < tokens.length - 1; i += 2) {
+    const value = tokens[i];
+    const name  = tokens[i + 1];
+
+    if (!name) continue;
+
+    elements.push({
+      ElementName: name.replace('%', ''),
+      reportedResult: {
+        resultValue: value,
+        limits: null,
+        Unit: name.includes('%') ? '%' : '%'
+      }
+    });
+  }
+
+
+  return {
+    headers,
+    elements
+  };
+}

@@ -128,6 +128,10 @@ export class DetailComponent implements OnInit {
       ipcRenderer.invoke('get-ascii-data', this.file.path)
         .then(spectrum => this.processSpectrum(spectrum));
     }
+    else if(this.file.name.endsWith('.csv')) {
+      ipcRenderer.invoke('get-csv-data', this.file.path)
+        .then(spectrum => this.processSpectrum(spectrum));
+    }
 
 
   }

@@ -98,7 +98,7 @@ var getFiles = function (dirPath, filterPredicate) {
                         }
                         supportedFiles = files.filter(function (file) {
                             var ext = path.extname(file).toLowerCase();
-                            return ext === '.xml' || ext === '.txt' || ext === '.asc';
+                            return ext === '.xml' || ext === '.txt' || ext === '.asc' || ext === '.csv';
                         });
                         fileInfos = [];
                         _i = 0, supportedFiles_1 = supportedFiles;

@@ -63,7 +63,7 @@ export const getFiles = (dirPath, filterPredicate?) => {
             // Allow XML, TXT, ASC
             let supportedFiles = files.filter(file => {
                 const ext = path.extname(file).toLowerCase();
-                return ext === '.xml' || ext === '.txt' || ext === '.asc';
+                return ext === '.xml' || ext === '.txt' || ext === '.asc' || ext === '.csv';
             });
 
             const fileInfos = [];

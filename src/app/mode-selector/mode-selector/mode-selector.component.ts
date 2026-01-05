@@ -33,7 +33,7 @@ showSpectromSave = false;
 showSpectromConfirm = false;
 
 pendingMachineType: string | null = null;
-pendingFileType: 'XML' | 'TXT' | 'BAK' | null = null;
+pendingFileType: 'XML' | 'TXT' | 'BAK' | 'CSV' | null = null;
 
 
 
@@ -47,7 +47,7 @@ pendingFileType: 'XML' | 'TXT' | 'BAK' | null = null;
   isAutoDetectSaved = false;
   autosent = false;
 theme: 'dark' | 'light' = 'dark';
-selectedFormat: 'XML' | 'TXT' | 'BAK' | null = null;
+selectedFormat: 'XML' | 'TXT' | 'BAK' | 'CSV' | null = null;
 isIpConnected = false;
 
 
@@ -308,7 +308,7 @@ toggleTheme(event: Event) {
 }
 
 
-onFormatChange(format: 'XML' | 'TXT' | 'BAK') {
+onFormatChange(format: 'XML' | 'TXT' | 'BAK' | 'CSV' ) {
   this.selectedFormat = format;
 
   this.app.setSelectedFileFormat(format);
@@ -356,7 +356,8 @@ onFormatSelect(event: Event) {
   const value = (event.target as HTMLSelectElement).value as
     | 'XML'
     | 'TXT'
-    | 'BAK';
+    | 'BAK'
+    | 'CSV';
 
   this.selectedFormat = value;
 
