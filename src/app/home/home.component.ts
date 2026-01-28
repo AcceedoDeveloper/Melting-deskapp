@@ -48,6 +48,14 @@ fileMetaMap: {
 } = {};
 
 
+private fileMtimeMap: { [path: string]: number } = {};
+private lastAutoSentTime: { [path: string]: number } = {};
+private fileStatMap: {
+  [path: string]: { mtime: number; size: number }
+} = {};
+
+
+
 
 
 statusInfo = {
@@ -294,51 +302,41 @@ this.sendStatus$.subscribe(statusMap => {
 
 
 
-  this.files$.subscribe(files => {
+//   this.files$.subscribe(files => {
 
-    if (!files || !files.length) return;
-
-
-  //   files.forEach(file => {
+//     if (!files || !files.length) return;
 
 
-  //    ipcRenderer.invoke('get-ascii-data', file.path)
-  // .then((data: any) => {
+// from(files)
+//   .pipe(
+//     mergeMap(
+//       file => {
+      
 
-  //   const headers = data?.headers || [];
-  //   console.log('HEADERS FOR', file.name, headers);
+//         const ext = file.name.toLowerCase();
 
-  //   const heatNo   = headers.find(h => h.name === 'Heat No')?.value;
-  //   const stage    = headers.find(h => h.name === 'Stage')?.value;
-  //   const partName = headers.find(h => h.name === 'Part Name')?.value;
-  //   const grade    = headers.find(h => h.name === 'Grade')?.value;
+// let reader = 'get-ascii-data';
 
-  //   this.fileMetaMap[file.path] = {
-  //     heatNo,
-  //     stage,
-  //     partName,
-  //     grade
-  //   };
-
-  //   this.fileMetaChanged$.next();
-  //   this.cdr.markForCheck(); 
-  // })
-  // .catch(err => {
-  //   console.error(' Error reading', file.name, err);
-  // });
+// if (ext.endsWith('.xml')) {
+//   reader = 'get-xml-summary';
+// } else if (ext.endsWith('.csv')) {
+//   reader = 'get-csv-data';
+// }
 
 
-  //   });
-
-
-// files.forEach(file => {
-//   const isXML = file.name.toLowerCase().endsWith('.xml');
-//   const reader = isXML ? 'get-xml-summary' : 'get-ascii-data';
-
-//   ipcRenderer.invoke(reader, file.path)
-//     .then((data: any) => {
-//       console.log('data', data);
+//         return from(ipcRenderer.invoke(reader, file.path))
+//           .pipe(
+//             map(data => ({ file, data }))
+//           );
+//       },
+//       2 
+//     )
+//   )
+//   .subscribe({
+//     next: ({ file, data }) => {
 //       const headers = data?.headers || [];
+
+//       console.log('HEADERS FOR', file.name, headers);
 
 //       this.fileMetaMap[file.path] = {
 //         heatNo: headers.find(h => h.name === 'Heat No')?.value,
@@ -349,40 +347,148 @@ this.sendStatus$.subscribe(statusMap => {
 
 //       this.fileMetaChanged$.next();
 //       this.cdr.markForCheck();
-//     });
+//     },
+//     error: err => {
+//       console.error('Metadata read error:', err);
+//     }
+//   });
+
+
+//   });
+
+
+// this.files$.subscribe(files => {
+
+//   if (!files || !files.length) return;
+
+//   files.forEach(file => {
+
+// const currentMtime = new Date(file.info.mtime).getTime();
+//     const lastMtime = this.fileMtimeMap[file.path];
+
+//     // First time → just record
+//     if (!lastMtime) {
+//       this.fileMtimeMap[file.path] = currentMtime;
+//       return;
+//     }
+
+//     // 🔥 FILE UPDATED
+//     if (currentMtime > lastMtime) {
+
+//       this.fileMtimeMap[file.path] = currentMtime;
+
+//       // Auto-send OFF → stop
+//       if (!this.app.getAutoSend()) return;
+
+//       // Prevent rapid re-send
+//       const now = Date.now();
+//       const lastSent = this.lastAutoSentTime[file.path] || 0;
+//       if (now - lastSent < 2000) return;
+
+//       const format = this.app.getSelectedFileFormat();
+//       const ext = file.name.split('.').pop()?.toLowerCase();
+
+//       const formatMap = {
+//         XML: ['xml'],
+//         TXT: ['txt', 'asc'],
+//         CSV: ['csv']
+//       };
+
+//       if (!formatMap[format]?.includes(ext)) return;
+
+//       const ip = this.app.getSelectedIP();
+//       const serial = this.app.getSelectedSerialPort();
+//       if (!ip && !serial) return;
+
+//       console.log('AUTO SEND (FILE UPDATED):', file.name);
+
+//       this.lastAutoSentTime[file.path] = now;
+
+//       this.fileService.setSelectedFile(file);
+//       this.router.navigate(['/detail'], {
+//         queryParams: { auto: true }
+//       });
+//     }
+//   });
 // });
 
-from(files)
-  .pipe(
-    mergeMap(
-      file => {
-        // const isXML = file.name.toLowerCase().endsWith('.xml');
-        // const reader = isXML ? 'get-xml-summary' : 'get-ascii-data';
+this.files$.subscribe(files => {
 
-        const ext = file.name.toLowerCase();
+  if (!files || !files.length) return;
 
-let reader = 'get-ascii-data';
+  files.forEach(file => {
 
-if (ext.endsWith('.xml')) {
-  reader = 'get-xml-summary';
-} else if (ext.endsWith('.csv')) {
-  reader = 'get-csv-data';
-}
+    const currentMtime = new Date(file.info.mtime).getTime();
+    const currentSize  = Number(file.info.size);
 
+    const prev = this.fileStatMap[file.path];
+
+    // First time → store & skip
+    if (!prev) {
+      this.fileStatMap[file.path] = {
+        mtime: currentMtime,
+        size: currentSize
+      };
+      return;
+    }
+
+    const isUpdated =
+      currentMtime > prev.mtime ||
+      currentSize !== prev.size;
+
+    if (!isUpdated) return;
+
+    // 🔥 FILE UPDATED
+    this.fileStatMap[file.path] = {
+      mtime: currentMtime,
+      size: currentSize
+    };
+
+    if (!this.app.getAutoSend()) return;
+
+    const now = Date.now();
+    const lastSent = this.lastAutoSentTime[file.path] || 0;
+    if (now - lastSent < 2000) return;
+
+    const format = this.app.getSelectedFileFormat();
+    const ext = file.name.split('.').pop()?.toLowerCase();
+
+    const formatMap = {
+      XML: ['xml'],
+      TXT: ['txt', 'asc'],
+      CSV: ['csv']
+    };
+
+    if (!formatMap[format]?.includes(ext)) return;
+
+    const ip = this.app.getSelectedIP();
+    const serial = this.app.getSelectedSerialPort();
+    if (!ip && !serial) return;
+
+    console.log('AUTO SEND (FILE UPDATED):', file.name);
+
+    this.lastAutoSentTime[file.path] = now;
+
+    this.fileService.setSelectedFile(file);
+    this.router.navigate(['/detail'], {
+      queryParams: { auto: true }
+    });
+  });
+
+  // ---- METADATA READ (SAFE HERE) ----
+  from(files)
+    .pipe(
+      mergeMap(file => {
+        let reader = 'get-ascii-data';
+        if (file.name.endsWith('.xml')) reader = 'get-xml-summary';
+        else if (file.name.endsWith('.csv')) reader = 'get-csv-data';
 
         return from(ipcRenderer.invoke(reader, file.path))
-          .pipe(
-            map(data => ({ file, data }))
-          );
-      },
-      2 
+          .pipe(map(data => ({ file, data })));
+      }, 2)
     )
-  )
-  .subscribe({
-    next: ({ file, data }) => {
+    .subscribe(({ file, data }) => {
       const headers = data?.headers || [];
-
-      console.log('HEADERS FOR', file.name, headers);
 
       this.fileMetaMap[file.path] = {
         heatNo: headers.find(h => h.name === 'Heat No')?.value,
@@ -393,14 +499,10 @@ if (ext.endsWith('.xml')) {
 
       this.fileMetaChanged$.next();
       this.cdr.markForCheck();
-    },
-    error: err => {
-      console.error('Metadata read error:', err);
-    }
-  });
+    });
 
+});
 
-  });
 
 this.furnaceOptions$ = combineLatest([
   this.files$,

@@ -504,54 +504,143 @@ function convertAsciiToSpectrum(content: string) {
   };
 }
 
+// function convertCsvToSpectrum(content: string) {
+
+//   const tokens = content
+//     .split(',')
+//     .map(t => t.trim())
+//     .filter(Boolean);
+
+//   if (tokens.length < 4) {
+//     return { headers: [], elements: [] };
+//   }
+
+//   const dateTime = tokens[0];           
+//   const heatInfo = tokens[1];            
+//   const grade    = tokens[2];           
+//   const stage    = tokens[3];            
+
+//   const headers = [
+//     { name: 'Date', value: dateTime.split('T')[0] },
+//     { name: 'Time', value: dateTime.split('T')[1] },
+//     { name: 'Heat No', value: heatInfo },
+//     { name: 'Grade', value: grade },
+//     { name: 'Stage', value: stage }
+//   ];
+
+//   const elements = [];
+
+//   for (let i = 4; i < tokens.length - 1; i += 2) {
+//     const value = tokens[i];
+//     const name  = tokens[i + 1];
+
+//     if (!name) continue;
+
+//     elements.push({
+//       ElementName: name.replace('%', ''),
+//       reportedResult: {
+//         resultValue: value,
+//         limits: null,
+//         Unit: name.includes('%') ? '%' : '%'
+//       }
+//     });
+//   }
+
+
+//   return {
+//     headers,
+//     elements
+//   };
+// }
+
+
 function convertCsvToSpectrum(content: string) {
 
   const tokens = content
     .split(',')
-    .map(t => t.trim())
-    .filter(Boolean);
+    .map(t => t.trim());
 
-  if (tokens.length < 4) {
+  if (!tokens.length) {
     return { headers: [], elements: [] };
   }
 
-  // -------- HEADERS --------
-  const dateTime = tokens[0];            // 2026-01-03T11:46:47
-  const heatInfo = tokens[1];            // 26A02B -   - MEI
-  const grade    = tokens[2];            // 28
-  const stage    = tokens[3];            // C
 
-  const headers = [
-    { name: 'Date', value: dateTime.split('T')[0] },
-    { name: 'Time', value: dateTime.split('T')[1] },
-    { name: 'Heat No', value: heatInfo },
-    { name: 'Grade', value: grade },
-    { name: 'Stage', value: stage }
-  ];
+  const firstElementIndex = tokens.findIndex(t => t === 'C');
 
-  // -------- ELEMENTS --------
-  const elements = [];
-
-  // start after first 4 tokens
-  for (let i = 4; i < tokens.length - 1; i += 2) {
-    const value = tokens[i];
-    const name  = tokens[i + 1];
-
-    if (!name) continue;
-
-    elements.push({
-      ElementName: name.replace('%', ''),
-      reportedResult: {
-        resultValue: value,
-        limits: null,
-        Unit: name.includes('%') ? '%' : '%'
-      }
-    });
+  if (firstElementIndex === -1) {
+    return { headers: [], elements: [] };
   }
+
+
+const headerTokens = tokens.slice(0, firstElementIndex);
+
+const headers = extractRequiredCsvHeaders(headerTokens);
+
+
+
+  const elements: any[] = [];
+
+  for (let i = firstElementIndex; i < tokens.length; i += 3) {
+
+  const element = tokens[i];
+  let value = tokens[i + 2];
+
+  if (!element || !value) continue;
+
+  value = value.replace(/[^0-9.-]/g, '').trim();
+
+  elements.push({
+    ElementName: element.replace('%', ''),
+    reportedResult: {
+      resultValue: value,
+      limits: null,
+      Unit: '%'
+    }
+  });
+
+  if (element === 'Fe%') break;
+}
 
 
   return {
     headers,
     elements
   };
+}
+
+
+function extractRequiredCsvHeaders(headerTokens: string[]) {
+
+  // Remove empty values
+  const cleanHeaders = headerTokens.filter(h => h && h.length);
+
+  // -------------------------
+  // Grade → Always H7 (index 6)
+  // -------------------------
+  const grade = cleanHeaders[6] ?? '';
+
+  // -------------------------
+  // Stage & Tested By
+  // Rule: ... TestedBy, Stage, 28
+  // -------------------------
+  const idx28 = cleanHeaders.lastIndexOf('28');
+
+  let stage = '';
+  let testedBy = '';
+  let HeatNo = '';
+  let sample_Id = '';
+
+  if (idx28 > 1) {
+    stage = cleanHeaders[idx28 - 1];
+    testedBy = cleanHeaders[idx28 - 2];
+    HeatNo = cleanHeaders[idx28 - 6];
+    sample_Id = cleanHeaders[idx28 - 3];
+  }
+
+  return [
+    { name: 'Grade', value: grade },
+    { name: 'Stage', value: stage + '-' + sample_Id },
+    { name: 'Tested By', value: testedBy },
+    { name: 'Heat No', value: HeatNo  }
+  ];
 }

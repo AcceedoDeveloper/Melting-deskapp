@@ -50,6 +50,7 @@ export class DetailComponent implements OnInit {
     { name: 'Furnace 2', no: 2 },
     { name: 'Furnace 3', no: 3 },
     { name: 'Furnace 4', no: 4 },
+    { name: 'Furnace 5', no: 5}
   ];
 
   furnaceCtrl = new FormControl('', [Validators.required]);
@@ -221,14 +222,50 @@ export class DetailComponent implements OnInit {
     // }
   }
 
-  getFurance(headers) {
-    const stage = (headers || []).find(header => header.name?.toLowerCase() === 'stage')
-    if (!stage) {
-      return null
-    }
-    const furanceChar = stage.value.substr(0, 1);
-    return furanceMap[furanceChar.toUpperCase()]
-  }
+  // getFurance(headers) {
+  //   const stage = (headers || []).find(header => header.name?.toLowerCase() === 'stage')
+  //   if (!stage) {
+  //     return null
+  //   }
+  //   const furanceChar = stage.value.substr(0, 1);
+  //   return furanceMap[furanceChar.toUpperCase()]
+  // }
+
+//   getFurance(headers) {
+//   const stageHeader = (headers || [])
+//     .find(h => h.name?.toLowerCase() === 'stage');
+
+//   if (!stageHeader || !stageHeader.value) {
+//     return null;
+//   }
+
+//   const match = stageHeader.value.match(/(\d)\s*F/i);
+
+//   if (!match) {
+//     return null;
+//   }
+
+//   const furnaceNo = Number(match[1]);
+
+//   return furnaceNo >= 1 && furnaceNo <= 4 ? furnaceNo : null;
+// }
+
+
+getFurance(headers) {
+  const stageHeader = (headers || [])
+    .find(h => h.name?.toLowerCase() === 'stage');
+
+  if (!stageHeader?.value) return null;
+
+  const match = stageHeader.value.match(/F\s*(\d)/i);
+
+  if (!match) return null;
+
+  const furnaceNo = Number(match[1]);
+
+  return furnaceNo >= 1 && furnaceNo <= 5 ? furnaceNo : null;
+}
+
 
 
 
@@ -311,131 +348,170 @@ onSendClick() {
 }
 
 
-private sendViaIP(ip: string, data: string, fileName: string) {
+// private sendViaIP(ip: string, data: string, fileName: string) {
 
-  let responseReceived = false;
-  let isErrorResponse = false; 
-  let errorMessage = ''; 
+//   let responseReceived = false;
+//   let isErrorResponse = false; 
+//   let errorMessage = ''; 
 
-  const timeout = setTimeout(() => {
-    if (!responseReceived) {
-      this.ngZone.run(() => {
+//   const timeout = setTimeout(() => {
+//     if (!responseReceived) {
+//       this.ngZone.run(() => {
+//         this.app.hideLoader();
+//         this.dialog.open(ErrorDialogComponent, {
+//           data: {
+//             message: "No response from device over IP (Timeout).",
+//             title: "Timeout",
+//             iconPath: "./assets/icons/error_outline_white_24dp.svg"
+//           }
+//         });
+//       });
+//       this.app.setFileStatus(fileName, "no-response");
+//     }
+//   }, 6000);
+
+//   this.ipService.sendData(ip, data)
+//     .pipe(
+//       catchError(err => {
+//         clearTimeout(timeout);
+//         this.ngZone.run(() => this.app.hideLoader());
+//         this.app.setFileStatus(fileName, "no-response");
+//         return throwError(() => err);
+//       })
+//     )
+//     .subscribe({
+
+
+
+// next: (resp: string) => {
+//   responseReceived = true;
+//   console.log("IP RESPONSE:", resp);
+
+//   if (resp?.includes('$ERR')) {
+//     isErrorResponse = true;
+
+//     const errorCode = resp
+//       .replace('$ERR,', '')
+//       .replace('#', '')
+//       .trim();
+
+//     if (errorCode === 'HEATNO_ALREADY_EXISTS') {
+//       errorMessage = 'Heat No already exists';
+//     }
+//     else if (errorCode === 'FURNACE_NOT_FOUND'){
+//       errorMessage = 'Furnace not found';
+//     } 
+//     else if (errorCode === 'CHARGE_MIX_NOT_EXIST'){
+//       errorMessage = 'Charge mix not exist';
+//     }
+//     else if(errorCode === 'PLANNING_NOT_SELECTED'){
+//       errorMessage = 'Planning not selected';
+//     }
+//     else {
+//       errorMessage = 'Unknown error from device';
+//     }
+
+//     this.app.setFileStatus(fileName, 'no-response');
+//   }
+// },
+
+
+
+
+// complete: () => {
+//   clearTimeout(timeout);
+
+//   if (isErrorResponse) {
+
+//     this.ngZone.run(() => {
+//       this.app.hideLoader();
+
+//        setTimeout(() => {
+//       this.dialog.open(ErrorDialogComponent, {
+//         disableClose: true,
+//         data: {
+//           message: errorMessage,
+//           title: 'Error',
+//           iconPath: './assets/icons/error_outline_white_24dp.svg'
+//         }
+//       });
+//     }); }, 200);
+
+//     return; 
+//   }
+
+//   responseReceived = true;
+
+//   this.ngZone.run(() => {
+//     this.app.hideLoader();
+//   });
+
+//   this.app.setFileStatus(fileName, "sent-data");
+
+//   if (this.isAutoSend) {
+//     setTimeout(() => {
+//       this.ngZone.run(() => {
+//         this.router.navigate(['/home']);
+//       });
+//     }, 200);
+//     return;
+//   }
+
+//   setTimeout(() => {
+//     this.dialog.open(ErrorDialogComponent, {
+//       data: {
+//         message: "Data sent successfully via IP.",
+//         title: "Success",
+//         iconPath: "./assets/icons/done_white_24dp.svg"
+//       }
+//     });
+//   }, 200);
+// }
+
+
+
+//     });
+// }
+
+ private sendViaIP(ip: string, data: string, fileName: string) {
+
+    let responded = false;
+
+    const timeout = setTimeout(() => {
+      if (!responded) {
+        this.app.setFileStatus(fileName, 'no-response');
         this.app.hideLoader();
-        this.dialog.open(ErrorDialogComponent, {
-          data: {
-            message: "No response from device over IP (Timeout).",
-            title: "Timeout",
-            iconPath: "./assets/icons/error_outline_white_24dp.svg"
-          }
-        });
-      });
-      this.app.setFileStatus(fileName, "no-response");
-    }
-  }, 6000);
+        this.goHome();
+      }
+    }, 6000);
 
-  this.ipService.sendData(ip, data)
-    .pipe(
+    this.ipService.sendData(ip, data).pipe(
       catchError(err => {
         clearTimeout(timeout);
-        this.ngZone.run(() => this.app.hideLoader());
-        this.app.setFileStatus(fileName, "no-response");
+        this.app.setFileStatus(fileName, 'no-response');
+        this.app.hideLoader();
+        this.goHome();
         return throwError(() => err);
       })
-    )
-    .subscribe({
+    ).subscribe({
+  next: (resp: string) => {
+    responded = true;
 
-
-
-next: (resp: string) => {
-  responseReceived = true;
-  console.log("IP RESPONSE:", resp);
-
-  if (resp?.includes('$ERR')) {
-    isErrorResponse = true;
-
-    const errorCode = resp
-      .replace('$ERR,', '')
-      .replace('#', '')
-      .trim();
-
-    if (errorCode === 'HEATNO_ALREADY_EXISTS') {
-      errorMessage = 'Heat No already exists';
-    }
-    else if (errorCode === 'FURNACE_NOT_FOUND'){
-      errorMessage = 'Furnace not found';
-    } 
-    else if (errorCode === 'CHARGE_MIX_NOT_EXIST'){
-      errorMessage = 'Charge mix not exist';
-    }
-    else if(errorCode === 'PLANNING_NOT_SELECTED'){
-      errorMessage = 'Planning not selected';
-    }
-    else {
-      errorMessage = 'Unknown error from device';
-    }
-
-    this.app.setFileStatus(fileName, 'no-response');
-  }
-},
-
-
-
-
-complete: () => {
-  clearTimeout(timeout);
-
-  if (isErrorResponse) {
-
-    this.ngZone.run(() => {
+    if (resp.includes('$ERR')) {
+      this.app.setFileStatus(fileName, 'no-response');
       this.app.hideLoader();
-
-       setTimeout(() => {
-      this.dialog.open(ErrorDialogComponent, {
-        disableClose: true,
-        data: {
-          message: errorMessage,
-          title: 'Error',
-          iconPath: './assets/icons/error_outline_white_24dp.svg'
-        }
-      });
-    }); }, 200);
-
-    return; 
-  }
-
-  responseReceived = true;
-
-  this.ngZone.run(() => {
+      this.goHome();
+    }
+  },
+  complete: () => {
+    clearTimeout(timeout);
+     this.app.setFileStatus(fileName, 'sent-data');
     this.app.hideLoader();
-  });
-
-  this.app.setFileStatus(fileName, "sent-data");
-
-  if (this.isAutoSend) {
-    setTimeout(() => {
-      this.ngZone.run(() => {
-        this.router.navigate(['/home']);
-      });
-    }, 200);
-    return;
+    this.goHome();
   }
+});
 
-  setTimeout(() => {
-    this.dialog.open(ErrorDialogComponent, {
-      data: {
-        message: "Data sent successfully via IP.",
-        title: "Success",
-        iconPath: "./assets/icons/done_white_24dp.svg"
-      }
-    });
-  }, 200);
-}
-
-
-
-    });
-}
-
+  }
 
 
 
@@ -527,5 +603,15 @@ private sendViaSerial(portPath: string, data: string, fileName: string) {
 backTo(){
   this.router.navigate(['/home']);
 }
+
+
+ private goHome(delay = 200) {
+    setTimeout(() => {
+      this.ngZone.run(() => {
+        this.router.navigate(['/home']);
+      });
+    }, delay);
+  }
+
 
 }

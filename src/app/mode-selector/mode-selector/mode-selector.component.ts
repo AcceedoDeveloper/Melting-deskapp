@@ -80,6 +80,12 @@ if (savedMachine) {
   this.selectedMachineType = savedMachine;
 }
 
+this.app.getAutoDetectFilesObs().subscribe(value => {
+  this.autoDetectValue = value;
+  this.isAutoDetectSaved = true;
+  this.cdr.markForCheck();
+});
+
 
 
 
@@ -264,10 +270,10 @@ confirmSaveAutoDetect() {
   this.autoDetectValue = this.pendingAutoDetectValue;
 
   this.app.setAutoDetectFiles(this.pendingAutoDetectValue);
-  localStorage.setItem(
-    'autoDetectFiles',
-    this.pendingAutoDetectValue.toString()
-  );
+  // localStorage.setItem(
+  //   'autoDetectFiles',
+  //   this.pendingAutoDetectValue.toString()
+  // );
 
   this.showSaveIcon = false;
   this.showConfirmPopup = false;
@@ -313,7 +319,7 @@ onFormatChange(format: 'XML' | 'TXT' | 'BAK' | 'CSV' ) {
 
   this.app.setSelectedFileFormat(format);
 
-  localStorage.setItem('selectedFormat', format);
+  localStorage.setItem('selectedFileFormat', format);
 }
 
 

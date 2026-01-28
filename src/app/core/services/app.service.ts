@@ -28,7 +28,9 @@ export class AppService {
     selectedIP$ = new BehaviorSubject<string>(null);
     mode$ = new BehaviorSubject<'serial' | 'ip'>('serial');
     serialDataReceived$ = new BehaviorSubject<string>('');
-private autoDetectFiles$ = new BehaviorSubject<number>(5); 
+private autoDetectFiles$ = new BehaviorSubject<number>(
+  Number(localStorage.getItem('autoDetectFiles')) || 5
+);
     selectedFileFormat$ = new BehaviorSubject<
   'XML' | 'TXT' | 'BAK' | 'CSV' | null
 >(null);
@@ -71,6 +73,18 @@ autoSend$ = new BehaviorSubject<boolean>(false);
   if (saved !== null) {
     this.autoSend$.next(saved === 'true');
   }
+
+
+  const fileFormat = localStorage.getItem('selectedFileFormat') as
+    | 'XML'
+    | 'TXT'
+    | 'BAK'
+    | 'CSV'
+    if (fileFormat) {
+    this.selectedFileFormat$.next(fileFormat);
+  }
+
+
 
   
 
@@ -204,6 +218,7 @@ getAutoDetectFiles() {
 
 setSelectedFileFormat(format: 'XML' | 'TXT' | 'BAK' | 'CSV') {
   this.selectedFileFormat$.next(format);
+  localStorage.setItem('selectedFileFormat', format);
 }
 
 getSelectedFileFormatObs() {
@@ -267,6 +282,7 @@ private normalize(name: string) {
 
 setAutoDetectFiles(value: number) {
   this.autoDetectFiles$.next(value);
+  localStorage.setItem('autoDetectFiles', value.toString());
 }
 
 getAutoDetectFilesObs(): Observable<number> {
