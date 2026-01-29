@@ -23,7 +23,8 @@ const headerMap = {
   'Grade': 'G',
   "Tested By": "T",
   "Stage": "ST",
-  "Product ID": "PRO"
+  "Product ID": "PRO",
+  "Sample ID": "MS",
 }
 
 const furanceMap = {
@@ -140,7 +141,7 @@ export class DetailComponent implements OnInit {
 
 
    processSpectrum(spectrum: Spectrum) {
-    this.sendableData = this.getSendableData(spectrum);
+    this.sendableData = this.getSendableData(spectrum);    
 
     const furanceNo = this.getFurance(spectrum.headers);
     if (furanceNo) {
@@ -183,7 +184,15 @@ export class DetailComponent implements OnInit {
 
 
   getSendableData(spectrum: any) {
-    // const headers = spectrum.headers.map(h => ({ n: h.name, v: h.value }));
+
+
+     const sampleIdHeader = spectrum.headers.find(
+       (h) => h.name === "Sample ID",
+     );
+
+     const sampleStatus = sampleIdHeader
+       ? this.getTheStatus(sampleIdHeader.value)
+       : "";
 
     const headers = spectrum.headers.filter(h => h.name !== 'Alloy' && h.name !== 'Product ID').map((h) => {
       let value = h.value
@@ -191,7 +200,12 @@ export class DetailComponent implements OnInit {
         value = h.value.split(' ')[0]
       }
       if (h.name === 'Stage') {
-        value = value && value.replace(' ', '-')
+        value = value && value.replace(' ', '-');
+
+        if (sampleStatus) {
+          value = `${value}-${sampleStatus}`;
+        }
+
       }
       return `${headerMap[h.name]}:${value}`
     }).join(',');
@@ -202,24 +216,6 @@ export class DetailComponent implements OnInit {
 
     return `${headers},${elements}`
 
-    // const elements = spectrum.elements.map((e: SpectrumElement) => {
-    //   const res = {};
-    //   if (e.reportedResult.limits) {
-    //     res['l'] = {
-    //       u: e.reportedResult.limits.UpperAcceptanceLimit,
-    //       l: e.reportedResult.limits.LowerAcceptanceLimit,
-    //       uw: e.reportedResult.limits.UpperWarningLimit,
-    //       lw: e.reportedResult.limits.LowerWarningLimit
-    //     }
-    //   }
-    //   res['n'] = e.ElementName;
-    //   res['r'] = e.reportedResult.resultValue;
-    //   return res
-    // });
-    // return {
-    //   h: headers,
-    //   e: elements
-    // }
   }
 
   // getFurance(headers) {
@@ -271,44 +267,6 @@ getFurance(headers) {
 
 
 
-
-// onSendClick() {
-
-//   const furnaceNo = this.furnaceCtrl.value;
-//   const sendData = `${this.sendableData},fur:${furnaceNo}`;
-//   const finalSerialData = `$${sendData}#`;
-//   const finalIPData = sendData;
-//   const fileName = this.file.name;
-
-//   const ip = this.app.getSelectedIP();
-//   console.log("Selected IP:", ip);
-//   const serialPort = this.app.getSelectedSerialPort();
-
-//   this.ngZone.run(() => this.app.showLoader("Sending data..."));
-
-
-//   if (ip) {
-//     this.sendViaIP(ip, finalIPData, fileName);
-//     return;
-//   }
-
-
-//   if (serialPort) {
-//     this.sendViaSerial(serialPort.path, finalSerialData, fileName);
-//     return;
-//   }
-
-
-//   this.app.hideLoader();
-//   this.dialog.open(ErrorDialogComponent, {
-//     data: {
-//       message: "No IP or Serial connection available.",
-//       title: "Connection Error",
-//       iconPath: "./assets/icons/error_outline_white_24dp.svg"
-//     }
-//   });
-// }
-
 onSendClick() {
 
  
@@ -319,6 +277,7 @@ onSendClick() {
   const finalSerialData = `$${sendData}#`;
   const finalIPData = sendData;
   const fileName = this.file.name;
+  console.log('data sent to the server:', sendData);
 
   const ip = this.app.getSelectedIP();
   const serialPort = this.app.getSelectedSerialPort();
@@ -613,5 +572,12 @@ backTo(){
     }, delay);
   }
 
+
+  getTheStatus(value: string) {
+    if(value === 'FINAL'){
+      return 'F1'
+    }
+    return '';
+  }
 
 }

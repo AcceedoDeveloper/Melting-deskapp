@@ -611,18 +611,10 @@ const headers = extractRequiredCsvHeaders(headerTokens);
 
 function extractRequiredCsvHeaders(headerTokens: string[]) {
 
-  // Remove empty values
   const cleanHeaders = headerTokens.filter(h => h && h.length);
 
-  // -------------------------
-  // Grade → Always H7 (index 6)
-  // -------------------------
   const grade = cleanHeaders[6] ?? '';
 
-  // -------------------------
-  // Stage & Tested By
-  // Rule: ... TestedBy, Stage, 28
-  // -------------------------
   const idx28 = cleanHeaders.lastIndexOf('28');
 
   let stage = '';
@@ -639,8 +631,9 @@ function extractRequiredCsvHeaders(headerTokens: string[]) {
 
   return [
     { name: 'Grade', value: grade },
-    { name: 'Stage', value: stage + '-' + sample_Id },
+    { name: 'Stage', value: stage  },
     { name: 'Tested By', value: testedBy },
-    { name: 'Heat No', value: HeatNo  }
+    { name: 'Heat No', value: HeatNo  },
+    { name: 'Sample ID', value: sample_Id }
   ];
 }

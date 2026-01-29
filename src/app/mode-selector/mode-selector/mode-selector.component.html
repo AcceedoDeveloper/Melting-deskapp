@@ -13,7 +13,6 @@
     <span class="icon moon">🌙</span>
   </span>
 </label>
-<!-- ================= LOGIN ================= -->
 
 
 <div class="login-box" *ngIf="!isLoggedIn">
@@ -36,14 +35,9 @@
 </div>
 
 
-<!-- ================= SETTINGS ================= -->
 <div *ngIf="isLoggedIn" class="settings-layout">
 
 
-
-
-
-  <!-- ========== COMMUNICATION ========= -->
   <div class="settings-card">
     <h3 class="section-title">Communication </h3>
 
@@ -57,7 +51,6 @@
         </select>
       </div>
 
-      <!-- SERIAL MODE -->
       <div *ngIf="modeCtrl.value === 'serial'" class="mode-content">
         <div class="input-group">
           <label>Select Serial Port</label>
@@ -75,7 +68,6 @@
         <button class="refresh-btn" (click)="onRefreshClick()">⟳</button>
       </div>
 
-     <!-- IP MODE -->
 <div *ngIf="modeCtrl.value === 'ip'" class="mode-content">
 
   <div class="input-group">
@@ -189,8 +181,6 @@
     </div>
     </div>
 
-
-
     <div class="settings-card" >
     
 
@@ -251,15 +241,11 @@
 
   </div>
 
-
-
-  <!-- ========== LOCATION ========= -->
   <div class="settings-card">
     <h3 class="section-title">Location</h3>
 
     <div class="section-content location-section">
 
-      <!-- ENTER DIRECTORY -->
       <ng-container *ngIf="showSearchDirectory; else editDirectoryTpl">
 
         <label class="heading">Enter Directory</label>
@@ -302,7 +288,6 @@
 
       </ng-container>
 
-      <!-- EDIT DIRECTORY -->
       <ng-template #editDirectoryTpl>
 
         <div class="heading">Change Search Directory</div>
@@ -338,11 +323,12 @@
     </div>
   </div>
 
-
-
-
-
 </div>
+
+
+<!-- <div>
+  sfdvc
+</div> -->
 
 
 <div class="confirm-overlay" *ngIf="showConfirmPopup">
@@ -360,8 +346,6 @@
     </div>
   </div>
 </div>
-
-
 
 <div class="confirm-overlay" *ngIf="showSpectromConfirm">
   <div class="confirm-box">
