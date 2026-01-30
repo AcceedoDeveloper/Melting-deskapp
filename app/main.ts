@@ -387,6 +387,43 @@ ipcMain.handle(
   }
 );
 
+ipcMain.handle(
+  'get-headers',
+  async (e, { baseUrl }) => {
+    try {
+      if (!baseUrl || baseUrl.trim() === '') {
+        throw new Error('Base URL is empty');
+      }
+
+      if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+        baseUrl = 'http://' + baseUrl;
+      }
+
+      const apiUrl = new URL('/headers', baseUrl);
+
+      const response = await fetch(apiUrl.toString());
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      return {
+        success: true,
+        data
+      };
+
+    } catch (err) {
+      console.error('Headers API Error:', err);
+
+      return {
+        success: false,
+        error: err.message
+      };
+    }
+  }
+);
 
 
 

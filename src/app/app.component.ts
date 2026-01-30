@@ -65,6 +65,22 @@ fileStatusCount$ = this.app.getFileStatusCountObs();
   }
   ngOnInit(): void {
 
+    const savedIp = localStorage.getItem('lastEnteredIp');
+
+  if (savedIp) {
+    let ip = savedIp.trim();
+
+    if (!ip.startsWith('http://') && !ip.startsWith('https://')) {
+      ip = 'http://' + ip;
+    }
+
+    if (!ip.endsWith('/')) {
+      ip += '/';
+    }
+
+    this.app.setSelectedIPAddress(ip);
+  }
+
      this.app.getThemeObs().subscribe(theme => {
       this.theme = theme; 
     document.body.classList.toggle('dark-theme', theme === 'dark');

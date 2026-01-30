@@ -330,6 +330,54 @@
   sfdvc
 </div> -->
 
+<div *ngIf="isLoggedIn" class="settings-layout">
+<div class="settings-card full-width">
+  <div class="section-header-row">
+<h3 class="section-title-no-border space">
+  <span class="header-name">Header Name</span>
+  <span class="variations">Variations</span>
+</h3>
+    <div class="header-actions">
+    
+      <button class="add-btn" title="Add Row" (click)="addRow()">+</button>
+    </div>
+  </div>
+
+<div class="section-content mapping-container">
+  <div class="mapping-container">
+    <div class="mapping-row" *ngFor="let item of mappings; let i = index; trackBy: trackByIndex">
+      
+      <input 
+        type="text" 
+        [(ngModel)]="item.header" 
+        placeholder="Header" 
+        class="custom-input mapping-box">
+      
+      <span class="mapping-arrow">=</span>
+
+      <div class="horizontal-values-wrapper" style="display: flex; align-items: center; gap: 10px;">
+        <ng-container *ngFor="let val of item.input; let j = index; trackBy: trackByIndex">
+          <input 
+            type="text" 
+            [(ngModel)]="item.input[j]" 
+            placeholder="Input Box" 
+            class="custom-input mapping-box">
+          
+          <span class="mapping-arrow" *ngIf="j < item.input.length - 1"></span>
+        </ng-container>
+
+         <button class="add-btn-small mapping-plus-gap" (click)="addValueToRow(i)" title="Add horizontal box">+</button>
+
+         <button class="save-btn2" (click)="saveMappings(i)" title="Save All">
+        <img src="assets/icons/save.png" alt="Save" />
+      </button>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
 
 <div class="confirm-overlay" *ngIf="showConfirmPopup">
   <div class="confirm-box">
@@ -364,3 +412,9 @@
 </div>
 
 
+<div class="ui-toast" *ngIf="showToast" [ngClass]="toastType">
+  <div class="toast-content">
+    <span class="toast-icon"></span>
+    <span class="toast-text">{{ toastMsg }}</span>
+  </div>
+</div>

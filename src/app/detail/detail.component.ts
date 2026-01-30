@@ -3,7 +3,7 @@ import { AppService } from '../core/services/app.service';
 import { FileListService } from '../core/services/file-list.service';
 import { AcFile } from '../models/file-model';
 
-import { ipcRenderer } from 'electron';
+import {  ipcRenderer } from 'electron';
 import { Spectrum, SpectrumElement } from '../models/spectrum.model';
 import { catchError, finalize, Observable, throwError } from 'rxjs';
 import { PortInfo } from '../models/port-info.model';
@@ -59,6 +59,11 @@ export class DetailComponent implements OnInit {
   WifiDisconneced: number = 0;
   isAutoSend = false;
 
+  stageHeaders: Array<{
+  name: string;
+  variations: string[];
+}>
+
 
   constructor(
     private fileList: FileListService,
@@ -73,6 +78,26 @@ export class DetailComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.restoreIpFromStorage();
+this.loadTheHeaders().then(() => {
+
+    if (this.file.name.endsWith('.xml')) {
+      ipcRenderer.invoke('get-spectrum-data', this.file.path)
+        .then(spectrum => this.processSpectrum(spectrum));
+    }
+    else if (this.file.name.endsWith('.asc') || this.file.name.endsWith('.txt')) {
+      ipcRenderer.invoke('get-ascii-data', this.file.path)
+        .then(spectrum => this.processSpectrum(spectrum));
+    }
+    else if (this.file.name.endsWith('.csv')) {
+      ipcRenderer.invoke('get-csv-data', this.file.path)
+        .then(spectrum => this.processSpectrum(spectrum));
+    }
+
+  }).catch(err => {
+    console.error('Header load failed:', err);
+  });
+
 
      this.route.queryParams.subscribe(params => {
     this.isAutoSend = params['auto'] === 'true';
@@ -122,18 +147,18 @@ export class DetailComponent implements OnInit {
 
 
 
-    if (this.file.name.endsWith('.xml')) {
-      ipcRenderer.invoke('get-spectrum-data', this.file.path)
-        .then(spectrum => this.processSpectrum(spectrum));
-    } 
-    else if (this.file.name.endsWith('.asc') || this.file.name.endsWith('.txt')) {
-      ipcRenderer.invoke('get-ascii-data', this.file.path)
-        .then(spectrum => this.processSpectrum(spectrum));
-    }
-    else if(this.file.name.endsWith('.csv')) {
-      ipcRenderer.invoke('get-csv-data', this.file.path)
-        .then(spectrum => this.processSpectrum(spectrum));
-    }
+    // if (this.file.name.endsWith('.xml')) {
+    //   ipcRenderer.invoke('get-spectrum-data', this.file.path)
+    //     .then(spectrum => this.processSpectrum(spectrum));
+    // } 
+    // else if (this.file.name.endsWith('.asc') || this.file.name.endsWith('.txt')) {
+    //   ipcRenderer.invoke('get-ascii-data', this.file.path)
+    //     .then(spectrum => this.processSpectrum(spectrum));
+    // }
+    // else if(this.file.name.endsWith('.csv')) {
+    //   ipcRenderer.invoke('get-csv-data', this.file.path)
+    //     .then(spectrum => this.processSpectrum(spectrum));
+    // }
 
 
   }
@@ -190,9 +215,8 @@ export class DetailComponent implements OnInit {
        (h) => h.name === "Sample ID",
      );
 
-     const sampleStatus = sampleIdHeader
-       ? this.getTheStatus(sampleIdHeader.value)
-       : "";
+     const sampleStatus = this.getStageSuffix(sampleIdHeader.value);
+     console.log('sample status ', sampleStatus);
 
     const headers = spectrum.headers.filter(h => h.name !== 'Alloy' && h.name !== 'Product ID').map((h) => {
       let value = h.value
@@ -573,11 +597,67 @@ backTo(){
   }
 
 
-  getTheStatus(value: string) {
-    if(value === 'FINAL'){
-      return 'F1'
-    }
-    return '';
+ getStageSuffix(stageValue: string): string {
+  if (!stageValue || !this.stageHeaders?.length) {
+    return stageValue;
   }
+
+  const match = this.stageHeaders.find(h =>
+    h.variations.includes(stageValue)
+  );
+
+  console.log('header ', match);
+  
+
+  return match ? match.name : stageValue;
+}
+
+
+
+loadTheHeaders(): Promise<void> {
+  // const baseUrl = 'http://localhost:3002';
+    const baseUrl = this.app.getSelectedIP();
+
+
+
+  return ipcRenderer.invoke('get-headers', { baseUrl })
+    .then(res => {
+      if (!res.success) {
+        throw new Error(res.error);
+      }
+
+      this.stageHeaders = res.data.data;
+
+      console.log(
+        'stageHeaders is array:',
+        Array.isArray(this.stageHeaders),
+        this.stageHeaders
+      );
+    });
+}
+
+
+restoreIpFromStorage() {
+  const savedIp = localStorage.getItem('lastEnteredIp');
+  if (!savedIp) return;
+
+  let ip = savedIp.trim();
+
+  if (!ip.startsWith('http://') && !ip.startsWith('https://')) {
+    ip = 'http://' + ip;
+  }
+
+  if (!ip.endsWith('/')) {
+    ip += '/';
+  }
+
+  this.app.setSelectedIPAddress(ip);
+  this.app.setMode('ip'); // 🔥 THIS WAS MISSING
+}
+
+
+
+
+
 
 }
