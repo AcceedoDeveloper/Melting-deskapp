@@ -654,3 +654,16 @@ width: 150px;
    display: flex;
   gap: 86px;
 }
+
+
+
+header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Rendu button-kum naduvula gap iruka */
+}
+
+.save-all-btn img {
+  width: 20px; /* Icon size adjust panna */
+  height: 20px;
+}

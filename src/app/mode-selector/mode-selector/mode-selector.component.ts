@@ -19,6 +19,7 @@ interface StageMapping {
   styleUrls: ['./mode-selector.component.scss']
 })
 export class ModeSelectorComponent implements OnInit {
+  
 
     directoryCtrl = new FormControl('', Validators.required);
 
@@ -81,6 +82,7 @@ modeCtrl = new FormControl('ip');
     private router: Router,
     private http: HttpClient
   ) {}
+
 
   ngOnInit(): void {
 
@@ -703,7 +705,29 @@ private connectWithIp(rawIp: string) {
 }
 
 
+saveAllMappings() {
+  const payload = {
+    headers: this.mappings.map(m => ({
+      name: m.header,
+      variations: m.input.filter(v => v && v.trim() !== '') // Empty values-ah remove panna
+    }))
+  };
 
+  console.log("Sending Payload to Server:", payload);
+
+  // 2. HTTP POST request moolama server-ku anupuvom
+  // Inga this.apiUrl use pannunga (http://localhost:3003/headers)
+  this.http.put(this.apiUrl, payload).subscribe({
+    next: (res) => {
+      this.showNotification('Ellam data-vum server-la save aiyiduchi!', 'success');
+      this.loadFromServer(); // Save panna apram refresh panna
+    },
+    error: (err) => {
+      console.error("Save failed:", err);
+      this.showNotification('Server-la save panna mudiyala!', 'error');
+    }
+  });
+}
 
 
 

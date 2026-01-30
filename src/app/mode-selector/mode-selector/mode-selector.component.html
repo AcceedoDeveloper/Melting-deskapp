@@ -338,7 +338,14 @@
   <span class="variations">Variations</span>
 </h3>
     <div class="header-actions">
-    
+
+      <!-- <button class="save-btn2" title="Save All">
+        <img src="assets/icons/save.png" alt="Save" />
+      </button> -->
+<button class="save-btn2" title="Save All" (click)="saveAllMappings()">
+  <img src="assets/icons/save.png" alt="Save" />
+</button>
+
       <button class="add-btn" title="Add Row" (click)="addRow()">+</button>
     </div>
   </div>
@@ -368,9 +375,7 @@
 
          <button class="add-btn-small mapping-plus-gap" (click)="addValueToRow(i)" title="Add horizontal box">+</button>
 
-         <button class="save-btn2" (click)="saveMappings(i)" title="Save All">
-        <img src="assets/icons/save.png" alt="Save" />
-      </button>
+
 
       </div>
 
