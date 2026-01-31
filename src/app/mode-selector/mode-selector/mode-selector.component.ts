@@ -19,11 +19,11 @@ interface StageMapping {
   styleUrls: ['./mode-selector.component.scss']
 })
 export class ModeSelectorComponent implements OnInit {
-  
 
     directoryCtrl = new FormControl('', Validators.required);
 
     private apiUrl = this.app.getSelectedIP() + 'headers';
+    isMappingDirty = false;
     mappings: StageMapping[] = [{ header: '', input: [''] }];
 
    loginUserCtrl = new FormControl('');
@@ -82,7 +82,6 @@ modeCtrl = new FormControl('ip');
     private router: Router,
     private http: HttpClient
   ) {}
-
 
   ngOnInit(): void {
 
@@ -525,14 +524,19 @@ trackByIndex(index: number, obj: any): any {
   return index;
 }
 
-
+onMappingChange() {
+  console.log("Change detected!");
+  this.isMappingDirty = true;
+}
 
   addRow() {
     this.mappings.push({ header: '', input: [''] });
+    this.onMappingChange();
   }
 
 addValueToRow(rowIndex: number) {
   this.mappings[rowIndex].input.push('');
+  this.onMappingChange();
 }
 
 
@@ -720,6 +724,7 @@ saveAllMappings() {
   this.http.put(this.apiUrl, payload).subscribe({
     next: (res) => {
       this.showNotification('Ellam data-vum server-la save aiyiduchi!', 'success');
+      this.isMappingDirty = false;
       this.loadFromServer(); // Save panna apram refresh panna
     },
     error: (err) => {
@@ -728,6 +733,7 @@ saveAllMappings() {
     }
   });
 }
+
 
 
 
