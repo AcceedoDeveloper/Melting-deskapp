@@ -6,7 +6,13 @@ import { PortInfo } from '../../models/port-info.model';
 import { FileListService } from '../../core/services/file-list.service';
 import { catchError, combineLatest, finalize, map, Observable, pairwise, shareReplay, startWith, tap, throwError, BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
+interface StageMapping {
+  id?: string;
+  header: string;
+  input: string[];
+}
 @Component({
   selector: 'app-mode-selector',
   templateUrl: './mode-selector.component.html',
@@ -16,6 +22,9 @@ export class ModeSelectorComponent implements OnInit {
 
     directoryCtrl = new FormControl('', Validators.required);
 
+    private apiUrl = this.app.getSelectedIP() + 'headers';
+    isMappingDirty = false;
+    mappings: StageMapping[] = [{ header: '', input: [''] }];
 
    loginUserCtrl = new FormControl('');
   loginPassCtrl = new FormControl('');
@@ -34,6 +43,11 @@ showSpectromConfirm = false;
 
 pendingMachineType: string | null = null;
 pendingFileType: 'XML' | 'TXT' | 'BAK' | 'CSV' | null = null;
+
+
+showToast = false;
+toastMsg = '';
+toastType: 'success' | 'error' | 'warning' = 'success';
 
 
 
@@ -65,10 +79,14 @@ modeCtrl = new FormControl('ip');
     private serialService: SerialPortService,
     private fileService: FileListService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
+
+          this.loadFromServer();
+
 
 
     const currentTheme = this.app.getTheme();
@@ -80,13 +98,30 @@ if (savedMachine) {
   this.selectedMachineType = savedMachine;
 }
 
+this.app.getAutoDetectFilesObs().subscribe(value => {
+  this.autoDetectValue = value;
+  this.isAutoDetectSaved = true;
+  this.cdr.markForCheck();
+});
 
 
 
-    const savedLastIp = localStorage.getItem('lastEnteredIp');
+
+//     const savedLastIp = localStorage.getItem('lastEnteredIp');
+// if (savedLastIp) {
+//   this.lastEnteredIp = savedLastIp;
+//   this.ipAddressCtrl.setValue(savedLastIp);
+// }
+
+
+const savedLastIp = localStorage.getItem('lastEnteredIp');
+
 if (savedLastIp) {
   this.lastEnteredIp = savedLastIp;
-  this.ipAddressCtrl.setValue(savedLastIp);
+  this.connectWithIp(savedLastIp);
+
+  // load API AFTER connection
+  this.loadFromServer();
 }
 
 
@@ -264,10 +299,10 @@ confirmSaveAutoDetect() {
   this.autoDetectValue = this.pendingAutoDetectValue;
 
   this.app.setAutoDetectFiles(this.pendingAutoDetectValue);
-  localStorage.setItem(
-    'autoDetectFiles',
-    this.pendingAutoDetectValue.toString()
-  );
+  // localStorage.setItem(
+  //   'autoDetectFiles',
+  //   this.pendingAutoDetectValue.toString()
+  // );
 
   this.showSaveIcon = false;
   this.showConfirmPopup = false;
@@ -313,43 +348,64 @@ onFormatChange(format: 'XML' | 'TXT' | 'BAK' | 'CSV' ) {
 
   this.app.setSelectedFileFormat(format);
 
-  localStorage.setItem('selectedFormat', format);
+  localStorage.setItem('selectedFileFormat', format);
 }
 
 
 
+
+// onConnectIP() {
+//   this.loadFromServer();
+//   if (this.isIpConnected) {
+//   this.lastEnteredIp = this.ipAddressCtrl.value || this.lastEnteredIp;
+//   localStorage.setItem('lastEnteredIp', this.lastEnteredIp);
+
+//   this.app.setSelectedIPAddress(null);
+//   this.isIpConnected = false;
+
+//   this.ipAddressCtrl.setValue(this.lastEnteredIp);
+
+//   return;
+// }
+
+
+//   let rawIp = this.ipAddressCtrl.value?.trim();
+//   if (!rawIp) return;
+
+//   if (!rawIp.startsWith('http://') && !rawIp.startsWith('https://')) {
+//     rawIp = 'http://' + rawIp;
+//   }
+
+//   if (!rawIp.endsWith('/')) {
+//     rawIp = rawIp + '/';
+//   }
+
+//   console.log('Final IP:', rawIp);
+
+//   this.app.setSelectedIPAddress(rawIp);
+//   this.isIpConnected = true;
+//   this.loadFromServer();
+// }
 
 onConnectIP() {
 
+  // DISCONNECT
   if (this.isIpConnected) {
-  this.lastEnteredIp = this.ipAddressCtrl.value || this.lastEnteredIp;
-  localStorage.setItem('lastEnteredIp', this.lastEnteredIp);
+    this.app.setSelectedIPAddress(null);
+    this.isIpConnected = false;
+    return;
+  }
 
-  this.app.setSelectedIPAddress(null);
-  this.isIpConnected = false;
-
-  this.ipAddressCtrl.setValue(this.lastEnteredIp);
-
-  return;
-}
-
-
-  let rawIp = this.ipAddressCtrl.value?.trim();
+  const rawIp = this.ipAddressCtrl.value;
   if (!rawIp) return;
 
-  if (!rawIp.startsWith('http://') && !rawIp.startsWith('https://')) {
-    rawIp = 'http://' + rawIp;
-  }
+  localStorage.setItem('lastEnteredIp', rawIp);
 
-  if (!rawIp.endsWith('/')) {
-    rawIp = rawIp + '/';
-  }
-
-  console.log('Final IP:', rawIp);
-
-  this.app.setSelectedIPAddress(rawIp);
-  this.isIpConnected = true;
+  this.connectWithIp(rawIp);
+  this.loadFromServer();
 }
+
+
 
 
 onFormatSelect(event: Event) {
@@ -461,6 +517,223 @@ cancelSpectromSave() {
   this.pendingMachineType = null;
   this.pendingFileType = null;
 }
+
+
+  
+trackByIndex(index: number, obj: any): any {
+  return index;
+}
+
+onMappingChange() {
+  console.log("Change detected!");
+  this.isMappingDirty = true;
+}
+
+  addRow() {
+    this.mappings.push({ header: '', input: [''] });
+    this.onMappingChange();
+  }
+
+addValueToRow(rowIndex: number) {
+  this.mappings[rowIndex].input.push('');
+  this.onMappingChange();
+}
+
+
+
+
+saveMappings(rowIndex: number) {
+  const row = this.mappings[rowIndex];
+  
+  if (!row.header || !row.header.trim()) {
+    this.showNotification('Please enter a Header name', 'warning');
+    return;
+  }
+
+  const payload = {
+    name: row.header,
+    variations: row.input.filter(v => v && v.trim() !== '')
+  };
+
+  if (row.id) {
+    this.http.put(`${this.apiUrl}/${row.id}`, payload).subscribe({
+      next: (res) => {
+        this.showNotification(`Updated: ${payload.name}`, 'success');
+        this.loadFromServer(); 
+      },
+      error: (err) => this.showNotification('Update failed!', 'error')
+    });
+  } else {
+    this.http.post<any>(this.apiUrl, payload).subscribe({
+      next: (res) => {
+        this.showNotification(`Saved: ${payload.name}`, 'success');
+        this.loadFromServer(); 
+      },
+      error: (err) => this.showNotification('Save failed!', 'error')
+    });
+  }
+}
+
+// loadFromServer() {
+//   console.log('API ', this.apiUrl);
+//   this.http.get<any>(this.apiUrl).subscribe({
+//     next: (res) => {
+//       const rawData = Array.isArray(res) ? res : (res.data || []);
+      
+//       if (rawData.length > 0) {
+//         this.mappings = rawData.map(item => ({
+//           id: item._id,            
+//           header: item.name || '', 
+//           input: item.variations && item.variations.length ? [...item.variations] : ['']
+//         }));
+//       } else {
+//         this.mappings = [{ header: '', input: [''] }];
+//       }
+//       this.cdr.detectChanges();
+//     },
+//     error: (err) => {
+//       console.error("Load failed:", err);
+//       this.mappings = [{ header: '', input: [''] }];
+//     }
+//   });
+// }
+
+
+// loadFromServer() {
+//   const baseIp = this.app.getSelectedIP();
+
+//   if (!baseIp) {
+//     console.warn('IP not set yet, skipping loadFromServer');
+//     return;
+//   }
+
+//   const apiUrl = baseIp.endsWith('/')
+//     ? `${baseIp}headers`
+//     : `${baseIp}/headers`;
+
+//   console.log('API', apiUrl);
+
+//   this.http.get<any>(apiUrl).subscribe({
+//     next: (res) => {
+//       const rawData = Array.isArray(res) ? res : (res.data || []);
+
+//       this.mappings = rawData.length
+//         ? rawData.map(item => ({
+//             id: item._id,
+//             header: item.name || '',
+//             input: item.variations?.length
+//               ? [...item.variations]
+//               : ['']
+//           }))
+//         : [{ header: '', input: [''] }];
+
+//       this.cdr.detectChanges();
+//     },
+//     error: (err) => {
+//       console.error('Load failed:', err);
+//       this.mappings = [{ header: '', input: [''] }];
+//     }
+//   });
+// }
+
+loadFromServer(): Promise<boolean> {
+  const baseIp = this.app.getSelectedIP();
+
+  if (!baseIp) {
+    console.warn('IP not set yet');
+    return Promise.resolve(false);
+  }
+
+  const apiUrl = baseIp.endsWith('/')
+    ? `${baseIp}headers`
+    : `${baseIp}/headers`;
+
+  console.log('API', apiUrl);
+
+  return new Promise((resolve, reject) => {
+    this.http.get<any>(apiUrl).subscribe({
+      next: (res) => {
+        const rawData = Array.isArray(res) ? res : (res.data || []);
+
+        this.mappings = rawData.length
+          ? rawData.map(item => ({
+              id: item._id,
+              header: item.name || '',
+              input: item.variations?.length
+                ? [...item.variations]
+                : ['']
+            }))
+          : [{ header: '', input: [''] }];
+
+        this.cdr.detectChanges();
+        resolve(true);   // ✅ DATA LOADED
+      },
+      error: (err) => {
+        console.error('Load failed:', err);
+        reject(false);
+      }
+    });
+  });
+}
+
+
+
+showNotification(message: string, type: 'success' | 'error' | 'warning' = 'success') {
+  this.toastMsg = message;
+  this.toastType = type;
+  this.showToast = true;
+
+  // Auto-hide after 3 seconds
+  setTimeout(() => {
+    this.showToast = false;
+    this.cdr.detectChanges();
+  }, 3000);
+}
+
+private connectWithIp(rawIp: string) {
+  let ip = rawIp.trim();
+
+  if (!ip) return;
+
+  if (!ip.startsWith('http://') && !ip.startsWith('https://')) {
+    ip = 'http://' + ip;
+  }
+
+  if (!ip.endsWith('/')) {
+    ip += '/';
+  }
+
+  this.app.setSelectedIPAddress(ip);
+  this.isIpConnected = true;
+  this.ipAddressCtrl.setValue(ip);
+}
+
+
+saveAllMappings() {
+  const payload = {
+    headers: this.mappings.map(m => ({
+      name: m.header,
+      variations: m.input.filter(v => v && v.trim() !== '') // Empty values-ah remove panna
+    }))
+  };
+
+  console.log("Sending Payload to Server:", payload);
+
+  // 2. HTTP POST request moolama server-ku anupuvom
+  // Inga this.apiUrl use pannunga (http://localhost:3003/headers)
+  this.http.put(this.apiUrl, payload).subscribe({
+    next: (res) => {
+      this.showNotification('Ellam data-vum server-la save aiyiduchi!', 'success');
+      this.isMappingDirty = false;
+      this.loadFromServer(); // Save panna apram refresh panna
+    },
+    error: (err) => {
+      console.error("Save failed:", err);
+      this.showNotification('Server-la save panna mudiyala!', 'error');
+    }
+  });
+}
+
 
 
 

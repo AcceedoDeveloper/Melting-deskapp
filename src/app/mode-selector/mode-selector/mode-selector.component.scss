@@ -479,3 +479,191 @@ background: linear-gradient(135deg,#4a90e2,#357ac9);}
 .theme-toggle input:checked + .slider2 .moon {
   opacity: 0.5;
 }
+
+
+
+.section-title1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  width: 80%;
+  margin-left: 30px;
+}
+
+
+/* Container to handle the alignment of the row */
+.mapping-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+  padding: 0;
+  pointer-events: auto;
+}
+
+.mapping-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+}
+
+/* Specific sizing for mapping inputs */
+.mapping-box {
+width: 150px;
+  max-width: 150px;
+}
+
+.mapping-arrow {
+  font-size: 24px;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+/* Plus button styling matching your save buttons */
+.add-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: var(--accent); /* Uses your blue theme color */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  transition: 0.25s ease;
+}
+
+.add-btn:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+}
+
+.add-btn:active {
+  transform: scale(0.95);
+}
+
+/* Container for the Title and Icons on the same line */
+.section-header-row {
+  display: flex;
+  justify-content: space-between; /* Pushes title to left, icons to right */
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+/* Remove the default border from title since we moved it to the row container */
+.section-title-no-border {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 0;
+}
+
+/* Grouping the buttons together */
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.horizontal-inputs {
+  display: flex;
+  flex-wrap: wrap; /* Allows wrapping if the line gets too long */
+  align-items: center;
+}
+
+.add-btn-small {
+  width: 30px;
+  height: 30px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--accent);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.add-btn-small:hover {
+  background: var(--accent);
+  color: white;
+}
+
+
+
+.mapping-plus-gap {
+  /* This ensures the plus button doesn't hug the last input box too tightly */
+  margin-left: 5px; 
+}
+
+.horizontal-values-wrapper {
+  display: flex;
+  align-items: center;
+  /* This 'gap' handles the space where the '=' used to be */
+  gap: 12px; 
+}
+
+/* Ensure the layout wrapper doesn't cover the screen when not logged in */
+.settings-layout {
+  position: relative;
+  z-index: 1;
+}
+
+.ui-toast {
+  position: fixed;
+  top: 30px;        /* Changed from bottom to top */
+  right: 30px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  z-index: 99999;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  animation: slideInTop 0.4s ease-out; /* Updated animation name */
+
+  &.success { background: #2ecc71; border-left: 5px solid #27ae60; }
+  &.error { background: #e74c3c; border-left: 5px solid #c0392b; }
+  &.warning { background: #f1c40f; color: #333; border-left: 5px solid #f39c12; }
+}
+
+/* Smoother animation for top-right entry */
+@keyframes slideInTop {
+  from { 
+    transform: translateY(-100%); /* Slides down from the top edge */
+    opacity: 0; 
+  }
+  to { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+.space{
+   display: flex;
+  gap: 86px;
+}
+
+
+
+header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Rendu button-kum naduvula gap iruka */
+}
+
+.save-all-btn img {
+  width: 20px; /* Icon size adjust panna */
+  height: 20px;
+}

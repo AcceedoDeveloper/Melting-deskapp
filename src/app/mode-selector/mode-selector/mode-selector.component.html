@@ -1,6 +1,4 @@
 
-          
-
 <label class="theme-toggle" *ngIf="isLoggedIn" >
   <input
     type="checkbox"
@@ -13,7 +11,6 @@
     <span class="icon moon">🌙</span>
   </span>
 </label>
-<!-- ================= LOGIN ================= -->
 
 
 <div class="login-box" *ngIf="!isLoggedIn">
@@ -36,14 +33,9 @@
 </div>
 
 
-<!-- ================= SETTINGS ================= -->
 <div *ngIf="isLoggedIn" class="settings-layout">
 
 
-
-
-
-  <!-- ========== COMMUNICATION ========= -->
   <div class="settings-card">
     <h3 class="section-title">Communication </h3>
 
@@ -57,7 +49,6 @@
         </select>
       </div>
 
-      <!-- SERIAL MODE -->
       <div *ngIf="modeCtrl.value === 'serial'" class="mode-content">
         <div class="input-group">
           <label>Select Serial Port</label>
@@ -75,7 +66,6 @@
         <button class="refresh-btn" (click)="onRefreshClick()">⟳</button>
       </div>
 
-     <!-- IP MODE -->
 <div *ngIf="modeCtrl.value === 'ip'" class="mode-content">
 
   <div class="input-group">
@@ -189,8 +179,6 @@
     </div>
     </div>
 
-
-
     <div class="settings-card" >
     
 
@@ -251,15 +239,11 @@
 
   </div>
 
-
-
-  <!-- ========== LOCATION ========= -->
   <div class="settings-card">
     <h3 class="section-title">Location</h3>
 
     <div class="section-content location-section">
 
-      <!-- ENTER DIRECTORY -->
       <ng-container *ngIf="showSearchDirectory; else editDirectoryTpl">
 
         <label class="heading">Enter Directory</label>
@@ -302,7 +286,6 @@
 
       </ng-container>
 
-      <!-- EDIT DIRECTORY -->
       <ng-template #editDirectoryTpl>
 
         <div class="heading">Change Search Directory</div>
@@ -338,10 +321,71 @@
     </div>
   </div>
 
+</div>
+
+
+<!-- <div>
+  sfdvc
+</div> -->
+
+<div *ngIf="isLoggedIn" class="settings-layout">
+<div class="settings-card full-width">
+  <div class="section-header-row">
+<h3 class="section-title-no-border space">
+  <span class="header-name">Header Name</span>
+  <span class="variations">Variations</span>
+</h3>
+    <div class="header-actions">
+
+
+<!-- <button class="save-btn2" title="Save All" (click)="saveAllMappings()">
+  <img src="assets/icons/save.png" alt="Save" />
+</button> -->
+
+<button 
+  class="save-btn2" 
+  title="Save All" 
+  (click)="saveAllMappings()"
+  [disabled]="!isMappingDirty"> <img src="assets/icons/save.png" alt="Save" [style.opacity]="isMappingDirty ? '1' : '0.3'"/>
+</button>
+
+      <button class="add-btn" title="Add Row" (click)="addRow()">+</button>
+    </div>
+  </div>
+
+<div class="section-content mapping-container">
+  <div class="mapping-container">
+    <div class="mapping-row" *ngFor="let item of mappings; let i = index; trackBy: trackByIndex">
+      
+      <input 
+        type="text" 
+        [(ngModel)]="item.header" 
+        (ngModelChange)="onMappingChange()"
+        placeholder="Header" 
+        class="custom-input mapping-box">
+      
+      <span class="mapping-arrow">=</span>
+
+      <div class="horizontal-values-wrapper" style="display: flex; align-items: center; gap: 10px;">
+        <ng-container *ngFor="let val of item.input; let j = index; trackBy: trackByIndex">
+          <input 
+            type="text" 
+            [(ngModel)]="item.input[j]" 
+            (ngModelChange)="onMappingChange()"
+            placeholder="Input Box" 
+            class="custom-input mapping-box">
+          
+          <span class="mapping-arrow" *ngIf="j < item.input.length - 1"></span>
+        </ng-container>
+
+         <button class="add-btn-small mapping-plus-gap" (click)="addValueToRow(i)" title="Add horizontal box">+</button>
 
 
 
+      </div>
 
+    </div>
+  </div>
 </div>
 
 
@@ -361,8 +405,6 @@
   </div>
 </div>
 
-
-
 <div class="confirm-overlay" *ngIf="showSpectromConfirm">
   <div class="confirm-box">
     <h4>Confirm Save</h4>
@@ -380,3 +422,9 @@
 </div>
 
 
+<div class="ui-toast" *ngIf="showToast" [ngClass]="toastType">
+  <div class="toast-content">
+    <span class="toast-icon"></span>
+    <span class="toast-text">{{ toastMsg }}</span>
+  </div>
+</div>
