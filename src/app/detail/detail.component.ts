@@ -251,40 +251,40 @@ this.loadTheHeaders().then(() => {
   //   return furanceMap[furanceChar.toUpperCase()]
   // }
 
-//   getFurance(headers) {
-//   const stageHeader = (headers || [])
-//     .find(h => h.name?.toLowerCase() === 'stage');
-
-//   if (!stageHeader || !stageHeader.value) {
-//     return null;
-//   }
-
-//   const match = stageHeader.value.match(/(\d)\s*F/i);
-
-//   if (!match) {
-//     return null;
-//   }
-
-//   const furnaceNo = Number(match[1]);
-
-//   return furnaceNo >= 1 && furnaceNo <= 4 ? furnaceNo : null;
-// }
-
-
-getFurance(headers) {
+  getFurance(headers) {
   const stageHeader = (headers || [])
     .find(h => h.name?.toLowerCase() === 'stage');
 
-  if (!stageHeader?.value) return null;
+  if (!stageHeader || !stageHeader.value) {
+    return null;
+  }
 
-  const match = stageHeader.value.match(/F\s*(\d)/i);
+  const match = stageHeader.value.match(/(\d)\s*F/i);
 
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
 
   const furnaceNo = Number(match[1]);
 
-  return furnaceNo >= 1 && furnaceNo <= 5 ? furnaceNo : null;
+  return furnaceNo >= 1 && furnaceNo <= 4 ? furnaceNo : null;
 }
+
+// Sandfits header 
+// getFurance(headers) {
+//   const stageHeader = (headers || [])
+//     .find(h => h.name?.toLowerCase() === 'stage');
+
+//   if (!stageHeader?.value) return null;
+
+//   const match = stageHeader.value.match(/F\s*(\d)/i);
+
+//   if (!match) return null;
+
+//   const furnaceNo = Number(match[1]);
+
+//   return furnaceNo >= 1 && furnaceNo <= 5 ? furnaceNo : null;
+// }
 
 
 
@@ -614,27 +614,50 @@ backTo(){
 
 
 
+// loadTheHeaders(): Promise<void> {
+//   // const baseUrl = 'http://localhost:3002';
+//     const baseUrl = this.app.getSelectedIP();
+
+
+
+//   return ipcRenderer.invoke('get-headers', { baseUrl })
+//     .then(res => {
+//       if (!res.success) {
+//         throw new Error(res.error);
+//       }
+
+//       this.stageHeaders = res.data.data;
+
+//       console.log(
+//         'stageHeaders is array:',
+//         Array.isArray(this.stageHeaders),
+//         this.stageHeaders
+//       );
+//     });
+// }
+
 loadTheHeaders(): Promise<void> {
-  // const baseUrl = 'http://localhost:3002';
-    const baseUrl = this.app.getSelectedIP();
-
-
+  const baseUrl = this.app.getSelectedIP();
 
   return ipcRenderer.invoke('get-headers', { baseUrl })
     .then(res => {
       if (!res.success) {
+        if (res.error?.includes('404')) {
+          console.warn('Headers API not found, continuing without headers');
+          this.stageHeaders = []; // fallback
+          return;
+        }
         throw new Error(res.error);
       }
 
       this.stageHeaders = res.data.data;
-
-      console.log(
-        'stageHeaders is array:',
-        Array.isArray(this.stageHeaders),
-        this.stageHeaders
-      );
+    })
+    .catch(err => {
+      console.warn('Header load failed, continuing:', err);
+      this.stageHeaders = []; // safe default
     });
 }
+
 
 
 restoreIpFromStorage() {
