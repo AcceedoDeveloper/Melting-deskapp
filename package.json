@@ -63,6 +63,7 @@
     "@angular/router": "13.2.4",
     "chokidar": "3.5.3",
     "mime-types": "2.1.34",
+    "pdfjs-dist": "5.4.530",
     "rxjs": "7.5.0",
     "serialport": "10.4.0",
     "tslib": "^2.1.0",

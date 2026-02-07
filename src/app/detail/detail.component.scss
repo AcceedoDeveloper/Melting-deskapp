@@ -160,3 +160,111 @@
   color: var(--text-main);
 
 }
+
+
+
+/* ================= PDF REPORT WRAPPER ================= */
+.pdf-report {
+  padding: 24px;
+  color: #f5f5f5;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+/* ================= HEADER SECTION ================= */
+.pdf-header {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
+  gap: 12px 40px;
+  margin-bottom: 28px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pdf-header div {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.pdf-header span {
+  display: inline-block;
+  min-width: 130px;
+  color: #9aa4b2;
+  font-weight: 500;
+}
+
+/* ================= TABLE ================= */
+.pdf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: #121212;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ================= TABLE HEADER ================= */
+.pdf-table thead {
+  background: #1e1e1e;
+}
+
+.pdf-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: #cfd8dc;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+}
+
+/* ================= TABLE BODY ================= */
+.pdf-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #e0e0e0;
+}
+
+/* Alternate row background */
+.pdf-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Hover highlight */
+.pdf-table tbody tr:hover {
+  background: rgba(80, 115, 251, 0.12);
+}
+
+/* ================= COLUMN ALIGNMENT ================= */
+.pdf-table td:nth-child(2),
+.pdf-table td:nth-child(3),
+.pdf-table td:nth-child(4),
+.pdf-table td:nth-child(5),
+.pdf-table td:nth-child(6) {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================= PASS / FAIL ================= */
+.pdf-table td.fail {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+.pdf-table td:not(.fail) {
+  color: #c8e6c9;
+}
+
+/* ================= SCROLL SUPPORT ================= */
+.pdf-report {
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+}
+
+/* ================= MOBILE SAFETY ================= */
+@media (max-width: 900px) {
+  .pdf-header {
+    grid-template-columns: 1fr;
+  }
+
+  .pdf-table {
+    font-size: 12px;
+  }
+}

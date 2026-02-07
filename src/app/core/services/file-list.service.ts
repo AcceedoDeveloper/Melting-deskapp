@@ -42,14 +42,76 @@ export class FileListService {
         return files
     }
 
+// getFileList(directoryPath: string) {
+//   return new Observable<AcFile[]>(observer => {
+//     ipcRenderer.invoke('file-list', directoryPath).then(files => {
+//       observer.next(files);
+//       observer.complete();
+//     });
+//   }).pipe(
+//     tap((files: AcFile[]) => {
+
+//       const opened = this.openedFiles$.value;
+//       const newFiles: AcFile[] = [];
+
+//       files.forEach(file => {
+//         const isNew = !opened.has(file.name);
+//         file.new = isNew;
+
+//         if (isNew && !this.autoSentFiles.has(file.name)) {
+//           newFiles.push(file);
+//           this.autoSentFiles.add(file.name);
+//         }
+//       });
+
+//       if (newFiles.length) {
+//         this.newFiles$.next(newFiles);
+//       }
+
+//       this.files$.next(files);
+//     })
+//   );
+
+  
+// }
+
+
 getFileList(directoryPath: string) {
   return new Observable<AcFile[]>(observer => {
-    ipcRenderer.invoke('file-list', directoryPath).then(files => {
-      observer.next(files);
-      observer.complete();
-    });
+
+    console.log('📂 Requested directory:', directoryPath);
+
+    ipcRenderer.invoke('file-list', directoryPath)
+      .then(files => {
+
+        // 🔥 LOG RAW RESPONSE
+        console.log('📄 RAW FILE LIST FROM MAIN:', files);
+
+        if (!Array.isArray(files)) {
+          console.error('❌ file-list did not return an array');
+        } else {
+          console.log(
+            '📄 FILE NAMES:',
+            files.map(f => f.name)
+          );
+        }
+
+        observer.next(files || []);
+        observer.complete();
+      })
+      .catch(err => {
+        console.error('❌ IPC file-list error:', err);
+        observer.next([]);
+        observer.complete();
+      });
+
   }).pipe(
     tap((files: AcFile[]) => {
+
+      console.log(
+        '📄 FILES ENTERING BehaviorSubject:',
+        files.map(f => f.name)
+      );
 
       const opened = this.openedFiles$.value;
       const newFiles: AcFile[] = [];
@@ -65,6 +127,7 @@ getFileList(directoryPath: string) {
       });
 
       if (newFiles.length) {
+        console.log('🆕 NEW FILES:', newFiles.map(f => f.name));
         this.newFiles$.next(newFiles);
       }
 
@@ -72,6 +135,7 @@ getFileList(directoryPath: string) {
     })
   );
 }
+
 
 
 

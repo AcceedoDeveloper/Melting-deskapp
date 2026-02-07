@@ -51,41 +51,6 @@ var getFileInfo = function (filePath) {
     });
 };
 exports.getFileInfo = getFileInfo;
-// export const getFiles = (dirPath, filterPredicate?) => {
-//     return new Promise((resolve, reject) => {
-//         fs.readdir(dirPath, async (err, files) => {
-//             if (err) {
-//                 // console.log(err)
-//                 return reject({ code: err.code, err })
-//             }
-// let xmlFiles = files.filter(file => {
-//     const ext = path.extname(file).toLowerCase();
-//     return ext === '.xml' || ext === '.txt' || ext === '.asc';
-// });
-//             const xmlFilesInfo = []
-//             for (const file of xmlFiles) {
-//                 const filePath = path.join(dirPath, file);
-//                 const name = path.parse(filePath).name
-//                 const fileInfo = await getFileInfo(filePath) as any;
-//                 const durationMs = (new Date() as any) - fileInfo.birthtime
-//                 const durationHr = Math.round(durationMs / (1000 * 60 * 60))
-//                 // if (filterPredicate ? filterPredicate(durationHr) : (durationHr <= 24)) {
-//                 //     xmlFilesInfo.push({
-//                 //         name,
-//                 //         path: filePath,
-//                 //         info: fileInfo
-//                 //     })
-//                 // }
-//                 xmlFilesInfo.push({
-//                     name,
-//                     path: filePath,
-//                     info: fileInfo
-//                 })
-//             }
-//             resolve(xmlFilesInfo)
-//         })
-//     })
-// }
 var getFiles = function (dirPath, filterPredicate) {
     return new Promise(function (resolve, reject) {
         fs.readdir(dirPath, function (err, files) { return __awaiter(void 0, void 0, void 0, function () {
@@ -98,8 +63,13 @@ var getFiles = function (dirPath, filterPredicate) {
                         }
                         supportedFiles = files.filter(function (file) {
                             var ext = path.extname(file).toLowerCase();
-                            return ext === '.xml' || ext === '.txt' || ext === '.asc' || ext === '.csv';
+                            return (ext === '.xml' ||
+                                ext === '.txt' ||
+                                ext === '.asc' ||
+                                ext === '.csv' ||
+                                ext === '.pdf');
                         });
+                        console.log(' Supported files:', supportedFiles);
                         fileInfos = [];
                         _i = 0, supportedFiles_1 = supportedFiles;
                         _a.label = 1;

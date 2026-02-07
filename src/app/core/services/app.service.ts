@@ -32,7 +32,7 @@ private autoDetectFiles$ = new BehaviorSubject<number>(
   Number(localStorage.getItem('autoDetectFiles')) || 5
 );
     selectedFileFormat$ = new BehaviorSubject<
-  'XML' | 'TXT' | 'BAK' | 'CSV' | null
+  'XML' | 'TXT' | 'BAK' | 'CSV' | 'PDF' | null
 >(null);
 
 
@@ -80,6 +80,7 @@ autoSend$ = new BehaviorSubject<boolean>(false);
     | 'TXT'
     | 'BAK'
     | 'CSV'
+    | 'PDF'
     if (fileFormat) {
     this.selectedFileFormat$.next(fileFormat);
   }
@@ -216,7 +217,7 @@ getAutoDetectFiles() {
 }
 
 
-setSelectedFileFormat(format: 'XML' | 'TXT' | 'BAK' | 'CSV') {
+setSelectedFileFormat(format: 'XML' | 'TXT' | 'BAK' | 'CSV' | 'PDF') {
   this.selectedFileFormat$.next(format);
   localStorage.setItem('selectedFileFormat', format);
 }

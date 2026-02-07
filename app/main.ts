@@ -6,6 +6,9 @@ import * as net from 'net';
 import { checkFileExists, deleteFile, getFilePaths, getFiles } from './helpers/get-file-name';
 import { readFileAndGetJson, sendDataSerialPort } from './helpers/serial-com';
 import { readXmlSummary } from './helpers/xml-summary';
+import {extractHeaderFromLines } from './helpers/extracHeaderFromLines';
+const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
+
 
 const fetch = require("node-fetch");
 import { SerialPort } from 'serialport';
@@ -674,3 +677,76 @@ function extractRequiredCsvHeaders(headerTokens: string[]) {
     { name: 'Sample ID', value: sample_Id }
   ];
 }
+
+
+
+
+ipcMain.handle('get-pdf-report', async (e, filePath: string) => {
+  const data = new Uint8Array(fs.readFileSync(filePath));
+  const pdf = await pdfjsLib.getDocument({ data }).promise;
+
+  const rows: any[] = [];
+  let header: any = {};
+
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+
+    const lines = content.items
+      .map((it: any) => it.str.trim())
+      .filter(Boolean);
+
+    if (p === 1) {
+      header = extractHeaderFromLines(lines);
+    }
+
+    const items = content.items.map((it: any) => ({
+      text: it.str.trim(),
+      x: it.transform[4],
+      y: Math.round(it.transform[5])
+    }));
+
+    const rowMap: Record<number, any[]> = {};
+    items.forEach(it => {
+      if (!rowMap[it.y]) rowMap[it.y] = [];
+      rowMap[it.y].push(it);
+    });
+
+    Object.values(rowMap).forEach(row => {
+      const cols = row
+        .sort((a, b) => a.x - b.x)
+        .map(c => c.text)
+        .filter(Boolean);
+
+      if (cols[0]?.startsWith('L NO') && cols.length >= 6) {
+        rows.push({
+          name: cols[0],
+          measured: +cols[1],
+          nominal: +cols[2],
+          plusTol: +cols[3],
+          minusTol: +cols[4],
+          deviation: +cols[5]
+        });
+      }
+    });
+  }
+
+  rows.sort((a, b) => {
+  const getIndex = (name: string) => {
+    // "L NO 95.2" → 95.2
+    const match = name.match(/L NO\s+([\d.]+)/);
+    return match ? parseFloat(match[1]) : Number.MAX_VALUE;
+  };
+
+  return getIndex(a.name) - getIndex(b.name);
+});
+
+
+
+  return {
+    success: true,
+    header,
+    rows
+  };
+});
+

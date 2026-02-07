@@ -2,8 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { AppService } from '../core/services/app.service';
 import { FileListService } from '../core/services/file-list.service';
 import { AcFile } from '../models/file-model';
-
-import {  ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron';
 import { Spectrum, SpectrumElement } from '../models/spectrum.model';
 import { catchError, finalize, Observable, throwError } from 'rxjs';
 import { PortInfo } from '../models/port-info.model';
@@ -24,7 +23,10 @@ const headerMap = {
   "Tested By": "T",
   "Stage": "ST",
   "Product ID": "PRO",
-  "Sample ID": "MS",
+  "Material": "M",
+  "Product ": "P",
+  "Part Name": "PN",
+  "Method": "ME",
 }
 
 const furanceMap = {
@@ -51,18 +53,35 @@ export class DetailComponent implements OnInit {
     { name: 'Furnace 2', no: 2 },
     { name: 'Furnace 3', no: 3 },
     { name: 'Furnace 4', no: 4 },
-    { name: 'Furnace 5', no: 5}
   ];
+
+
+  isPdf = false;
+
+pdfHeader: {
+  cmmNo?: string;
+  partIdent?: string;
+  drawingNumber?: string;
+  customerName?: string;
+  partName?: string;
+} | null = null;
+
+pdfRows: any[] = [];
+
+
+
 
   furnaceCtrl = new FormControl('', [Validators.required]);
   furanceFound = false;
   WifiDisconneced: number = 0;
   isAutoSend = false;
 
+
   stageHeaders: Array<{
   name: string;
   variations: string[];
 }>
+
 
 
   constructor(
@@ -79,26 +98,6 @@ export class DetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.restoreIpFromStorage();
-this.loadTheHeaders().then(() => {
-
-    if (this.file.name.endsWith('.xml')) {
-      ipcRenderer.invoke('get-spectrum-data', this.file.path)
-        .then(spectrum => this.processSpectrum(spectrum));
-    }
-    else if (this.file.name.endsWith('.asc') || this.file.name.endsWith('.txt')) {
-      ipcRenderer.invoke('get-ascii-data', this.file.path)
-        .then(spectrum => this.processSpectrum(spectrum));
-    }
-    else if (this.file.name.endsWith('.csv')) {
-      ipcRenderer.invoke('get-csv-data', this.file.path)
-        .then(spectrum => this.processSpectrum(spectrum));
-    }
-
-  }).catch(err => {
-    console.error('Header load failed:', err);
-  });
-
-
      this.route.queryParams.subscribe(params => {
     this.isAutoSend = params['auto'] === 'true';
   });
@@ -111,62 +110,53 @@ this.loadTheHeaders().then(() => {
 
     this.selectedPort$ = this.app.geSelectedtSerialPortObs();
 
-    // ipcRenderer.invoke('get-spectrum-data', this.file.path).then((spectrum: Spectrum) => {
 
-    //   // junk of 8 data
-
-    //   this.sendableData = this.getSendableData(spectrum);
-    //   const furanceNo = this.getFurance(spectrum.headers)
-    //   if (furanceNo) {
-    //     this.furnaceCtrl.setValue(furanceNo);
-    //     this.furanceFound = true;
-    //   }
-    //   console.log(this.sendableData)
-
-    //   const elements = [];
-    //   const chunkCount = Math.ceil(spectrum.elements.length / CHUNK_LENGTH)
-
-    //   for (let i = 0; i < chunkCount; i++) {
-    //     const startIndex = i * CHUNK_LENGTH;
-    //     const endIndex = startIndex + CHUNK_LENGTH;
-    //     const subElemt = spectrum.elements.slice(startIndex, endIndex)
-    //     if (subElemt.length < CHUNK_LENGTH) {
-    //       const itemRequiredToFill = CHUNK_LENGTH - subElemt.length;
-    //       for (let j = 0; j < itemRequiredToFill; j++) {
-    //         subElemt.push(null)
-    //       }
-    //     }
-    //     elements.push(subElemt)
-    //   }
-
-    //   spectrum.elements = elements;
-
-    //   this.spectrum = spectrum;
-    //   this.cdr.detectChanges();
-    // })
-
-
-
-    // if (this.file.name.endsWith('.xml')) {
-    //   ipcRenderer.invoke('get-spectrum-data', this.file.path)
-    //     .then(spectrum => this.processSpectrum(spectrum));
-    // } 
-    // else if (this.file.name.endsWith('.asc') || this.file.name.endsWith('.txt')) {
-    //   ipcRenderer.invoke('get-ascii-data', this.file.path)
-    //     .then(spectrum => this.processSpectrum(spectrum));
-    // }
-    // else if(this.file.name.endsWith('.csv')) {
-    //   ipcRenderer.invoke('get-csv-data', this.file.path)
-    //     .then(spectrum => this.processSpectrum(spectrum));
-    // }
+    if (this.file.name.endsWith('.xml')) {
+      ipcRenderer.invoke('get-spectrum-data', this.file.path)
+        .then(spectrum => this.processSpectrum(spectrum));
+    } 
+    else if (this.file.name.endsWith('.asc') || this.file.name.endsWith('.txt')) {
+      ipcRenderer.invoke('get-ascii-data', this.file.path)
+        .then(spectrum => this.processSpectrum(spectrum));
+    }
+    else if(this.file.name.endsWith('.csv')) {
+      ipcRenderer.invoke('get-csv-data', this.file.path)
+        .then(spectrum => this.processSpectrum(spectrum));
+    }
+    else if(this.file.name.endsWith('.pdf')) {
+      this.isPdf = true;
+      ipcRenderer.invoke('get-pdf-report', this.file.path)
+        .then(pdfData => this.processPdfData(pdfData));
+    }
 
 
   }
 
 
+  processPdfData(pdfData: any) {
+  if (!pdfData?.success) {
+    console.error('Invalid PDF data');
+    return;
+  }
+
+  this.pdfHeader = {
+    cmmNo: pdfData.header.cmmNo,
+    partIdent: pdfData.header.partIdent,
+    drawingNumber: pdfData.header.drawingNumber,
+    customerName: pdfData.header.customerName,
+    partName: pdfData.header.partName
+  };
+
+  this.pdfRows = pdfData.rows || [];
+
+  console.log('PDF HEADER:', this.pdfHeader);
+  console.log('PDF ROWS:', this.pdfRows.length);
+
+  this.cdr.detectChanges();
+}
 
    processSpectrum(spectrum: Spectrum) {
-    this.sendableData = this.getSendableData(spectrum);    
+    this.sendableData = this.getSendableData(spectrum);
 
     const furanceNo = this.getFurance(spectrum.headers);
     if (furanceNo) {
@@ -174,7 +164,6 @@ this.loadTheHeaders().then(() => {
       this.furanceFound = true;
     }
 
-    // Chunk elements for UI table
     const elements = [];
     const chunkCount = Math.ceil(spectrum.elements.length / CHUNK_LENGTH);
 
@@ -210,27 +199,15 @@ this.loadTheHeaders().then(() => {
 
   getSendableData(spectrum: any) {
 
-
-     const sampleIdHeader = spectrum.headers.find(
-       (h) => h.name === "Sample ID",
-     );
-
-     const sampleStatus = this.getStageSuffix(sampleIdHeader.value);
-     console.log('sample status ', sampleStatus);
-
     const headers = spectrum.headers.filter(h => h.name !== 'Alloy' && h.name !== 'Product ID').map((h) => {
       let value = h.value
       if (h.name === 'Grade') {
         value = h.value.split(' ')[0]
       }
       if (h.name === 'Stage') {
-        value = value && value.replace(' ', '-');
-
-        if (sampleStatus) {
-          value = `${value}-${sampleStatus}`;
-        }
-
+        value = value && value.replace(' ', '-')
       }
+    
       return `${headerMap[h.name]}:${value}`
     }).join(',');
 
@@ -240,51 +217,17 @@ this.loadTheHeaders().then(() => {
 
     return `${headers},${elements}`
 
+
   }
 
-  // getFurance(headers) {
-  //   const stage = (headers || []).find(header => header.name?.toLowerCase() === 'stage')
-  //   if (!stage) {
-  //     return null
-  //   }
-  //   const furanceChar = stage.value.substr(0, 1);
-  //   return furanceMap[furanceChar.toUpperCase()]
-  // }
-
-//   getFurance(headers) {
-//   const stageHeader = (headers || [])
-//     .find(h => h.name?.toLowerCase() === 'stage');
-
-//   if (!stageHeader || !stageHeader.value) {
-//     return null;
-//   }
-
-//   const match = stageHeader.value.match(/(\d)\s*F/i);
-
-//   if (!match) {
-//     return null;
-//   }
-
-//   const furnaceNo = Number(match[1]);
-
-//   return furnaceNo >= 1 && furnaceNo <= 4 ? furnaceNo : null;
-// }
-
-
-getFurance(headers) {
-  const stageHeader = (headers || [])
-    .find(h => h.name?.toLowerCase() === 'stage');
-
-  if (!stageHeader?.value) return null;
-
-  const match = stageHeader.value.match(/F\s*(\d)/i);
-
-  if (!match) return null;
-
-  const furnaceNo = Number(match[1]);
-
-  return furnaceNo >= 1 && furnaceNo <= 5 ? furnaceNo : null;
-}
+  getFurance(headers) {
+    const stage = (headers || []).find(header => header.name?.toLowerCase() === 'stage')
+    if (!stage) {
+      return null
+    }
+    const furanceChar = stage.value.substr(0, 1);
+    return furanceMap[furanceChar.toUpperCase()]
+  }
 
 
 
@@ -301,7 +244,6 @@ onSendClick() {
   const finalSerialData = `$${sendData}#`;
   const finalIPData = sendData;
   const fileName = this.file.name;
-  console.log('data sent to the server:', sendData);
 
   const ip = this.app.getSelectedIP();
   const serialPort = this.app.getSelectedSerialPort();
@@ -331,132 +273,11 @@ onSendClick() {
 }
 
 
-// private sendViaIP(ip: string, data: string, fileName: string) {
-
-//   let responseReceived = false;
-//   let isErrorResponse = false; 
-//   let errorMessage = ''; 
-
-//   const timeout = setTimeout(() => {
-//     if (!responseReceived) {
-//       this.ngZone.run(() => {
-//         this.app.hideLoader();
-//         this.dialog.open(ErrorDialogComponent, {
-//           data: {
-//             message: "No response from device over IP (Timeout).",
-//             title: "Timeout",
-//             iconPath: "./assets/icons/error_outline_white_24dp.svg"
-//           }
-//         });
-//       });
-//       this.app.setFileStatus(fileName, "no-response");
-//     }
-//   }, 6000);
-
-//   this.ipService.sendData(ip, data)
-//     .pipe(
-//       catchError(err => {
-//         clearTimeout(timeout);
-//         this.ngZone.run(() => this.app.hideLoader());
-//         this.app.setFileStatus(fileName, "no-response");
-//         return throwError(() => err);
-//       })
-//     )
-//     .subscribe({
 
 
-
-// next: (resp: string) => {
-//   responseReceived = true;
-//   console.log("IP RESPONSE:", resp);
-
-//   if (resp?.includes('$ERR')) {
-//     isErrorResponse = true;
-
-//     const errorCode = resp
-//       .replace('$ERR,', '')
-//       .replace('#', '')
-//       .trim();
-
-//     if (errorCode === 'HEATNO_ALREADY_EXISTS') {
-//       errorMessage = 'Heat No already exists';
-//     }
-//     else if (errorCode === 'FURNACE_NOT_FOUND'){
-//       errorMessage = 'Furnace not found';
-//     } 
-//     else if (errorCode === 'CHARGE_MIX_NOT_EXIST'){
-//       errorMessage = 'Charge mix not exist';
-//     }
-//     else if(errorCode === 'PLANNING_NOT_SELECTED'){
-//       errorMessage = 'Planning not selected';
-//     }
-//     else {
-//       errorMessage = 'Unknown error from device';
-//     }
-
-//     this.app.setFileStatus(fileName, 'no-response');
-//   }
-// },
-
-
-
-
-// complete: () => {
-//   clearTimeout(timeout);
-
-//   if (isErrorResponse) {
-
-//     this.ngZone.run(() => {
-//       this.app.hideLoader();
-
-//        setTimeout(() => {
-//       this.dialog.open(ErrorDialogComponent, {
-//         disableClose: true,
-//         data: {
-//           message: errorMessage,
-//           title: 'Error',
-//           iconPath: './assets/icons/error_outline_white_24dp.svg'
-//         }
-//       });
-//     }); }, 200);
-
-//     return; 
-//   }
-
-//   responseReceived = true;
-
-//   this.ngZone.run(() => {
-//     this.app.hideLoader();
-//   });
-
-//   this.app.setFileStatus(fileName, "sent-data");
-
-//   if (this.isAutoSend) {
-//     setTimeout(() => {
-//       this.ngZone.run(() => {
-//         this.router.navigate(['/home']);
-//       });
-//     }, 200);
-//     return;
-//   }
-
-//   setTimeout(() => {
-//     this.dialog.open(ErrorDialogComponent, {
-//       data: {
-//         message: "Data sent successfully via IP.",
-//         title: "Success",
-//         iconPath: "./assets/icons/done_white_24dp.svg"
-//       }
-//     });
-//   }, 200);
-// }
-
-
-
-//     });
-// }
 
  private sendViaIP(ip: string, data: string, fileName: string) {
+  console.log("Data sent to the server ", data);
 
     let responded = false;
 
@@ -496,6 +317,15 @@ onSendClick() {
 
   }
 
+
+
+   private goHome(delay = 200) {
+    setTimeout(() => {
+      this.ngZone.run(() => {
+        this.router.navigate(['/home']);
+      });
+    }, delay);
+  }
 
 
 private sendViaSerial(portPath: string, data: string, fileName: string) {
@@ -567,6 +397,7 @@ private sendViaSerial(portPath: string, data: string, fileName: string) {
 
 
 
+
   isSendDisabled() {
   const mode = this.app.getMode();
 
@@ -583,56 +414,31 @@ private sendViaSerial(portPath: string, data: string, fileName: string) {
   return true;
 }
 
+
 backTo(){
   this.router.navigate(['/home']);
 }
 
 
- private goHome(delay = 200) {
-    setTimeout(() => {
-      this.ngZone.run(() => {
-        this.router.navigate(['/home']);
-      });
-    }, delay);
-  }
-
-
- getStageSuffix(stageValue: string): string {
-  if (!stageValue || !this.stageHeaders?.length) {
-    return stageValue;
-  }
-
-  const match = this.stageHeaders.find(h =>
-    h.variations.includes(stageValue)
-  );
-
-  console.log('header ', match);
-  
-
-  return match ? match.name : stageValue;
-}
-
-
-
 loadTheHeaders(): Promise<void> {
-  // const baseUrl = 'http://localhost:3002';
-    const baseUrl = this.app.getSelectedIP();
-
-
+  const baseUrl = this.app.getSelectedIP();
 
   return ipcRenderer.invoke('get-headers', { baseUrl })
     .then(res => {
       if (!res.success) {
+        if (res.error?.includes('404')) {
+          console.warn('Headers API not found, continuing without headers');
+          this.stageHeaders = []; // fallback
+          return;
+        }
         throw new Error(res.error);
       }
 
       this.stageHeaders = res.data.data;
-
-      console.log(
-        'stageHeaders is array:',
-        Array.isArray(this.stageHeaders),
-        this.stageHeaders
-      );
+    })
+    .catch(err => {
+      console.warn('Header load failed, continuing:', err);
+      this.stageHeaders = []; // safe default
     });
 }
 
@@ -654,10 +460,6 @@ restoreIpFromStorage() {
   this.app.setSelectedIPAddress(ip);
   this.app.setMode('ip'); // 🔥 THIS WAS MISSING
 }
-
-
-
-
 
 
 }

@@ -11,8 +11,10 @@
         </button>
           
        
-    </span>  Element Concentration</div>
-    <div class="content-area" *ngIf="spectrum">
+    </span>
+<span *ngIf="!isPdf">Element Concentration</span>
+      <span *ngIf="isPdf">Inspection Report</span>  </div>
+    <div class="content-area" *ngIf="!isPdf && spectrum">
       <div class="header" gdAuto="column">
         <div gdRows gdGap="5px" *ngFor="let header of spectrum.headers">
           <div class="header-label">{{ header.name }} :</div>
@@ -80,5 +82,51 @@
 
       </div>
     </div>
+
+
+<div *ngIf="isPdf && pdfHeader" class="pdf-report">
+
+  <div class="pdf-header">
+    <div><span>CMM No</span> {{ pdfHeader.cmmNo }}</div>
+    <div><span>Part Ident</span> {{ pdfHeader.partIdent }}</div>
+    <div><span>Drawing No</span> {{ pdfHeader.drawingNumber }}</div>
+    <div><span>Customer</span> {{ pdfHeader.customerName }}</div>
+    <div><span>Part Name</span> {{ pdfHeader.partName }}</div>
+    <div>
+      <button class="send-enabled" >
+        Sent
+      </button>
+    </div>
+  </div>
+
+  <table class="pdf-table">
+    <thead>
+      <tr>
+        <th>Characteristic</th>
+        <th>Measured</th>
+        <th>Nominal</th>
+        <th>+Tol</th>
+        <th>-Tol</th>
+        <th>Deviation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of pdfRows">
+        <td>{{ row.name }}</td>
+        <td>{{ row.measured }}</td>
+        <td>{{ row.nominal }}</td>
+        <td>{{ row.plusTol }}</td>
+        <td>{{ row.minusTol }}</td>
+        <td [ngClass]="{ 'fail': row.deviation > row.plusTol || row.deviation < row.minusTol }">
+          {{ row.deviation }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+
+
   </div>
 </div>

@@ -9,6 +9,8 @@ import { FileListService } from '../core/services/file-list.service';
 import { AcFile } from '../models/file-model';
 import {  from } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -46,6 +48,18 @@ fileMetaMap: {
     grade? : string;
   }
 } = {};
+
+
+pdfHeaderMap: {
+  [filePath: string]: {
+    cmmNo?: string;
+    partIdent?: string;
+    drawingNumber?: string;
+    customerName?: string;
+    partName?: string;
+  }
+} = {};
+
 
 
 private fileMtimeMap: { [path: string]: number } = {};
@@ -90,57 +104,25 @@ statusInfo = {
 
   ngOnInit(): void {
 
+setTimeout(() => {
+  const pdfPath = 'D:/Melting/pdf/PIR/PIR-01.pdf';
+
+  ipcRenderer.invoke('get-pdf-report', pdfPath)
+    .then(res => {
+      console.log(' REPORT DATA:', res);
+    })
+    .catch(err => {
+      console.error('PDF REPORT ERROR:', err);
+    });
+}, 1500);
+
+
 
 
     console.log('file format:', this.app.getSelectedFileFormat());
 
 
 
-
-
-// this.fileService.getNewFilesObs().subscribe(files => {
-
-
-//   if (this.fileService.isManualOpen()) {
-//     this.fileService.setManualOpen(false);
-//     return;
-//   }
-
-//   if (!this.app.getAutoSend()) return;
-//   if (!files || !files.length) return;
-
-//   files.forEach(file => {
-
-//     const format = this.app.getSelectedFileFormat();
-//     if (!format) return;
-
-// const ext = file.name.split('.').pop()?.toLowerCase();
-
-// const formatMap = {
-//   XML: ['xml'],
-//   TXT: ['txt', 'asc'],
-//   BAK: ['bak']
-// };
-
-// if (!formatMap[format]?.includes(ext)) return;
-
-
-//     const ip = this.app.getSelectedIP();
-//     const serial = this.app.getSelectedSerialPort();
-//     if (!ip && !serial) return;
-
-//     console.log('AUTO SEND FILE:', file.name);
-
-//     this.fileService.setSelectedFile(file);
-
-//     this.router.navigate(['/detail'], {
-//       queryParams: { auto: true }
-//     });
-//   });
-
-//   this.fileService.clearNewFiles();
-
-// });
 
 
 
@@ -167,7 +149,8 @@ this.fileService.getNewFilesObs().subscribe(files => {
       XML: ['xml'],
       TXT: ['txt', 'asc'],
       BAK: ['bak'],
-      CSV: ['csv']
+      CSV: ['csv'],
+      PDF: ['pdf']
     };
 
     if (!formatMap[format]?.includes(ext)) return;
@@ -277,7 +260,8 @@ if (selectedFormat) {
         XML: '.xml',
         TXT: '.txt',
         BAK: '.bak',
-        CSV: '.csv'
+        CSV: '.csv',
+        PDF: '.pdf'
       };
       filtered = filtered.filter(file =>
         file.name.toLowerCase().endsWith(extMap[selectedFormat])
@@ -301,116 +285,6 @@ this.sendStatus$.subscribe(statusMap => {
 
 
 
-
-//   this.files$.subscribe(files => {
-
-//     if (!files || !files.length) return;
-
-
-// from(files)
-//   .pipe(
-//     mergeMap(
-//       file => {
-      
-
-//         const ext = file.name.toLowerCase();
-
-// let reader = 'get-ascii-data';
-
-// if (ext.endsWith('.xml')) {
-//   reader = 'get-xml-summary';
-// } else if (ext.endsWith('.csv')) {
-//   reader = 'get-csv-data';
-// }
-
-
-//         return from(ipcRenderer.invoke(reader, file.path))
-//           .pipe(
-//             map(data => ({ file, data }))
-//           );
-//       },
-//       2 
-//     )
-//   )
-//   .subscribe({
-//     next: ({ file, data }) => {
-//       const headers = data?.headers || [];
-
-//       console.log('HEADERS FOR', file.name, headers);
-
-//       this.fileMetaMap[file.path] = {
-//         heatNo: headers.find(h => h.name === 'Heat No')?.value,
-//         stage: headers.find(h => h.name === 'Stage')?.value,
-//         partName: headers.find(h => h.name === 'Part Name')?.value,
-//         grade: headers.find(h => h.name === 'Grade')?.value
-//       };
-
-//       this.fileMetaChanged$.next();
-//       this.cdr.markForCheck();
-//     },
-//     error: err => {
-//       console.error('Metadata read error:', err);
-//     }
-//   });
-
-
-//   });
-
-
-// this.files$.subscribe(files => {
-
-//   if (!files || !files.length) return;
-
-//   files.forEach(file => {
-
-// const currentMtime = new Date(file.info.mtime).getTime();
-//     const lastMtime = this.fileMtimeMap[file.path];
-
-//     // First time → just record
-//     if (!lastMtime) {
-//       this.fileMtimeMap[file.path] = currentMtime;
-//       return;
-//     }
-
-//     // 🔥 FILE UPDATED
-//     if (currentMtime > lastMtime) {
-
-//       this.fileMtimeMap[file.path] = currentMtime;
-
-//       // Auto-send OFF → stop
-//       if (!this.app.getAutoSend()) return;
-
-//       // Prevent rapid re-send
-//       const now = Date.now();
-//       const lastSent = this.lastAutoSentTime[file.path] || 0;
-//       if (now - lastSent < 2000) return;
-
-//       const format = this.app.getSelectedFileFormat();
-//       const ext = file.name.split('.').pop()?.toLowerCase();
-
-//       const formatMap = {
-//         XML: ['xml'],
-//         TXT: ['txt', 'asc'],
-//         CSV: ['csv']
-//       };
-
-//       if (!formatMap[format]?.includes(ext)) return;
-
-//       const ip = this.app.getSelectedIP();
-//       const serial = this.app.getSelectedSerialPort();
-//       if (!ip && !serial) return;
-
-//       console.log('AUTO SEND (FILE UPDATED):', file.name);
-
-//       this.lastAutoSentTime[file.path] = now;
-
-//       this.fileService.setSelectedFile(file);
-//       this.router.navigate(['/detail'], {
-//         queryParams: { auto: true }
-//       });
-//     }
-//   });
-// });
 
 this.files$.subscribe(files => {
 
@@ -456,7 +330,8 @@ this.files$.subscribe(files => {
     const formatMap = {
       XML: ['xml'],
       TXT: ['txt', 'asc'],
-      CSV: ['csv']
+      CSV: ['csv'],
+      PDF: ['pdf']
     };
 
     if (!formatMap[format]?.includes(ext)) return;
@@ -475,33 +350,70 @@ this.files$.subscribe(files => {
     });
   });
 
-  // ---- METADATA READ (SAFE HERE) ----
   from(files)
     .pipe(
-      mergeMap(file => {
-        let reader = 'get-ascii-data';
-        if (file.name.endsWith('.xml')) reader = 'get-xml-summary';
-        else if (file.name.endsWith('.csv')) reader = 'get-csv-data';
+     mergeMap(file => {
 
-        return from(ipcRenderer.invoke(reader, file.path))
-          .pipe(map(data => ({ file, data })));
-      }, 2)
+  let reader: string | null = null;
+
+  if (file.name.endsWith('.xml')) {
+    reader = 'get-xml-summary';
+  } 
+  else if (file.name.endsWith('.csv')) {
+    reader = 'get-csv-data';
+  } 
+  else if (file.name.endsWith('.pdf')) {
+    reader = 'get-pdf-report';
+  } 
+  else {
+    reader = 'get-ascii-data';
+  }
+
+  return from(ipcRenderer.invoke(reader, file.path)).pipe(
+    map(data => ({ file, data }))
+  );
+
+}, 2)
+
     )
-    .subscribe(({ file, data }) => {
-      const headers = data?.headers || [];
+.subscribe(({ file, data }) => {
 
-      this.fileMetaMap[file.path] = {
-        heatNo: headers.find(h => h.name === 'Heat No')?.value,
-        stage: headers.find(h => h.name === 'Stage')?.value,
-        partName: headers.find(h => h.name === 'Part Name')?.value,
-        grade: headers.find(h => h.name === 'Grade')?.value
-      };
+  // ---------- PDF ----------
+  if (file.name.toLowerCase().endsWith('.pdf')) {
 
-      this.fileMetaChanged$.next();
-      this.cdr.markForCheck();
-    });
+    const h = data?.header || {};
+
+    this.pdfHeaderMap[file.path] = {
+      cmmNo: h.cmmNo,
+      partIdent: h.partIdent,
+      drawingNumber: h.drawingNumber,
+      customerName: h.customerName,
+      partName: h.partName
+    };
+
+    this.cdr.markForCheck();
+    return;
+  }
+
+  // ---------- XML / CSV ----------
+  const headers = data?.headers || [];
+
+  this.fileMetaMap[file.path] = {
+    heatNo: headers.find(h => h.name === 'Heat No')?.value,
+    stage: headers.find(h => h.name === 'Stage')?.value,
+    partName: headers.find(h => h.name === 'Part Name')?.value,
+    grade: headers.find(h => h.name === 'Grade')?.value
+  };
+
+  this.fileMetaChanged$.next();
+  this.cdr.markForCheck();
+});
+
+
 
 });
+
+
 
 
 this.furnaceOptions$ = combineLatest([
@@ -701,6 +613,9 @@ getStatusIcon(status: string): string {
   }
 }
 
+getPdfHeader(file: AcFile) {
+  return this.pdfHeaderMap[file.path];
+}
 
 
 

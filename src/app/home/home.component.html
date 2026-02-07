@@ -120,12 +120,22 @@
   <div class="file-name" *ngIf="getFileMeta(file) as meta" > {{ formatFurnaceName(meta.stage) }}</div>
   <div class="file-date">{{ file.info?.birthtime | date:'dd/MM/yy, h:mm a' }}</div>
 
-  <div class="file-meta" *ngIf="getFileMeta(file) as meta">
-    <div><span>Heat No</span> {{ meta.heatNo }}</div>
-    <div><span>Grade</span> {{ meta.grade }}</div>
-    <div><span>Part</span> {{ meta.partName }}</div>
-    <!-- <div class="view-more" >View more </div> -->
-  </div>
+<!-- XML / CSV -->
+<div class="file-meta" *ngIf="getFileMeta(file) as meta">
+  <div><span>Heat No</span> {{ meta.heatNo }}</div>
+  <div><span>Grade</span> {{ meta.grade }}</div>
+  <div><span>Part</span> {{ meta.partName }}</div>
+</div>
+
+<!-- PDF -->
+<div class="file-meta pdf-meta" *ngIf="getPdfHeader(file) as pdf">
+  <div><span>CMM No</span> {{ pdf.cmmNo }}</div>
+  <div><span>Part Ident</span> {{ pdf.partIdent }}</div>
+  <div><span>Drawing No</span> {{ pdf.drawingNumber }}</div>
+  <div><span>Customer</span> {{ pdf.customerName }}</div>
+  <div><span>Part Name</span> {{ pdf.partName }}</div>
+</div>
+
 
 
 

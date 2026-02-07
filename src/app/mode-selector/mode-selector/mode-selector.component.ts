@@ -61,11 +61,11 @@ toastType: 'success' | 'error' | 'warning' = 'success';
   isAutoDetectSaved = false;
   autosent = false;
 theme: 'dark' | 'light' = 'dark';
-selectedFormat: 'XML' | 'TXT' | 'BAK' | 'CSV' | null = null;
+selectedFormat: 'XML' | 'TXT' | 'BAK' | 'CSV' | 'PDF' | null = null;
 isIpConnected = false;
 
 
-
+  
 
 
 modeCtrl = new FormControl('ip');

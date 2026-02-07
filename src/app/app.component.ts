@@ -28,7 +28,7 @@ selectedIP$: Observable<string>;
 serialDataReceived$: Observable<string>;
 private subscriptions: Subscription[] = [];
 selectedFileFormat$: Observable<
-  'XML' | 'TXT' | 'BAK' | 'CSV' 
+  'XML' | 'TXT' | 'BAK' | 'CSV' | 'PDF'
 >;
 
 theme : string = '';
