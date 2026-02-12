@@ -24,10 +24,10 @@ const headerMap = {
   "Tested By": "T",
   "Stage": "ST",
   "Product ID": "PRO",
-  "Material": "M",
+  "Material": "Material",
   "Product ": "P",
-  "Part Name": "PN",
-  "Method": "ME",
+  "Part Name": "PartName",
+  "Method": "Method",
 }
 
 const furanceMap = {
