@@ -91,9 +91,9 @@
     <div><span>Part Ident</span> {{ pdfHeader.partIdent }}</div>
     <div><span>Drawing No</span> {{ pdfHeader.drawingNumber }}</div>
     <div><span>Customer</span> {{ pdfHeader.customerName }}</div>
-    <div><span>Part Name</span> {{ pdfHeader.partName }}</div>
+    <div><span  >Part Name</span> {{ pdfHeader.partName }}</div>
     <div>
-      <button class="send-enabled" >
+      <button class="send-enabled"  (click)="sendViaSerialPDF()"  >
         Sent
       </button>
     </div>

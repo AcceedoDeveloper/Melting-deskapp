@@ -104,17 +104,17 @@ statusInfo = {
 
   ngOnInit(): void {
 
-setTimeout(() => {
-  const pdfPath = 'D:/Melting/pdf/PIR/PIR-01.pdf';
+// setTimeout(() => {
+//   const pdfPath = 'D:/Melting/pdf/PIR/PIR-01.pdf';
 
-  ipcRenderer.invoke('get-pdf-report', pdfPath)
-    .then(res => {
-      console.log(' REPORT DATA:', res);
-    })
-    .catch(err => {
-      console.error('PDF REPORT ERROR:', err);
-    });
-}, 1500);
+//   ipcRenderer.invoke('get-pdf-report', pdfPath)
+//     .then(res => {
+//       console.log(' REPORT DATA:', res);
+//     })
+//     .catch(err => {
+//       console.error('PDF REPORT ERROR:', err);
+//     });
+// }, 1500);
 
 
 

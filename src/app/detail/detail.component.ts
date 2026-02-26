@@ -58,6 +58,8 @@ export class DetailComponent implements OnInit {
 
   isPdf = false;
 
+  pdfData: any;
+
 pdfHeader: {
   cmmNo?: string;
   partIdent?: string;
@@ -134,6 +136,8 @@ pdfRows: any[] = [];
 
 
   processPdfData(pdfData: any) {
+
+    this.pdfData = pdfData;
   if (!pdfData?.success) {
     console.error('Invalid PDF data');
     return;
@@ -395,8 +399,27 @@ private sendViaSerial(portPath: string, data: string, fileName: string) {
 
 
 
+sendViaSerialPDF() {
 
+    const ip = this.app.getSelectedIP();
+    console.log("Data sent to the server ", ip);
 
+    const url = `${ip.replace(/\/$/, '')}/createCmmInspection`;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            header: this.pdfData.header,
+            rows: this.pdfData.rows
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("Server response:", data))
+    .catch(err => console.error(err));
+}
 
   isSendDisabled() {
   const mode = this.app.getMode();
@@ -460,6 +483,7 @@ restoreIpFromStorage() {
   this.app.setSelectedIPAddress(ip);
   this.app.setMode('ip'); // 🔥 THIS WAS MISSING
 }
+
 
 
 }
