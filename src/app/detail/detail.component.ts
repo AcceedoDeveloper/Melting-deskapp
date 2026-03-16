@@ -14,6 +14,7 @@ import { IpService} from '../core/services/ip-service';
 import { FormControl, Validators } from '@angular/forms';
 import { NgZone } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { formatDate } from '@angular/common';
 
 
 const CHUNK_LENGTH = 10;
@@ -28,6 +29,14 @@ const headerMap = {
   "Product ": "P",
   "Part Name": "PartName",
   "Method": "Method",
+  "Sample name": "h",
+  "Tester Name": "T",
+  "Testing Company Name": "ST",
+  "Customer Name": "G",
+  "Test Item Name": "partname"
+
+
+
 }
 
 const furanceMap = {
@@ -195,17 +204,28 @@ export class DetailComponent implements OnInit {
   getSendableData(spectrum: any) {
     // const headers = spectrum.headers.map(h => ({ n: h.name, v: h.value }));
 
-    const headers = spectrum.headers.filter(h => h.name !== 'Alloy' && h.name !== 'Product ID').map((h) => {
-      let value = h.value
-      if (h.name === 'Grade') {
-        value = h.value.split(' ')[0]
-      }
-      if (h.name === 'Stage') {
-        value = value && value.replace(' ', '-')
-      }
+    // const headers = spectrum.headers.filter(h => h.name !== 'Alloy' && h.name !== 'Product ID').map((h) => {
+    //   let value = h.value
+    //   if (h.name === 'Grade') {
+    //     value = h.value.split(' ')[0]
+    //   }
+    //   if (h.name === 'Stage') {
+    //     value = value && value.replace(' ', '-')
+    //   }
     
-      return `${headerMap[h.name]}:${value}`
-    }).join(',');
+    //   return `${headerMap[h.name]}:${value}`
+    // }).join(',');
+
+    const allowedHeaders = ['Sample name', 'Tester Name', 'Testing Company Name','Customer Name', 'Test Item Name' ];
+
+  const headers = spectrum.headers
+    .filter(h => allowedHeaders.includes(h.name))
+    .map(h => {
+      const mappedKey = headerMap[h.name] || h.name;
+      return `${mappedKey}:${h.value || ''}`;
+    })
+    .join(',');
+
 
     const elements = spectrum.elements.map((e: SpectrumElement) => {
       return `${e.ElementName}:${e.reportedResult.resultValue}`
@@ -234,7 +254,7 @@ export class DetailComponent implements OnInit {
   }
 
   getFurance(headers) {
-    const stage = (headers || []).find(header => header.name?.toLowerCase() === 'stage')
+    const stage = (headers || []).find(header => header.name?.toLowerCase() === 'testing company name')
     if (!stage) {
       return null
     }
@@ -284,15 +304,60 @@ export class DetailComponent implements OnInit {
 //   });
 // }
 
-onSendClick() {
+// onSendClick() {
 
  
 
 
+//   // const furnaceNo = this.furnaceCtrl.value;
+//   // const sendData = `$${this.sendableData},fur:${furnaceNo}#`;
+//   // const finalSerialData = `$${sendData}#`;
+//   // const finalIPData = sendData;
+//   // const fileName = this.file.name;
+
+//   // const ip = this.app.getSelectedIP();
+//   // const serialPort = this.app.getSelectedSerialPort();
+
+
+//     const furnaceNo = this.furnaceCtrl.value;
+//   const fileName = this.file.name;
+
+//   const ip = this.app.getSelectedIP();
+//   const serialPort = this.app.getSelectedSerialPort();
+
+//   this.ngZone.run(() => {
+//     this.app.showLoader("Sending data...");
+//   });
+
+//   this.ngZone.run(() => {
+//     this.app.showLoader("Sending data...");
+//   });
+
+//   if (ip) {
+//      const formattedData = `$${this.sendableData}#`;
+
+//     this.sendViaIP(ip, formattedData, furnaceNo, fileName);
+//     return;
+//   }
+
+//   if (serialPort) {
+//     this.sendViaSerial(serialPort.path, formattedData, fileName);
+//     return;
+//   }
+
+//   this.app.hideLoader();
+//   this.dialog.open(ErrorDialogComponent, {
+//     data: {
+//       message: "No IP or Serial connection available.",
+//       title: "Connection Error",
+//       iconPath: "./assets/icons/error_outline_white_24dp.svg"
+//     }
+//   });
+// }
+
+onSendClick() {
+
   const furnaceNo = this.furnaceCtrl.value;
-  const sendData = `${this.sendableData},fur:${furnaceNo}`;
-  const finalSerialData = `$${sendData}#`;
-  const finalIPData = sendData;
   const fileName = this.file.name;
 
   const ip = this.app.getSelectedIP();
@@ -302,168 +367,95 @@ onSendClick() {
     this.app.showLoader("Sending data...");
   });
 
+  // ------------------------
+  // HTTP MODE
+  // ------------------------
   if (ip) {
-    this.sendViaIP(ip, finalIPData, fileName);
+
+    const httpData = `${this.sendableData}`;
+
+    this.sendViaIP(ip, httpData, furnaceNo, fileName);
     return;
   }
 
+  // ------------------------
+  // SERIAL MODE
+  // ------------------------
   if (serialPort) {
-    this.sendViaSerial(serialPort.path, finalSerialData, fileName);
+
+    const serialData = `$${this.sendableData},fur:${furnaceNo}#`;
+
+    this.sendViaSerial(serialPort.path, serialData, fileName);
     return;
   }
 
   this.app.hideLoader();
-  this.dialog.open(ErrorDialogComponent, {
-    data: {
-      message: "No IP or Serial connection available.",
-      title: "Connection Error",
-      iconPath: "./assets/icons/error_outline_white_24dp.svg"
-    }
-  });
 }
 
+//  private sendViaIP(ip: string, data: string, fileName: string) {
+//   console.log("Data sent to the server ", data);
 
-// private sendViaIP(ip: string, data: string, fileName: string) {
+//     let responded = false;
 
-//   let responseReceived = false;
-//   let isErrorResponse = false; 
-//   let errorMessage = ''; 
-
-//   const timeout = setTimeout(() => {
-//     if (!responseReceived) {
-//       this.ngZone.run(() => {
+//     const timeout = setTimeout(() => {
+//       if (!responded) {
+//         this.app.setFileStatus(fileName, 'no-response');
 //         this.app.hideLoader();
-//         this.dialog.open(ErrorDialogComponent, {
-//           data: {
-//             message: "No response from device over IP (Timeout).",
-//             title: "Timeout",
-//             iconPath: "./assets/icons/error_outline_white_24dp.svg"
-//           }
-//         });
-//       });
-//       this.app.setFileStatus(fileName, "no-response");
-//     }
-//   }, 6000);
+//         this.goHome();
+//       }
+//     }, 6000);
 
-//   this.ipService.sendData(ip, data)
-//     .pipe(
+//     this.ipService.sendData(ip, data).pipe(
 //       catchError(err => {
 //         clearTimeout(timeout);
-//         this.ngZone.run(() => this.app.hideLoader());
-//         this.app.setFileStatus(fileName, "no-response");
+//         this.app.setFileStatus(fileName, 'no-response');
+//         this.app.hideLoader();
+//         this.goHome();
 //         return throwError(() => err);
 //       })
-//     )
-//     .subscribe({
+//     ).subscribe({
+//   next: (resp: string) => {
+//     responded = true;
 
-
-
-// next: (resp: string) => {
-//   responseReceived = true;
-//   console.log("IP RESPONSE:", resp);
-
-//   if (resp?.includes('$ERR')) {
-//     isErrorResponse = true;
-
-//     const errorCode = resp
-//       .replace('$ERR,', '')
-//       .replace('#', '')
-//       .trim();
-
-//     if (errorCode === 'HEATNO_ALREADY_EXISTS') {
-//       errorMessage = 'Heat No already exists';
-//     }
-//     else if (errorCode === 'FURNACE_NOT_FOUND'){
-//       errorMessage = 'Furnace not found';
-//     } 
-//     else if (errorCode === 'CHARGE_MIX_NOT_EXIST'){
-//       errorMessage = 'Charge mix not exist';
-//     }
-//     else if(errorCode === 'PLANNING_NOT_SELECTED'){
-//       errorMessage = 'Planning not selected';
-//     }
-//     else {
-//       errorMessage = 'Unknown error from device';
-//     }
-
-//     this.app.setFileStatus(fileName, 'no-response');
-//   }
-// },
-
-
-
-
-// complete: () => {
-//   clearTimeout(timeout);
-
-//   if (isErrorResponse) {
-
-//     this.ngZone.run(() => {
+//     if (resp.includes('$ERR')) {
+//       this.app.setFileStatus(fileName, 'no-response');
 //       this.app.hideLoader();
-
-//        setTimeout(() => {
-//       this.dialog.open(ErrorDialogComponent, {
-//         disableClose: true,
-//         data: {
-//           message: errorMessage,
-//           title: 'Error',
-//           iconPath: './assets/icons/error_outline_white_24dp.svg'
-//         }
-//       });
-//     }); }, 200);
-
-//     return; 
-//   }
-
-//   responseReceived = true;
-
-//   this.ngZone.run(() => {
+//       this.goHome();
+//     }
+//   },
+//   complete: () => {
+//     clearTimeout(timeout);
+//      this.app.setFileStatus(fileName, 'sent-data');
 //     this.app.hideLoader();
-//   });
+//     this.goHome();
+//   }
+// });
 
-//   this.app.setFileStatus(fileName, "sent-data");
-
-//   if (this.isAutoSend) {
-//     setTimeout(() => {
-//       this.ngZone.run(() => {
-//         this.router.navigate(['/home']);
-//       });
-//     }, 200);
-//     return;
 //   }
 
-//   setTimeout(() => {
-//     this.dialog.open(ErrorDialogComponent, {
-//       data: {
-//         message: "Data sent successfully via IP.",
-//         title: "Success",
-//         iconPath: "./assets/icons/done_white_24dp.svg"
-//       }
-//     });
-//   }, 200);
-// }
 
+private sendViaIP(
+  ip: string,
+  data: string,
+  furnaceNo: number,
+  fileName: string
+) {
 
+  console.log("Data sent to server (d param):", data);
+  console.log("Furnace No (f param):", furnaceNo);
 
-//     });
-// }
+  let responded = false;
 
+  const timeout = setTimeout(() => {
+    if (!responded) {
+      this.app.setFileStatus(fileName, 'no-response');
+      this.app.hideLoader();
+      this.goHome();
+    }
+  }, 6000);
 
-
- private sendViaIP(ip: string, data: string, fileName: string) {
-  console.log("Data sent to the server ", data);
-
-    let responded = false;
-
-    const timeout = setTimeout(() => {
-      if (!responded) {
-        this.app.setFileStatus(fileName, 'no-response');
-        this.app.hideLoader();
-        this.goHome();
-      }
-    }, 6000);
-
-    this.ipService.sendData(ip, data).pipe(
+  this.ipService.sendData(ip, data, furnaceNo)
+    .pipe(
       catchError(err => {
         clearTimeout(timeout);
         this.app.setFileStatus(fileName, 'no-response');
@@ -471,25 +463,35 @@ onSendClick() {
         this.goHome();
         return throwError(() => err);
       })
-    ).subscribe({
+    )
+    .subscribe({
   next: (resp: string) => {
     responded = true;
 
     if (resp.includes('$ERR')) {
       this.app.setFileStatus(fileName, 'no-response');
-      this.app.hideLoader();
-      this.goHome();
+    } else {
+      this.app.setFileStatus(fileName, 'no-response');
     }
+
+    this.app.hideLoader();
+    this.goHome();
   },
-  complete: () => {
+  error: (err) => {
+    responded = true;
     clearTimeout(timeout);
-     this.app.setFileStatus(fileName, 'sent-data');
+
+    if (err?.error?.includes('$ERR')) {
+      this.app.setFileStatus(fileName, 'no-response');
+    } else {
+      this.app.setFileStatus(fileName, 'no-response');
+    }
+
     this.app.hideLoader();
     this.goHome();
   }
 });
-
-  }
+}
 
 
 
@@ -612,7 +614,7 @@ loadTheHeaders(): Promise<void> {
     })
     .catch(err => {
       console.warn('Header load failed, continuing:', err);
-      this.stageHeaders = []; // safe default
+      this.stageHeaders = []; 
     });
 }
 
@@ -632,7 +634,7 @@ restoreIpFromStorage() {
   }
 
   this.app.setSelectedIPAddress(ip);
-  this.app.setMode('ip'); // 🔥 THIS WAS MISSING
+  this.app.setMode('ip'); 
 }
 
 

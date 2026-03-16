@@ -205,23 +205,81 @@ ipcMain.handle('get-xml-summary', async (e, filePath) => {
 
 
 
-ipcMain.handle('send-data-ip', async (e, ip, data) => {
+// ipcMain.handle('send-data-ip', async (e, ip, data) => {
+//   try {
+//     if (!ip.startsWith('http://') && !ip.startsWith('https://')) {
+//       ip = 'http://' + ip;
+//     }
+
+//     const url = new URL('/spectrumResult', ip);
+//     url.searchParams.set('d', data);
+
+
+//     const response = await fetch(url.toString(), {
+//       method: 'GET'
+//     });
+
+//     const text = await response.text();
+
+//     return text;
+//   } catch (err) {
+//     console.error('IP HTTP Error:', err);
+//     throw err;
+//   }
+// });
+
+// ipcMain.handle('send-data-ip', async (e, ip, data, furnaceNo) => {
+//   try {
+
+//     if (!ip.startsWith('http://') && !ip.startsWith('https://')) {
+//       ip = 'http://' + ip;
+//     }
+
+//     const url = new URL('/spectrumResult', ip);
+
+//     url.searchParams.set('d', data);
+
+//     url.searchParams.set('fur', furnaceNo.toString());
+
+//     console.log("Final URL:", url.toString());
+
+//     const response = await fetch(url.toString(), {
+//       method: 'GET'
+//     });
+
+//     const text = await response.text();
+//     return text;
+
+//   } catch (err) {
+//     console.error('IP HTTP Error:', err);
+//     throw err;
+//   }
+// });
+
+
+ipcMain.handle('send-data-ip', async (e, ip, data, furnaceNo) => {
   try {
     if (!ip.startsWith('http://') && !ip.startsWith('https://')) {
       ip = 'http://' + ip;
     }
 
-    const url = new URL('/spectrumResult', ip);
-    url.searchParams.set('d', data);
+    // IMPORTANT:
+    // Device expects RAW data, NOT url-encoded
+    // Furnace must be inside the data string
 
+    const finalData = `${data.replace(/#$/, '')},fur:${furnaceNo}#`;
 
-    const response = await fetch(url.toString(), {
+    const finalUrl =
+      `${ip.replace(/\/$/, '')}/spectrumResult?d=${finalData}`;
+
+    console.log('Final RAW URL:', finalUrl);
+
+    const response = await fetch(finalUrl, {
       method: 'GET'
     });
 
-    const text = await response.text();
+    return await response.text();
 
-    return text;
   } catch (err) {
     console.error('IP HTTP Error:', err);
     throw err;
@@ -541,50 +599,212 @@ function convertAsciiToSpectrum(content: string) {
   };
 }
 
+// function convertCsvToSpectrum(content: string) {
+//   console.log('data', content);
+
+//   const tokens = content
+//     .split(',')
+//     .map(t => t.trim())
+//     .filter(Boolean);
+
+//   if (tokens.length < 4) {
+//     return { headers: [], elements: [] };
+//   }
+
+//   const dateTime = tokens[0];            
+//   const heatInfo = tokens[1];            
+//   const grade    = tokens[2];            
+//   const stage    = tokens[3];            
+
+//   const headers = [
+//     { name: 'Date', value: dateTime.split('T')[0] },
+//     { name: 'Time', value: dateTime.split('T')[1] },
+//     { name: 'Heat No', value: heatInfo },
+//     { name: 'Grade', value: grade },
+//     { name: 'Stage', value: stage }
+//   ];
+
+//   const elements = [];
+
+//   for (let i = 4; i < tokens.length - 1; i += 2) {
+//     const value = tokens[i];
+//     const name  = tokens[i + 1];
+
+//     if (!name) continue;
+
+//     elements.push({
+//       ElementName: name.replace('%', ''),
+//       reportedResult: {
+//         resultValue: value,
+//         limits: null,
+//         Unit: name.includes('%') ? '%' : '%'
+//       }
+//     });
+//   }
+
+
+//   console.log('Parsed CSV Headers:', headers);
+//   console.log('Parsed CSV Elements:', elements);
+//   return {
+//     headers,
+//     elements
+//   };
+// }
+
+
+
+// function convertCsvToSpectrum(content: string) {
+
+//   const lines = content
+//     .split('\n')
+//     .map(l => l.trim())
+//     .filter(l => l.length > 0);
+
+//   let elementRow: string[] = [];
+//   let aveRow: string[] = [];
+
+//   for (const line of lines) {
+
+//     const cols = line
+//       .split(',')
+//       .map(c => c.replace(/"/g, '').trim());
+
+//     if (cols.includes('C') && cols.includes('Si') && cols.includes('Mn')) {
+//       elementRow = cols;
+//     }
+
+//     if (cols[0] === 'Ave') {
+//       aveRow = cols;
+//     }
+//   }
+
+//   if (!elementRow.length || !aveRow.length) {
+//     console.error('Element row or Ave row not found');
+//     return { headers: [], elements: [] };
+//   }
+
+//   const elements = [];
+
+//   for (let i = 1; i < elementRow.length; i++) {
+
+//     const elementName = elementRow[i];
+//     const value = aveRow[i];
+
+//     if (!elementName) continue;
+
+//     elements.push({
+//       ElementName: elementName,
+//       reportedResult: {
+//         resultValue: value || '',
+//         limits: null,
+//         Unit: '%'
+//       }
+//     });
+//   }
+
+//   return {
+//     headers: [],
+//     elements
+//   };
+// }
+
+
+
 function convertCsvToSpectrum(content: string) {
 
-  const tokens = content
-    .split(',')
-    .map(t => t.trim())
-    .filter(Boolean);
+  const lines = content
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0);
 
-  if (tokens.length < 4) {
-    return { headers: [], elements: [] };
+  const headers = [];
+  let elementRow: string[] = [];
+  let aveRow: string[] = [];
+
+  // for (const line of lines) {
+
+  //   const cols = line
+  //     .split(',')
+  //     .map(c => c.replace(/"/g, '').trim());
+
+  //   if (
+  //     cols.length === 2 &&
+  //     !cols[0].includes(' ') &&   
+  //     !['Ave', 'Min', 'Max'].includes(cols[0])
+  //   ) {
+  //     headers.push({
+  //       name: cols[0],
+  //       value: cols[1]
+  //     });
+  //   }
+
+  //   if (cols.includes('C') && cols.includes('Si') && cols.includes('Mn')) {
+  //     elementRow = cols;
+  //   }
+
+  //   if (cols[0] === 'Ave') {
+  //     aveRow = cols;
+  //   }
+  // }
+
+
+  for (const line of lines) {
+
+  const cols = line
+    .split(',')
+    .map(c => c.replace(/"/g, '').trim());
+
+  if (
+    cols.length === 2 &&
+    cols[0] !== '' &&
+    !['Ave', 'Min', 'Max'].includes(cols[0])
+  ) {
+    headers.push({
+      name: cols[0],
+      value: cols[1] || ''
+    });
+    continue;
   }
 
-  // -------- HEADERS --------
-  const dateTime = tokens[0];            // 2026-01-03T11:46:47
-  const heatInfo = tokens[1];            // 26A02B -   - MEI
-  const grade    = tokens[2];            // 28
-  const stage    = tokens[3];            // C
+  if (cols.includes('C') && cols.includes('Si') && cols.includes('Mn')) {
+    elementRow = cols;
+  }
 
-  const headers = [
-    { name: 'Date', value: dateTime.split('T')[0] },
-    { name: 'Time', value: dateTime.split('T')[1] },
-    { name: 'Heat No', value: heatInfo },
-    { name: 'Grade', value: grade },
-    { name: 'Stage', value: stage }
-  ];
+  if (cols[0] === 'Ave') {
+    aveRow = cols;
+  }
+}
 
-  // -------- ELEMENTS --------
+  if (!elementRow.length || !aveRow.length) {
+    console.error('Element row or Ave row not found');
+    return { headers, elements: [] };
+  }
+
   const elements = [];
 
-  // start after first 4 tokens
-  for (let i = 4; i < tokens.length - 1; i += 2) {
-    const value = tokens[i];
-    const name  = tokens[i + 1];
 
-    if (!name) continue;
 
-    elements.push({
-      ElementName: name.replace('%', ''),
-      reportedResult: {
-        resultValue: value,
-        limits: null,
-        Unit: name.includes('%') ? '%' : '%'
-      }
-    });
-  }
+
+
+  for (let i = 1; i < elementRow.length; i++) {
+
+  const elementName = elementRow[i];
+  let value = aveRow[i] || '';
+
+  if (!elementName) continue;
+
+  value = value.replace('<', '').trim();
+
+  elements.push({
+    ElementName: elementName,
+    reportedResult: {
+      resultValue: value,
+      limits: null,
+      Unit: '%'
+    }
+  });
+}
+
 
 
   return {

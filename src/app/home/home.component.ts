@@ -385,10 +385,12 @@ if (ext.endsWith('.xml')) {
       console.log('HEADERS FOR', file.name, headers);
 
       this.fileMetaMap[file.path] = {
-        heatNo: headers.find(h => h.name === 'Heat No')?.value,
-        stage: headers.find(h => h.name === 'Stage')?.value,
-        partName: headers.find(h => h.name === 'Part Name')?.value,
-        grade: headers.find(h => h.name === 'Grade')?.value
+          heatNo: headers.find(h => h.name === 'Heat No')?.value
+           || headers.find(h => h.name === 'Sample name')?.value,        
+           stage: headers.find(h => h.name === 'Testing Company Name')?.value,
+            partName: headers.find(h => h.name === 'Part Name')?.value
+             || headers.find(h => h.name === 'Test Item Name')?.value,       
+              grade: headers.find(h => h.name === 'Customer Name')?.value
       };
 
       this.fileMetaChanged$.next();

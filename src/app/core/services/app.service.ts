@@ -252,7 +252,7 @@ getAutoSend() {
 
 setFileStatus(
   fileName: string,
-  status: 'sent-data' | 'no-response' | 'no-wifi'
+  status: 'sent-data' | 'no-response' | 'no-wifi' | 'heat number mismatch'
 ): void {
 
   const key = this.normalize(fileName);
